@@ -1,0 +1,323 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #d6edbc;
+  color: #452d16;
+  font:
+    600 15px system-ui,
+    -apple-system,
+    sans-serif;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#app {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+}
+.game {
+  width: min(100%, 540px);
+  background: #f8e9c2;
+  border: 6px solid #81512b;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px #345b3266;
+}
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background-size: 100% 100%;
+  overflow: hidden;
+}
+.stage:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12%;
+  background: linear-gradient(#654021ef, #654021e8);
+  z-index: 1;
+}
+.hud {
+  position: absolute;
+  z-index: 8;
+  left: 2%;
+  right: 2%;
+  top: 1.5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+.pill {
+  background: #fff9e6;
+  border: 2px solid #8d6435;
+  border-radius: 24px;
+  padding: 6px 9px;
+  box-shadow: 0 2px #613b25;
+  font-size: clamp(10px, 2.7vw, 14px);
+  white-space: nowrap;
+}
+.nav {
+  background: #2377aa;
+  color: white;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.spot {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  border-radius: 12px;
+  z-index: 3;
+}
+.spot:hover,
+.spot:focus-visible {
+  outline: 3px dashed #fff5a0;
+  background: #fff0a01a;
+}
+.spot .tip {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #fff8d7;
+  border: 2px solid #835128;
+  border-radius: 8px;
+  padding: 3px 6px;
+  font-size: 12px;
+}
+.spot:hover .tip,
+.spot:focus-visible .tip {
+  display: block;
+}
+.bottom {
+  background: linear-gradient(#ffefd0, #efd6a2);
+  border-top: 4px solid #865229;
+  padding: 10px 12px;
+  min-height: 100px;
+  text-align: center;
+}
+.bottom h2 {
+  font:
+    800 21px Georgia,
+    serif;
+  margin: 0 0 4px;
+}
+.bottom p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+.btn {
+  background: #248e48;
+  color: white;
+  border: 2px solid #12622c;
+  border-bottom-width: 4px;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 3px;
+  font-weight: 800;
+}
+.btn.alt {
+  background: #fff4d8;
+  color: #54351b;
+  border-color: #ad8151;
+}
+.btn:disabled {
+  opacity: 0.4;
+}
+.row {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.modal {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  background: #25180dbb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px;
+}
+.dialog {
+  background: #fff5d9;
+  border: 6px solid #a26a31;
+  border-radius: 20px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85dvh;
+  overflow: auto;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 12px 40px #22150c99;
+}
+.dialog h2 {
+  font:
+    800 25px Georgia,
+    serif;
+  margin: 0 0 8px;
+}
+.dialog p {
+  margin: 7px 0;
+}
+.qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  margin: 10px;
+}
+.qty button {
+  border: 0;
+  background: #237d47;
+  color: white;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 21px;
+}
+.basketline {
+  padding: 5px;
+  border-bottom: 1px solid #d5b88b;
+  text-align: left;
+}
+.plantgrid {
+  position: absolute;
+  z-index: 4;
+  left: 13%;
+  top: 22%;
+  width: 74%;
+  height: 66%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 1.5%;
+  transform: perspective(650px) rotateX(5deg);
+}
+.plot {
+  border: 2px solid #74401dc9;
+  background: #8d522dbd;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: clamp(15px, 4.5vw, 28px);
+  text-shadow: 1px 2px #30221177;
+  padding: 0;
+}
+.plot:focus-visible {
+  outline: 3px solid yellow;
+}
+.plot.ready {
+  background: #d1a043aa;
+}
+.small {
+  font-size: 12px;
+}
+.tag {
+  background: #fff5ce;
+  border: 2px solid #946a35;
+  border-radius: 10px;
+  padding: 5px 8px;
+  display: inline-block;
+}
+.coin {
+  font-size: 20px;
+}
+.counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.counter button {
+  border: 2px solid #8c6d36;
+  border-radius: 8px;
+  background: #e5d0a3;
+  padding: 7px;
+}
+.note {
+  background: #f9e6ab;
+  border-radius: 10px;
+  padding: 7px;
+  margin: 7px 0;
+  font-size: 13px;
+}
+.progress {
+  height: 13px;
+  border: 2px solid #936d34;
+  border-radius: 15px;
+  background: #e9d8a6;
+  overflow: hidden;
+}
+.progress span {
+  display: block;
+  height: 100%;
+  background: #4aaf58;
+}
+.marketstock {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.marketstock button {
+  background: #fff2c9;
+  border: 2px solid #96652e;
+  border-radius: 10px;
+  padding: 6px;
+  font-size: 12px;
+}
+.marketstock button strong {
+  display: block;
+}
+.footer {
+  font-size: 11px;
+  color: #77542c;
+  padding: 4px;
+  text-align: center;
+}
+@media (max-height: 700px) {
+  #app {
+    align-items: start;
+  }
+  .bottom {
+    min-height: 76px;
+    padding: 6px;
+  }
+}
+
+/* Small accessibility improvements; original scene artwork is untouched. */
+input {
+  font: inherit;
+  width: 7em;
+  padding: 8px;
+  border: 2px solid #835128;
+  border-radius: 8px;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #2377aa;
+  outline-offset: 2px;
+}
+.plot {
+  position: relative;
+}
+.dialog {
+  max-height: 85dvh;
+  overflow-y: auto;
+}
