@@ -12,7 +12,8 @@ const initial = () => Game.initial();
 let state = loadGame();
 let view = "town",
   popup = "",
-  selected = "carrot";
+  selected = "carrot",
+  dialogKey = null;
 const $ = (s) => document.querySelector(s),
   money = (n) => "$" + Number(n).toFixed(2),
   crop = (id) => CROPS.find((c) => c.id === id),
@@ -25,15 +26,19 @@ const $ = (s) => document.querySelector(s),
     }
   };
 function go(v) {
+  if (view !== v) state.notice = "";
   view = v;
   popup = "";
+  dialogKey = null;
   render();
 }
 function closeDialog() {
   popup = "";
+  dialogKey = null;
   render();
 }
-function show(html) {
+function show(html, key = null) {
+  dialogKey = key;
   popup = `<div class="modal" onclick="if(event.target===this)closeDialog()"><div class="dialog">${html}<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div></div></div>`;
   render();
 }
@@ -53,7 +58,7 @@ function renderScene() {
       spot(55, 15, 43, 44, "go('seeds')", "Seed & Feed") +
       spot(5, 57, 51, 37, "go('garden')", "My Garden") +
       spot(58, 57, 40, 40, "go('market')", "Farmers Market");
-    bottom = `<h2>🌱 My Garden Grows</h2><p>Tap a building to explore! Your dream: ${DREAMS[state.goal][2]} · ${money(DREAMS[state.goal][3])}</p><div class="row"><button class="btn alt" onclick="go('supplies')">🧺 Market Supplies</button><button class="btn alt" onclick="jobBoard()">📋 Job Board</button><button class="btn alt" onclick="seedHelp()">🌱 Community seed help</button><button class="btn alt" onclick="settings()">⚙ Settings</button></div>`;
+    bottom = `<h2>🌱 My Garden Grows</h2>${Game.debtTotal(state) ? `<p>Equipment charges still owed: ${money(Game.debtTotal(state))}</p>` : ""}<p>Tap a building to explore! Your dream: ${DREAMS[state.goal][2]} · ${money(DREAMS[state.goal][3])}</p><div class="row"><button class="btn alt" onclick="go('supplies')">🧺 Market Supplies</button><button class="btn alt" onclick="jobBoard()">📋 Job Board</button><button class="btn alt" onclick="seedHelp()">🌱 Community seed help</button><button class="btn alt" onclick="settings()">⚙ Settings</button></div>`;
   }
   if (view === "dream") {
     for (let [id, x, y, w, h] of SHOP_HOTSPOTS.dream)
@@ -65,7 +70,7 @@ function renderScene() {
         `dream('${id}')`,
         DREAMS.find((d) => d[0] === id)[2],
       );
-    bottom = `<h2>🎯 Dream Shop</h2><p>Tap a real item on the shelves to choose what you're saving for.</p><div class="progress"><span style="width:${Math.min(100, (100 * state.cash) / DREAMS[state.goal][3])}%"></span></div><p>${money(state.cash)} saved toward ${DREAMS[state.goal][2]} (${money(DREAMS[state.goal][3])})</p>`;
+    bottom = `<h2>🎯 Dream Shop</h2><p>Tap a real item on the shelves to choose what you're saving for.</p><div class="progress"><span style="width:${Math.min(100, (100 * Game.savings(state)) / DREAMS[state.goal][3])}%"></span></div><p>${money(Game.savings(state))} saved after equipment charges toward ${DREAMS[state.goal][2]} (${money(DREAMS[state.goal][3])})</p>`;
   }
   if (view === "seeds") {
     SHOP_HOTSPOTS.seeds.forEach(([id, x, y, w, h]) => {
@@ -78,10 +83,14 @@ function renderScene() {
       .map((p, i) => {
         let c = p && crop(p.id),
           ready = p && p.age >= c.days;
-        return `<button class="plot ${ready ? "ready" : ""}" onclick="plot(${i})" title="${p ? c.name : "Empty plot"}">${!p ? (state.plan[i] ? crop(state.plan[i]).icon : "") : ready ? c.icon : p.age === 0 ? "🌰" : p.age / c.days < 0.5 ? "🌱" : "🌿"}</button>`;
+        return `<button class="plot ${ready ? "ready" : ""}" onclick="plot(${i})" title="${p ? c.name : state.plan[i] ? crop(state.plan[i]).name + " planned · tap to cancel" : "Empty plot"}">${!p ? (state.plan[i] ? crop(state.plan[i]).icon : "") : ready ? c.icon : p.age === 0 ? "🌰" : p.age / c.days < 0.5 ? "🌱" : "🌿"}</button>`;
       })
       .join("")}</div>`;
-    bottom = `<h2>🌿 My Garden · 5 × 5</h2><p>Tap a plot to plant, inspect or harvest. ${state.plots.filter(Boolean).every((p) => p.watered) ? "💧 Plants watered today!" : "Plants need water to grow."}</p><div class="row"><button class="btn" onclick="water()">💧 Water all</button><button class="btn" onclick="plantPlanned()">🌱 Plant plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="endDay()">☀️ End day</button><button class="btn alt" onclick="inventory()">🧺 Harvest basket</button></div>`;
+    bottom = `<h2>🌿 My Garden · 5 × 5</h2>${state.notice ? `<p role="status">${state.notice}</p>` : ""}<p>Available seeds: ${
+      CROPS.filter((c) => state.seeds[c.id])
+        .map((c) => `${c.name}: ${Game.availableSeeds(state, c.id)}`)
+        .join(" · ") || "none"
+    }</p><p>Tap a plot to plant, inspect or harvest. ${state.plots.filter(Boolean).every((p) => p.watered) ? "💧 Plants watered today!" : "Plants need water to grow."}</p><div class="row"><button class="btn" onclick="water()">💧 Water all</button><button class="btn" onclick="plantPlanned()">🌱 Plant plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="cancelPlanting()" ${Object.keys(state.plan).length ? "" : "disabled"}>Cancel planting plan</button><button class="btn" onclick="harvestReady()">Harvest All Ready Crops</button><button class="btn alt" onclick="endDay()">☀️ End day</button><button class="btn alt" onclick="inventory()">🧺 Harvest basket</button></div>`;
   }
   if (view === "supplies") {
     SHOP_HOTSPOTS.supplies.forEach(([id, x, y, w, h]) => {
@@ -103,10 +112,10 @@ function renderScene() {
       spot(66, 57, 33, 40, "marketItem('cucumber')", "Cucumbers");
     let c = state.customer;
     if (state.hour >= 13)
-      bottom = `<h2>🍎 Market closed · 1 PM</h2><p>Today you earned ${money(state.sales)}!</p><button class="btn" onclick="go('garden')">Return to garden · end day to reopen</button>`;
+      bottom = `<h2>🍎 Market closed · 1 PM</h2><p>Produce sales today: ${money(state.sales)}</p>${financeSummary()}<button class="btn" onclick="go('garden')">Return to garden · end day to reopen</button>`;
     else {
       if (!c) {
-        bottom = `<h2>🍎 Farmers Market</h2><p>${state.marketOpen ? "Your stand is open. Welcome a neighbor!" : "Arrange your harvest before opening."}</p><button class="btn" onclick="marketStand()">🧺 Arrange produce / open market</button>${state.marketOpen ? '<button class="btn" onclick="newCustomer()">Welcome next customer</button><button class="btn alt" onclick="closeMarket()">Close market</button>' : ""}`;
+        bottom = `<h2>🍎 Farmers Market</h2>${state.marketOpen ? `<button class="btn market-primary" onclick="newCustomer()">Welcome Next Customer</button><p>${state.visitors} / ${Game.customerLimit(state)} customers welcomed</p><button class="btn alt" onclick="marketStand()">Arrange Produce</button><button class="btn alt" onclick="closeMarket()">Close market</button>` : '<p>Arrange your harvest before opening.</p><button class="btn" onclick="marketStand()">Arrange Produce / Open Market</button>'}`;
       } else
         bottom = `<h2>🍎 Market Day · ${Math.floor(state.hour)}:${state.hour % 1 ? "30" : "00"}</h2><p><b>${c.name}:</b> ${
           state.step === "greet"
@@ -123,8 +132,28 @@ function renderScene() {
         }</p><div class="row">${state.step === "greet" ? `<button class="btn" onclick="Game.greet(state);render()">😊 Welcome! What can I get you?</button><button class="btn alt" onclick="Game.greet(state);render()">Hello! How can I help?</button>` : state.step === "choose" ? `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="skip()">Sorry, sold out</button>` : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : `<button class="btn" onclick="advance()">👋 Thank you! Come again!</button><button class="btn alt" onclick="advance()">Hope to see you again!</button>`}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
     }
   }
-  $("#app").innerHTML =
-    `<div class="game"><div class="stage" style="background-image:url('${ART[view]}')">${header()}${stage}</div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 development · prototype 0.9 artwork</div></div>${popup}`;
+  const gameHTML = `<div class="game"><div class="stage" style="background-image:url('${ART[view]}')">${header()}${stage}</div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 development · prototype 0.9 artwork</div></div>`;
+  const app = $("#app"),
+    game = app.querySelector(".game");
+  if (!game || game.outerHTML !== gameHTML) {
+    const template = document.createElement("template");
+    template.innerHTML = gameHTML;
+    if (game) game.replaceWith(template.content.firstElementChild);
+    else app.prepend(template.content);
+  }
+  const modal = app.querySelector(".modal");
+  if (!popup) modal?.remove();
+  else {
+    const template = document.createElement("template");
+    template.innerHTML = popup;
+    if (modal && renderedDialogKey === dialogKey && dialogKey !== null) {
+      modal.querySelector(".dialog").innerHTML =
+        template.content.querySelector(".dialog").innerHTML;
+    } else {
+      if (modal) modal.replaceWith(template.content);
+      else app.append(template.content);
+    }
+  }
 }
 function dream(id) {
   let d = DREAMS.find((x) => x[0] === id);
@@ -136,12 +165,14 @@ function seed(id) {
   let c = crop(id);
   show(
     `<h2>${c.icon} ${c.name} Seeds</h2><p class="tag">${money(c.seed)} per seed packet</p><p>🌞 Sun-loving · 🌱 ${c.days} watered days to harvest</p><p>Harvest about ${c.yield} ${c.unit} · Sell for ${money(c.price)}/${c.unit}</p><p>${c.repeat ? "🔁 Repeat harvests" : "🌾 One harvest per planting"}</p><div class="qty"><button onclick="change('cart','${id}',-1)">−</button><b>${state.cart[id] || 0} in basket</b><button onclick="change('cart','${id}',1)">+</button></div><div><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,
+    "seed-" + id,
   );
 }
 function supply(id) {
   let s = SUPPLIES.find((x) => x[0] === id);
   show(
     `<h2>${s[1]} ${s[2]}</h2><p class="tag">${money(s[3])}</p><p>${s[4]}</p><p>Already owned: ${state.owned[id] || 0}</p>${id === "table" ? '<p>You can also rent a basic table for $1 per day or use a free blanket.</p><button class="btn alt" onclick="go(\'market\');marketStand()">Choose a market stand</button>' : ""}<div class="qty"><button onclick="change('supcart','${id}',-1)">−</button><b>${state.supcart[id] || 0} in basket</b><button onclick="change('supcart','${id}',1)">+</button></div><button class="btn" onclick="cart('supplies')">🛒 View basket</button>`,
+    "supply-" + id,
   );
 }
 
@@ -167,7 +198,8 @@ function plotDialog(i) {
         `<h2>🌱 Empty garden plot</h2><p>You need seeds first!</p><button class="btn" onclick="go('seeds')">Visit Seed & Feed</button>`,
       );
     show(
-      `<h2>🌱 Plant this plot</h2><p>Choose a seed packet from your bag:</p>${options.map((c) => `<button class="btn alt" onclick="plant(${i},'${c.id}')">${c.icon} ${c.name} (${state.seeds[c.id]})</button>`).join("")}`,
+      `<h2>🌱 Plant this plot</h2><p>Choose a seed packet from your bag:</p>${options.map((c) => `<button class="btn alt" ${Game.availableSeeds(state, c.id) ? "" : "disabled"} onclick="plant(${i},'${c.id}')">${c.icon} ${c.name} (${Game.availableSeeds(state, c.id)} available)</button>`).join("")}`,
+      "plant-seed",
     );
     return;
   }
@@ -193,6 +225,7 @@ function inventory() {
         .join("") ||
       "<p>Nothing harvested yet. Water your plants and advance days.</p>"
     }<button class="btn" onclick="go('market')">🍎 Go sell produce</button>`,
+    "inventory",
   );
 }
 
@@ -215,7 +248,8 @@ function order() {
       )
       .join(
         "",
-      )}<label>Calculate the total: $<input id="total-answer" type="number" min="0" step="0.01" inputmode="decimal"></label><button class="btn" onclick="ring()">⚖️ Check total / collect payment</button>`,
+      )}<label>Calculate the total: $<input id="total-answer" type="number" min="0" step="0.01" inputmode="decimal"></label><button class="btn" onclick="ring()">⚖️ Check total / collect payment</button>${Object.keys(c.want).some((id) => crop(id).unit === "lb") && !Game.hasEquipment(state, "scale") ? '<button class="btn alt" onclick="rentalOffer(\'scale\')">Need a scale? Review rental</button>' : ""}`,
+    "order",
   );
 }
 function basketChange(id, d) {
@@ -237,6 +271,7 @@ function paymentDialog() {
     due = state.tendered - t;
   show(
     `<h2>💵 Cash Register</h2><p>Order total: <b>${money(t)}</b></p><p>${state.customer.name} gives you <b>${money(state.tendered)}</b>.</p><p>Count back the change: <b>${money(due)}</b></p><div class="row">${[0.01, 0.05, 0.1, 0.25, 1, 5, 10, 20].map((n) => `<button class="btn alt coin" onclick="addMoney(${n})">${n < 1 ? Math.round(n * 100) + "¢" : "$" + n}</button>`).join("")}</div><p class="note">Change counted: ${money(state.change)}</p><button class="btn alt" onclick="state.change=0;payment()">Start over</button><button class="btn" onclick="finish()">Give change</button>`,
+    "payment",
   );
 }
 function addMoney(n) {

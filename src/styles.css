@@ -321,3 +321,15 @@ input:focus-visible {
   max-height: 85dvh;
   overflow-y: auto;
 }
+
+/* Repeated quantity actions retain their scroll container on mobile. */
+#app,
+.dialog {
+  overflow-anchor: none;
+}
+.market-primary {
+  display: block;
+  font-size: 18px;
+  min-height: 48px;
+  margin: 8px auto;
+}

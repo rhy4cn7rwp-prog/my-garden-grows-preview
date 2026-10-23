@@ -115,6 +115,12 @@
   ];
   const bundle = { carrot: 3, onion: 2, beans: 2, strawberry: 1 };
   const supplies = { table: 8, canopy: 10, bags: 3, scale: 5 };
+  const rentalPrices = {
+    table: { upfront: 1, deferred: 3 },
+    scale: { upfront: 1, deferred: 2 },
+    bags: { upfront: 0.5, deferred: 1 },
+  };
+  const debtCap = 6;
   const get = (id) => crops.find((c) => c.id === id);
   const cents = (n) => Math.round(n * 100);
   const quantity = (n) => Number.isSafeInteger(n) && n >= 0;
@@ -150,6 +156,11 @@
       notice: "",
       standMode: "blanket",
       tableRented: false,
+      rentals: {},
+      equipmentDebt: [],
+      marketSettled: false,
+      marketChargesPaid: 0,
+      rentalUpfrontPaid: 0,
     };
   }
   function dictionary(value, ids) {
@@ -245,6 +256,17 @@
           s.sales >= 0,
         "market",
       );
+      // Preserve valid seed reservations without charging or duplicating seeds.
+      for (const [index, id] of Object.entries(s.plan || {})) {
+        if (
+          /^(0|[1-9][0-9]?)$/.test(index) &&
+          +index < 25 &&
+          !clean.plots[index] &&
+          get(id) &&
+          availableSeeds(clean, id) > 0
+        )
+          clean.plan[index] = id;
+      }
       // Additive migration: retain v1 farms, money, equipment and this day's rental.
       clean.standMode = ["blanket", "rental", "owned"].includes(s.standMode)
         ? s.standMode
@@ -254,6 +276,49 @@
       clean.tableRented = s.tableRented === true;
       if (clean.standMode === "owned" && !clean.owned.table)
         clean.standMode = "blanket";
+      clean.rentals = s.rentals || {};
+      clean.equipmentDebt = s.equipmentDebt || [];
+      requireRule(
+        clean.rentals &&
+          typeof clean.rentals === "object" &&
+          !Array.isArray(clean.rentals) &&
+          Object.entries(clean.rentals).every(
+            ([id, r]) =>
+              rentalPrices[id] &&
+              r &&
+              ["upfront", "deferred", "legacy"].includes(r.payment),
+          ),
+        "rentals",
+      );
+      requireRule(
+        Array.isArray(clean.equipmentDebt) &&
+          clean.equipmentDebt.length <= 3 &&
+          clean.equipmentDebt.every(
+            (d) =>
+              d &&
+              rentalPrices[d.id] &&
+              Number.isInteger(d.cents) &&
+              d.cents > 0 &&
+              d.cents <= 600 &&
+              typeof d.day === "string",
+          ) &&
+          clean.equipmentDebt.reduce((n, d) => n + d.cents, 0) <=
+            cents(debtCap),
+        "rental charges",
+      );
+      if (clean.tableRented && !clean.rentals.table)
+        clean.rentals.table = { payment: "legacy" };
+      clean.marketSettled = s.marketSettled === true;
+      clean.marketChargesPaid =
+        Number.isFinite(s.marketChargesPaid) && s.marketChargesPaid >= 0
+          ? s.marketChargesPaid
+          : 0;
+      clean.rentalUpfrontPaid =
+        Number.isFinite(s.rentalUpfrontPaid) && s.rentalUpfrontPaid >= 0
+          ? s.rentalUpfrontPaid
+          : s.tableRented
+            ? 1
+            : 0;
       for (const id of ids)
         clean.display[id] = Math.min(
           clean.display[id] || 0,
@@ -311,7 +376,8 @@
           s.seeds[crop] = (s.seeds[crop] || 0) + q * n;
       else s.seeds[id] = (s.seeds[id] || 0) + n;
     }
-    if (kind === "supplies" && obj.table) s.standMode = "owned";
+    if (kind === "supplies" && obj.table && !s.marketPlayed)
+      s.standMode = "owned";
     s[kind === "seeds" ? "cart" : "supcart"] = {};
     return total;
   }
@@ -324,10 +390,7 @@
       delete s.plan[i];
       return;
     }
-    requireRule(
-      (s.seeds[id] || 0) > Object.values(s.plan).filter((x) => x === id).length,
-      "No unreserved seeds left.",
-    );
+    requireRule(availableSeeds(s, id) > 0, "No unreserved seeds left.");
     s.plan[i] = id;
   }
   function plantPlan(s) {
@@ -355,10 +418,61 @@
     }
     s.plan = {};
   }
+  function availableSeeds(s, id) {
+    return Math.max(
+      0,
+      (s.seeds[id] || 0) - Object.values(s.plan).filter((x) => x === id).length,
+    );
+  }
+  function cancelPlan(s, index) {
+    delete s.plan[index];
+  }
+  function cancelAllPlans(s) {
+    s.plan = {};
+  }
+  function harvestAll(s) {
+    const harvested = {};
+    let plots = 0;
+    s.plots.forEach((p, i) => {
+      if (!p || p.age < get(p.id).days) return;
+      const id = p.id,
+        before = s.inventory[id] || 0;
+      harvest(s, i);
+      harvested[id] = (harvested[id] || 0) + (s.inventory[id] - before);
+      plots++;
+    });
+    return { harvested, plots };
+  }
+  function canSellCrop(s, id) {
+    return get(id) && (get(id).unit !== "lb" || hasEquipment(s, "scale"));
+  }
+  function addAllToDisplay(s) {
+    requireRule(
+      !s.customer,
+      "Finish helping your customer before changing the stand.",
+    );
+    const added = {},
+      skipped = {};
+    for (const c of crops) {
+      const count = s.inventory[c.id] || 0;
+      s.display[c.id] = Math.min(s.display[c.id] || 0, count);
+      if (!count) continue;
+      if (!canSellCrop(s, c.id)) {
+        skipped[c.id] = count;
+        s.display[c.id] = 0;
+        continue;
+      }
+      const n = count - s.display[c.id];
+      if (n > 0) added[c.id] = n;
+      s.display[c.id] = count;
+    }
+    return { added, skipped };
+  }
   function water(s) {
     for (const p of s.plots) if (p) p.watered = true;
   }
   function endDay(s) {
+    settleMarket(s);
     s.day++;
     if (s.day > 20) {
       s.day = 1;
@@ -382,6 +496,10 @@
     s.marketOpen = false;
     s.marketPlayed = false;
     s.tableRented = false;
+    s.rentals = {};
+    s.marketSettled = false;
+    s.marketChargesPaid = 0;
+    s.rentalUpfrontPaid = 0;
     s.standMode = s.owned.table ? "owned" : "blanket";
   }
   function harvest(s, i) {
@@ -404,22 +522,23 @@
       "Your market has already opened today. End the farming day before opening again.",
     );
     requireRule(
-      Object.values(s.display).some((n) => n > 0),
+      crops.some((c) => (s.display[c.id] || 0) > 0 && canSellCrop(s, c.id)),
       "Place harvested produce on your stand first.",
     );
     if (s.standMode === "rental" && !s.tableRented) {
       requireRule(
         cents(s.cash) >= 100,
-        "A table rental costs $1 today. Choose the free blanket instead.",
+        "A table rental costs $1 today. Choose the free blanket or agree to the $3 pay-after-market option.",
       );
-      s.cash = (cents(s.cash) - 100) / 100;
-      s.tableRented = true;
+      rentEquipment(s, "table", "upfront");
     }
+    for (const c of crops) if (!canSellCrop(s, c.id)) s.display[c.id] = 0;
     s.marketOpen = true;
     s.marketPlayed = true;
     s.hour = 9;
   }
   function closeMarket(s) {
+    settleMarket(s);
     s.marketOpen = false;
     s.hour = 13;
     s.customer = null;
@@ -433,7 +552,9 @@
       s.visitors < customerLimit(s),
       `Your ${hasMarketTable(s) ? "table" : "blanket"} has welcomed all ${customerLimit(s)} customers for today. Close the market and return tomorrow.`,
     );
-    const stock = crops.filter((c) => (s.display[c.id] || 0) > 0);
+    const stock = crops.filter(
+      (c) => (s.display[c.id] || 0) > 0 && canSellCrop(s, c.id),
+    );
     requireRule(stock.length, "Your display is sold out.");
     const a = stock[s.visitors % stock.length],
       want = { [a.id]: Math.min(s.display[a.id], (s.visitors % 2) + 1) };
@@ -474,7 +595,7 @@
     );
     requireRule(
       !Object.keys(s.basket).some((id) => get(id).unit === "lb") ||
-        s.owned.scale,
+        hasEquipment(s, "scale"),
       "You need a scale for produce sold by the pound.",
     );
     const total = totalOrder(s);
@@ -512,6 +633,89 @@
     s.sales = (cents(s.sales) + cents(total)) / 100;
     s.step = "thanks";
     return total;
+  }
+  function savings(s) {
+    return Math.max(0, (cents(s.cash) - cents(debtTotal(s))) / 100);
+  }
+  function farmingDay(s) {
+    return `${s.season}:${s.day}`;
+  }
+  function debtTotal(s) {
+    return (s.equipmentDebt || []).reduce((n, d) => n + d.cents, 0) / 100;
+  }
+  function deferredAllowed(s, id) {
+    return (
+      !!rentalPrices[id] &&
+      cents(s.cash) < cents(rentalPrices[id].upfront) &&
+      !(s.equipmentDebt || []).some((d) => d.day !== farmingDay(s)) &&
+      cents(debtTotal(s)) + cents(rentalPrices[id].deferred) <= cents(debtCap)
+    );
+  }
+  function rentEquipment(s, id, payment) {
+    requireRule(
+      rentalPrices[id] && ["upfront", "deferred"].includes(payment),
+      "Choose a valid rental and payment option.",
+    );
+    requireRule(
+      !s.owned[id] && !s.rentals[id] && !(id === "table" && s.tableRented),
+      "You already have this equipment today.",
+    );
+    requireRule(
+      !s.marketPlayed || s.marketOpen,
+      "Rent before the market closes.",
+    );
+    requireRule(
+      id !== "table" || (!s.marketOpen && !s.marketPlayed),
+      "Choose your table before opening the market.",
+    );
+    const price = rentalPrices[id][payment];
+    if (payment === "upfront") {
+      requireRule(
+        cents(s.cash) >= cents(price),
+        "You do not have enough money for the upfront rental.",
+      );
+      s.cash = (cents(s.cash) - cents(price)) / 100;
+      s.rentalUpfrontPaid = (cents(s.rentalUpfrontPaid) + cents(price)) / 100;
+    } else {
+      requireRule(
+        deferredAllowed(s, id),
+        "Pay outstanding charges from an earlier day before borrowing again. Upfront rentals and free blanket selling are still available; unpaid charges cannot exceed $6.",
+      );
+      s.equipmentDebt.push({ id, cents: cents(price), day: farmingDay(s) });
+    }
+    s.rentals[id] = { payment };
+    if (id === "table") {
+      s.tableRented = true;
+      s.standMode = "rental";
+    }
+    return price;
+  }
+  function applyDebtPayment(s, amountInCents) {
+    let left = Math.min(amountInCents, cents(debtTotal(s)));
+    const paid = left;
+    for (const charge of s.equipmentDebt) {
+      const amount = Math.min(left, charge.cents);
+      charge.cents -= amount;
+      left -= amount;
+    }
+    s.equipmentDebt = s.equipmentDebt.filter((d) => d.cents > 0);
+    s.cash = (cents(s.cash) - paid) / 100;
+    return paid / 100;
+  }
+  function payOutstanding(s) {
+    return applyDebtPayment(s, Math.min(cents(s.cash), cents(debtTotal(s))));
+  }
+  function settleMarket(s) {
+    if (s.marketSettled || !s.marketPlayed) return 0;
+    const paid = applyDebtPayment(s, Math.min(cents(s.cash), cents(s.sales)));
+    s.marketChargesPaid = (cents(s.marketChargesPaid) + cents(paid)) / 100;
+    s.marketSettled = true;
+    return paid;
+  }
+  function hasEquipment(s, id) {
+    return (
+      !!s.owned[id] || !!s.rentals?.[id] || (id === "table" && s.tableRented)
+    );
   }
   function hasMarketTable(s) {
     return s.standMode === "owned"
@@ -566,6 +770,21 @@
     return "Your neighbors shared 3 carrot seeds. Plant, water and harvest them, then sell from a free blanket. No repayment is needed.";
   }
   const api = {
+    savings,
+    rentalPrices,
+    debtCap,
+    debtTotal,
+    deferredAllowed,
+    rentEquipment,
+    payOutstanding,
+    settleMarket,
+    hasEquipment,
+    availableSeeds,
+    cancelPlan,
+    cancelAllPlans,
+    harvestAll,
+    canSellCrop,
+    addAllToDisplay,
     hasMarketTable,
     customerLimit,
     chooseStand,
