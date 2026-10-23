@@ -53,7 +53,7 @@ function renderScene() {
       spot(55, 15, 43, 44, "go('seeds')", "Seed & Feed") +
       spot(5, 57, 51, 37, "go('garden')", "My Garden") +
       spot(58, 57, 40, 40, "go('market')", "Farmers Market");
-    bottom = `<h2>🌱 My Garden Grows</h2><p>Tap a building to explore! Your dream: ${DREAMS[state.goal][2]} · ${money(DREAMS[state.goal][3])}</p><div class="row"><button class="btn alt" onclick="go('supplies')">🧺 Market Supplies</button><button class="btn alt" onclick="settings()">⚙ Settings</button></div>`;
+    bottom = `<h2>🌱 My Garden Grows</h2><p>Tap a building to explore! Your dream: ${DREAMS[state.goal][2]} · ${money(DREAMS[state.goal][3])}</p><div class="row"><button class="btn alt" onclick="go('supplies')">🧺 Market Supplies</button><button class="btn alt" onclick="jobBoard()">📋 Job Board</button><button class="btn alt" onclick="seedHelp()">🌱 Community seed help</button><button class="btn alt" onclick="settings()">⚙ Settings</button></div>`;
   }
   if (view === "dream") {
     for (let [id, x, y, w, h] of SHOP_HOTSPOTS.dream)
@@ -108,7 +108,7 @@ function renderScene() {
       if (!c) {
         bottom = `<h2>🍎 Farmers Market</h2><p>${state.marketOpen ? "Your stand is open. Welcome a neighbor!" : "Arrange your harvest before opening."}</p><button class="btn" onclick="marketStand()">🧺 Arrange produce / open market</button>${state.marketOpen ? '<button class="btn" onclick="newCustomer()">Welcome next customer</button><button class="btn alt" onclick="closeMarket()">Close market</button>' : ""}`;
       } else
-        bottom = `<h2>🍎 Market Day · ${state.hour}:00</h2><p><b>${c.name}:</b> ${
+        bottom = `<h2>🍎 Market Day · ${Math.floor(state.hour)}:${state.hour % 1 ? "30" : "00"}</h2><p><b>${c.name}:</b> ${
           state.step === "greet"
             ? "Hello!"
             : state.step === "choose"
@@ -120,7 +120,7 @@ function renderScene() {
               : state.step === "thanks"
                 ? "Thanks so much!"
                 : "Let’s check out!"
-        }</p><div class="row">${state.step === "greet" ? `<button class="btn" onclick="Game.greet(state);render()">😊 Welcome! What can I get you?</button><button class="btn alt" onclick="Game.greet(state);render()">Hello! How can I help?</button>` : state.step === "choose" ? `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="skip()">Sorry, sold out</button>` : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : `<button class="btn" onclick="advance()">👋 Thank you! Come again!</button><button class="btn alt" onclick="advance()">Hope to see you again!</button>`}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${state.owned.table ? "Market table" : "Blanket stand"}</p>`;
+        }</p><div class="row">${state.step === "greet" ? `<button class="btn" onclick="Game.greet(state);render()">😊 Welcome! What can I get you?</button><button class="btn alt" onclick="Game.greet(state);render()">Hello! How can I help?</button>` : state.step === "choose" ? `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="skip()">Sorry, sold out</button>` : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : `<button class="btn" onclick="advance()">👋 Thank you! Come again!</button><button class="btn alt" onclick="advance()">Hope to see you again!</button>`}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
     }
   }
   $("#app").innerHTML =
@@ -141,7 +141,7 @@ function seed(id) {
 function supply(id) {
   let s = SUPPLIES.find((x) => x[0] === id);
   show(
-    `<h2>${s[1]} ${s[2]}</h2><p class="tag">${money(s[3])}</p><p>${s[4]}</p><p>Already owned: ${state.owned[id] || 0}</p><div class="qty"><button onclick="change('supcart','${id}',-1)">−</button><b>${state.supcart[id] || 0} in basket</b><button onclick="change('supcart','${id}',1)">+</button></div><button class="btn" onclick="cart('supplies')">🛒 View basket</button>`,
+    `<h2>${s[1]} ${s[2]}</h2><p class="tag">${money(s[3])}</p><p>${s[4]}</p><p>Already owned: ${state.owned[id] || 0}</p>${id === "table" ? '<p>You can also rent a basic table for $1 per day or use a free blanket.</p><button class="btn alt" onclick="go(\'market\');marketStand()">Choose a market stand</button>' : ""}<div class="qty"><button onclick="change('supcart','${id}',-1)">−</button><b>${state.supcart[id] || 0} in basket</b><button onclick="change('supcart','${id}',1)">+</button></div><button class="btn" onclick="cart('supplies')">🛒 View basket</button>`,
   );
 }
 

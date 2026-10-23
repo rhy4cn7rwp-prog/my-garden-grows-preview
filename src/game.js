@@ -148,6 +148,8 @@
       marketPlayed: false,
       weather: "sunny",
       notice: "",
+      standMode: "blanket",
+      tableRented: false,
     };
   }
   function dictionary(value, ids) {
@@ -243,6 +245,15 @@
           s.sales >= 0,
         "market",
       );
+      // Additive migration: retain v1 farms, money, equipment and this day's rental.
+      clean.standMode = ["blanket", "rental", "owned"].includes(s.standMode)
+        ? s.standMode
+        : s.owned.table
+          ? "owned"
+          : "blanket";
+      clean.tableRented = s.tableRented === true;
+      if (clean.standMode === "owned" && !clean.owned.table)
+        clean.standMode = "blanket";
       for (const id of ids)
         clean.display[id] = Math.min(
           clean.display[id] || 0,
@@ -300,6 +311,7 @@
           s.seeds[crop] = (s.seeds[crop] || 0) + q * n;
       else s.seeds[id] = (s.seeds[id] || 0) + n;
     }
+    if (kind === "supplies" && obj.table) s.standMode = "owned";
     s[kind === "seeds" ? "cart" : "supcart"] = {};
     return total;
   }
@@ -369,6 +381,8 @@
     s.step = "greet";
     s.marketOpen = false;
     s.marketPlayed = false;
+    s.tableRented = false;
+    s.standMode = s.owned.table ? "owned" : "blanket";
   }
   function harvest(s, i) {
     const p = s.plots[i];
@@ -393,6 +407,14 @@
       Object.values(s.display).some((n) => n > 0),
       "Place harvested produce on your stand first.",
     );
+    if (s.standMode === "rental" && !s.tableRented) {
+      requireRule(
+        cents(s.cash) >= 100,
+        "A table rental costs $1 today. Choose the free blanket instead.",
+      );
+      s.cash = (cents(s.cash) - 100) / 100;
+      s.tableRented = true;
+    }
     s.marketOpen = true;
     s.marketPlayed = true;
     s.hour = 9;
@@ -408,8 +430,8 @@
     requireRule(s.marketOpen && s.hour < 13, "The market is closed.");
     requireRule(!s.customer, "Finish serving this customer first.");
     requireRule(
-      s.owned.table || s.visitors < 3,
-      "A blanket stand welcomes three customers per day.",
+      s.visitors < customerLimit(s),
+      `Your ${hasMarketTable(s) ? "table" : "blanket"} has welcomed all ${customerLimit(s)} customers for today. Close the market and return tomorrow.`,
     );
     const stock = crops.filter((c) => (s.display[c.id] || 0) > 0);
     requireRule(stock.length, "Your display is sold out.");
@@ -491,7 +513,65 @@
     s.step = "thanks";
     return total;
   }
+  function hasMarketTable(s) {
+    return s.standMode === "owned"
+      ? !!s.owned.table
+      : s.standMode === "rental" && s.tableRented;
+  }
+  function customerLimit(s) {
+    return hasMarketTable(s) ? 6 : 3;
+  }
+  function chooseStand(s, mode) {
+    requireRule(
+      !s.marketPlayed && !s.marketOpen,
+      "Choose your stand before opening the market.",
+    );
+    requireRule(
+      ["blanket", "rental", "owned"].includes(mode),
+      "Choose a valid stand.",
+    );
+    requireRule(
+      mode !== "owned" || s.owned.table,
+      "You do not own a table yet.",
+    );
+    s.standMode = mode;
+  }
+  function advanceCustomer(s) {
+    requireRule(
+      s.customer && s.step === "thanks",
+      "Finish helping your customer first.",
+    );
+    s.hour = Math.min(13, s.hour + 0.5);
+    s.customer = null;
+    s.basket = {};
+    s.change = 0;
+  }
+  function canReceiveSeedHelp(s) {
+    if (cents(s.cash) >= 100) return false;
+    const sellable = (id) => s.owned.scale || get(id).unit === "each";
+    return (
+      !crops.some(
+        (c) =>
+          sellable(c.id) &&
+          ((s.seeds[c.id] || 0) > 0 || (s.inventory[c.id] || 0) > 0),
+      ) && !s.plots.some((p) => p && sellable(p.id))
+    );
+  }
+  function receiveSeedHelp(s) {
+    requireRule(
+      canReceiveSeedHelp(s),
+      "You already have a way to keep growing: use your seeds, water your plants, or sell your harvest.",
+    );
+    s.seeds.carrot = (s.seeds.carrot || 0) + 3;
+    return "Your neighbors shared 3 carrot seeds. Plant, water and harvest them, then sell from a free blanket. No repayment is needed.";
+  }
   const api = {
+    hasMarketTable,
+    customerLimit,
+    chooseStand,
+    advanceCustomer,
+    canReceiveSeedHelp,
+    receiveSeedHelp,
     crops,
     bundle,
     supplies,

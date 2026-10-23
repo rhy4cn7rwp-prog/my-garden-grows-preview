@@ -81,7 +81,7 @@ function harvest(i) {
 }
 function marketStand() {
   show(
-    `<h2>Arrange your market stand</h2>${
+    `<h2>Arrange your market stand</h2>${standOptions()}${
       CROPS.filter((c) => state.inventory[c.id])
         .map(
           (c) =>
@@ -138,16 +138,56 @@ function finish() {
   });
 }
 function advance() {
-  state.hour = Math.min(13, state.hour + 1);
-  state.customer = null;
-  state.basket = {};
-  state.change = 0;
-  render();
+  act(() => {
+    Game.advanceCustomer(state);
+    render();
+  });
 }
 function nextMarket() {
   show(
     "<h2>Market closed for today</h2><p>Return to your garden and end the day before reopening.</p>",
   );
+}
+function standLabel() {
+  return state.standMode === "owned" && state.owned.table
+    ? "Owned table"
+    : state.standMode === "rental"
+      ? state.tableRented
+        ? "Rented table · paid today"
+        : "Table rental · $1 when opening"
+      : "Free blanket";
+}
+function standOptions() {
+  if (state.marketPlayed || state.marketOpen)
+    return `<p>${standLabel()} · up to ${Game.customerLimit(state)} customers today.</p>`;
+  return `<fieldset><legend>Choose today's stand</legend>
+    <p>Blanket: free, up to 3 customers. Table: up to 6 customers. Produce prices stay the same; more visitors give more chances to sell.</p>
+    <button class="btn ${state.standMode === "blanket" ? "" : "alt"}" aria-pressed="${state.standMode === "blanket"}" onclick="selectStand('blanket')">Free blanket · $0</button>
+    ${state.owned.table ? `<button class="btn ${state.standMode === "owned" ? "" : "alt"}" aria-pressed="${state.standMode === "owned"}" onclick="selectStand('owned')">Use owned table · $0</button>` : `<button class="btn ${state.standMode === "rental" ? "" : "alt"}" aria-pressed="${state.standMode === "rental"}" onclick="selectStand('rental')">Rent table · $1 today</button>`}
+    <p>${standLabel()}. Rentals are paid once when you open, end when the farming day ends, and never renew automatically.</p></fieldset>`;
+}
+function selectStand(mode) {
+  act(() => {
+    Game.chooseStand(state, mode);
+    marketStand();
+  });
+}
+function jobBoard() {
+  show(
+    '<h2>📋 Town Job Board</h2><p>Coming soon: earn money by helping your neighbors with educational challenges.</p><p>No jobs or math challenges are available yet. You do not need to restart your farm if money runs low.</p><button class="btn alt" onclick="seedHelp()">Visit community seed help</button>',
+  );
+}
+function seedHelp() {
+  show(`<h2>🌱 Community seed help</h2><p>If you have less than $1 and no crops you can grow or sell with your equipment, your neighbors will share 3 carrot seeds. No fee, debt, or farm reset.</p>
+    ${Game.canReceiveSeedHelp(state) ? '<button class="btn" onclick="claimSeedHelp()">Accept 3 free carrot seeds</button>' : "<p>You have a way forward: buy a seed packet, plant your seeds, water your crops, or sell your harvest. Selling from a blanket is always free.</p>"}`);
+}
+function claimSeedHelp() {
+  act(() => {
+    const message = Game.receiveSeedHelp(state);
+    show(
+      `<h2>A fresh start for your garden</h2><p>${message}</p><button class="btn" onclick="go('garden')">Go plant carrots</button>`,
+    );
+  });
 }
 // Show counting-up feedback while preserving explicit collection of payment/change.
 function payment() {

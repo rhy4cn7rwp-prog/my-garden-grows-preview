@@ -1,0 +1,7 @@
+{
+  "name": "my-garden-grows-preview",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs"
+  }
+}
