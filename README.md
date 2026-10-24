@@ -1,9 +1,43 @@
-# My Garden Grows 1.0 preview — Phase 1D
+# My Garden Grows 1.0 preview — Phase 1E
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 1E customer service and order filling
+
+- Choose one of three greetings: an enthusiastic welcome, a friendly question,
+  or waiting quietly. Each has its own response. Curious and thoughtful shoppers
+  will ask for help after a wait; hurried shoppers may leave. There is no cash fee.
+- Satisfaction starts at 50, increases by 20/10 for excellent/good greetings, and
+  drops by only 5 for waiting. These scores never change prices, change due, or fees.
+- About one in four shoppers asks for a crop missing from the stand, when any
+  crop is missing. Politely apologize or offer a vegetable actually on display
+  and sellable with the current equipment. Vegetables are recommended for other
+  vegetables; berries are not substituted for vegetables. Customer personalities
+  affect acceptance; excellent greetings improve the chance by 10 percentage
+  points over a good greeting. Outcomes are fixed per customer and saved, so
+  refreshing does not reroll a decision. One alternative offer prevents pressure
+  through repeated suggestions. A refusal ends the visit without a sale.
+- An accepted substitution updates the customer's agreed order and clears the
+  uncommitted basket. Its quantity is limited to stock; the revised request is
+  shown before the player fills it. No inventory is consumed at this point.
+- Fill orders from **all sellable produce on the market stand**, including crops
+  not requested. Harvest still stored on the farm and zero-stock varieties are
+  not selectable. +/- quantities stop at the smaller of display and harvest stock,
+  rather than the requested quantity. Removing the last item removes its entry.
+- Check Basket validates both types and quantities. Wrong baskets/totals give
+  friendly inline feedback and allow correction without consuming stock, cash,
+  or bags. Unfinished mistaken baskets also survive refresh. Stock, money and one
+  bag move only after exact change is counted and Give Change completes the sale.
+- Three farewells have distinct friendly responses and small satisfaction effects
+  (+3/+2/0). They do not change earnings or prices. Customers who leave without
+  buying still receive a friendly goodbye and do not count as completed sales.
+- Existing saves keep version 1 and the same storage keys. Old active customers
+  receive safe defaults for new service fields; checkout and rental ledgers remain
+  intact. Sold-out requests may resume at greeting/selection, while payment-stage
+  recovery still requires an exact, stocked basket with no extra vegetables.
 
 ## Paper bags
 
@@ -14,7 +48,7 @@ are preserved.
   the current order are retained while buying a refill if bags run out.
 - Bags are consumed only on a successful completed sale. Wrong totals, incorrect
   change, skipped customers, restocking and canceled orders consume none.
-- The market preparation, customer order and register display bags remaining.
+- The market preparation, active customer screen and register display bags remaining.
   **Buy more bags** purchases a pack without changing the active customer,
   basket, greeting/checkout stage, visits, clock or market progress.
 - Daily-use bags from Phase 1B provide 10 consumable bags for that farming day.
@@ -45,14 +79,22 @@ extra savings. The Job Board is still a placeholder, without math minigames.
 
 ## Cash register and report
 
-Phase 1D compacts the register into the usable phone viewport: the four bills
-stay in two rows, the smaller coins share one row, and the receipt is concise.
-Paper bags remaining and Buy More Bags sit together below Change Counted and
-above Start Over/Give Change. Controls are at least 44px; no content is hidden
-to force a fit. The layout responds to viewport height, safe-area insets and
-landscape orientation. Normal-text register fit is tested down to 320 × 440,
-including a separate simulated safe-area case. Enlarged accessibility text
-retains an overflow fallback rather than clipping controls.
+Phase 1E uses `visualViewport.height`, offsets and resize/scroll events to fit
+Safari's currently visible area, including moving browser toolbars. The total input
+uses 16px text to prevent Safari's automatic focus zoom, without disabling user
+zoom. Smaller coins,
+tighter spacing and a short-screen layout keep every payment control visible.
+Normal portrait screens retain two large rows of bills; short screens put the
+four bills in one row, with coins underneath. All buttons retain 44px touch targets.
+Bag count/refill remain below Change Counted and above Start Over/Give Change.
+Tests check no register scrolling, cut-off buttons or overlapping targets at
+320 × 360, 320 × 400, 375 × 500, 390 × 664 and 568 × 256 landscape, plus earlier
+Phase 1D viewports, simulated safe-area insets and a separate visual viewport that
+shrinks to 350px while the layout viewport stays tall. Accessibility text can still
+use an overflow fallback when necessary; content is not clipped to force a fit.
+These are Chromium touch emulation and explicit viewport simulations, not a claim
+of physical iPhone Safari verification. WebKit could not be installed in this
+workspace because its browser-download domains return HTTP 403.
 
 
 The register uses original simplified SVG bills ($1/$5/$10/$20) and coins
@@ -104,9 +146,17 @@ day has complete accounting. Do not clear Safari data or restart to update.
 
 ## Tests and validation
 
-- `npm test`: 53 rule tests covering prior features plus bag packs/consumption,
-  active restocking, save migration/resumption, cash-matched accounting,
-  settlement idempotency and exact change.
+- `npm test`: 61 rule tests covering prior features, order type/quantity validation,
+  mistaken-basket recovery, greetings, preferences/alternatives, farewells,
+  bag packs/consumption, active restocking, save migration/resumption,
+  cash-matched accounting, settlement idempotency and exact change.
+- `python3 tests/mobile_phase1e.py`: full touch flow at five viewports, all-stock
+  choices with hidden unavailable items, stock caps, incorrect basket/total retries,
+  refresh recovery, greetings, accepted/declined alternatives, both apologies,
+  three farewells, successful checkout, and no-scroll/no-overlap register checks.
+  Includes separate Safari visual/layout viewport sizes, offset, safe-area and
+  toolbar transitions, and >=44px targets. Screenshots are written to `/tmp`.
+
 - `python3 tests/mobile_phase1d.py`: verifies the entire register and all controls
   fit without vertical/horizontal scrolling at 390 × 664, 375 × 548, 320 × 460,
   320 × 440 and 667 × 320, plus toolbar resizing and safe-area simulation. Also

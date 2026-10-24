@@ -44,15 +44,22 @@ try:
   page.get_by_role('button',name='Free blanket · $0',exact=True).tap()
   page.get_by_role('button',name='Open market',exact=True).tap()
   page.get_by_role('button',name='Welcome Next Customer',exact=True).tap()
-  page.get_by_role('button',name='😊 Welcome! What can I get you?',exact=True).tap()
+  page.get_by_role('button',name='Hi! What can I get for you?',exact=True).tap()
+  # A shopper may want sold-out produce; politely see them off, then serve the next.
+  if page.evaluate('Game.missingProduce(state).length'):
+   page.get_by_role('button',name='Help with sold-out produce',exact=True).tap()
+   page.get_by_role('button',name="I'm sorry, we're sold out of that today.",exact=True).tap()
+   page.get_by_role('button',name='Bye!',exact=True).tap()
+   page.get_by_role('button',name='Welcome Next Customer',exact=True).tap()
+   page.get_by_role('button',name='Hi! What can I get for you?',exact=True).tap()
   page.get_by_role('button',name='🧺 Fill customer basket',exact=True).tap()
-  page.get_by_role('button',name='+',exact=True).tap()
+  page.locator('.produce-choices button[aria-label^="Add " ]').first.tap()
   page.locator('#total-answer').fill('2')
   page.get_by_role('button',name='⚖️ Check total / collect payment',exact=True).tap()
   page.get_by_role('button',name='💵 Count change',exact=True).tap()
   for _ in range(3):page.get_by_role('button',name='$1',exact=True).tap()
   page.get_by_role('button',name='Give change',exact=True).tap()
-  page.get_by_role('button',name='👋 Thank you! Come again!',exact=True).tap()
+  page.get_by_role('button',name='Thank you so much! I hope to see you again!',exact=True).tap()
   assert page.evaluate('state.cash')==2
   page.reload()
   assert page.evaluate('[state.cash,state.goal,state.owned.canopy,state.seeds.carrot]')==[2,4,1,2]

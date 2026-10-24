@@ -12,6 +12,11 @@ function stocked(cash = 50) {
 function sell(s) {
   G.newCustomer(s, "Maya");
   G.greet(s);
+  // Isolate capacity/accounting from the separately tested sold-out service paths.
+  const item = G.crops.find((c) => G.marketStock(s, c.id) > 0);
+  s.customer.want = {
+    [item.id]: Math.min(G.marketStock(s, item.id), ((s.visitors - 1) % 2) + 1),
+  };
   s.basket = { ...s.customer.want };
   G.ring(s, G.totalOrder(s));
   s.change = s.tendered - G.totalOrder(s);

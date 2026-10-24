@@ -30,8 +30,8 @@ try:
    assert page.locator('.market-scene .spot').nth(1).evaluate('(e)=>getComputedStyle(e).outlineStyle')=='none'
    tap('Arrange Produce / Open Market')
    assert 'Paper bags remaining: 0' in page.locator('.dialog').inner_text()
-   tap('Open market');tap('Welcome Next Customer');tap('😊 Welcome! What can I get you?');tap('🧺 Fill customer basket')
-   modalTap('+');page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment')
+   tap('Open market');tap('Welcome Next Customer');tap('Hi! What can I get for you?');tap('🧺 Fill customer basket')
+   page.locator('.produce-choices button[aria-label^="Add " ]').first.tap();page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment')
    assert page.evaluate('state.step')=='pay'
    tap('💵 Count change')
    before=page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.hour,state.step])')
@@ -62,7 +62,7 @@ try:
     assert abs(page.locator('.dialog').evaluate('(e)=>e.scrollTop')-beforeScroll)<=2
    tap('Give change');assert page.evaluate('[state.cash,state.bagCount,state.customersServed]')==[51,9,1]
    page.reload();assert page.evaluate('[state.step,state.bagCount,state.customersServed]')==['thanks',9,1]
-   tap('👋 Thank you! Come again!');tap('Close market')
+   tap('Thank you so much! I hope to see you again!');tap('Close market')
    assert '$4.00' in row('Total produce sales')
    assert row('Customers served').endswith('1')
    assert '−$3.00' in row('Bag purchases / daily-use bag fees')
@@ -78,7 +78,7 @@ try:
    page.reload();assert page.evaluate('state.bagCount')==9
    # Empty bag stock offers a refill at completion and keeps counted change.
    page.evaluate('''()=>{state=Game.initial();state.inventory.corn=3;state.display.corn=3;go('market');}''')
-   tap('Arrange Produce / Open Market');tap('Open market');tap('Welcome Next Customer');tap('😊 Welcome! What can I get you?');tap('🧺 Fill customer basket');modalTap('+')
+   tap('Arrange Produce / Open Market');tap('Open market');tap('Welcome Next Customer');tap('Hi! What can I get for you?');tap('🧺 Fill customer basket');page.locator('.produce-choices button[aria-label^="Add " ]').first.tap()
    page.locator('#total-answer').fill('3');tap('⚖️ Check total / collect payment');tap('💵 Count change');tap('$1');tap('$1');tap('Give change')
    assert page.evaluate('[state.sales,state.bagCount]')==[0,0]
    tap('Buy 10 bags · $3');tap('Give change')

@@ -304,6 +304,9 @@ button {
 /* Small accessibility improvements; original scene artwork is untouched. */
 input {
   font: inherit;
+  /* Prevent Safari focus zoom without disabling user zoom. */
+  font-size: 16px;
+  min-height: 44px;
   width: 7em;
   padding: 8px;
   border: 2px solid #835128;
@@ -442,27 +445,42 @@ input:focus-visible {
   border-radius: 8px;
 }
 
-/* Phase 1D: a complete register in the usable phone viewport, with 44px targets. */
+/* Phase 1E: fit the visible Safari viewport, including toolbar transitions. */
 .register-modal {
-  padding: max(6px, env(safe-area-inset-top))
-    max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom))
-    max(6px, env(safe-area-inset-left));
+  --register-safe-top: env(safe-area-inset-top, 0px);
+  --register-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --register-room: calc(
+    var(--visible-height, 100dvh) - 8px - var(--register-safe-top) -
+      var(--register-safe-bottom)
+  );
+  inset: auto;
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  width: var(--visible-width, 100%);
+  height: var(--visible-height, 100dvh);
+  padding: max(4px, var(--register-safe-top))
+    max(4px, env(safe-area-inset-right, 0px))
+    max(4px, var(--register-safe-bottom))
+    max(4px, env(safe-area-inset-left, 0px));
 }
 .register-dialog {
-  padding: 8px;
-  border-width: 4px;
+  position: relative;
   width: min(100%, 420px);
-  max-height: calc(
-    100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
-  );
+  max-width: 700px;
+  max-height: var(--register-room);
+  padding: 6px;
+  border-width: 3px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
+}
+.register-dialog > * {
+  flex-shrink: 0;
 }
 .register-dialog p {
   margin: 0;
   font-size: 14px;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 .register-header {
   display: flex;
@@ -472,7 +490,7 @@ input:focus-visible {
   min-height: 44px;
 }
 .register-header h2 {
-  font-size: 21px;
+  font-size: 20px;
   margin: 0;
 }
 .register-close {
@@ -488,48 +506,50 @@ input:focus-visible {
 .register-receipt {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
+  gap: 3px;
 }
 .register-receipt p {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
+  overflow-wrap: anywhere;
 }
 .register-receipt span {
-  font-size: 12px;
+  font-size: 13px;
 }
 .register-receipt strong {
   font-size: 17px;
 }
 .register-dialog .money-tray {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: 64px 64px 52px;
-  gap: 5px;
-  margin: 2px 0;
+  grid-template-rows: 58px 58px 44px;
+  gap: 3px;
+  margin: 0;
 }
 .register-dialog .money-piece {
   min-height: 44px;
-  padding: 2px;
+  padding: 0;
 }
 .register-dialog .paper-bill {
   grid-column: span 2;
 }
 .register-dialog .paper-bill svg {
-  height: 60px;
+  height: 100%;
+  max-height: 58px;
   width: 100%;
   max-width: 160px;
 }
 .register-dialog .metal-coin svg {
-  height: 52px;
-  width: 66px;
+  height: 40px;
+  width: 52px;
   max-width: 100%;
 }
 .register-dialog .metal-coin svg text {
   font-size: 28px;
 }
 .register-count {
-  padding: 4px;
+  padding: 3px;
   background: #f9e6ab;
   border-radius: 8px;
   line-height: 1.15;
@@ -540,13 +560,13 @@ input:focus-visible {
 }
 .register-count small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
 }
 .register-dialog .register-bags {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
   margin: 0;
   min-height: 44px;
   text-align: left;
@@ -557,13 +577,12 @@ input:focus-visible {
 .register-dialog .btn {
   min-height: 44px;
   margin: 0;
-  padding: 5px 8px;
+  padding: 4px 6px;
   font-size: 14px;
   line-height: 1.1;
 }
 .register-bags .btn {
   flex-shrink: 0;
-  font-size: 13px;
 }
 .register-actions {
   display: flex;
@@ -572,31 +591,41 @@ input:focus-visible {
 .register-actions .btn {
   flex: 1;
 }
-@media (max-height: 520px) {
-  .register-dialog {
-    gap: 3px;
-  }
-  .register-dialog .money-tray {
-    grid-template-rows: 58px 58px 48px;
-    gap: 4px;
-  }
-  .register-dialog .paper-bill svg {
-    height: 54px;
-  }
-  .register-dialog .metal-coin svg {
-    height: 48px;
-  }
+/* Short usable screens: keep every tap target at least 44px rather than shrinking text. */
+:root[data-short-register="true"] .register-header {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  min-height: 0;
 }
-@media (max-height: 430px) and (min-width: 540px) {
+:root[data-short-register="true"] .register-header h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+:root[data-short-register="true"] .register-receipt {
+  margin-right: 46px;
+  min-height: 44px;
+}
+:root[data-short-register="true"] .register-dialog .money-tray {
+  grid-template-rows: 48px 44px;
+}
+:root[data-short-register="true"] .register-dialog .paper-bill {
+  grid-column: span 1;
+}
+:root[data-short-register="true"] .register-dialog .paper-bill svg {
+  max-height: 48px;
+}
+/* Landscape uses the width for larger bills. */
+@media (min-width: 540px) and (max-height: 470px) {
   .register-dialog {
     width: min(100%, 700px);
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-    grid-template-areas: "header header" "receipt money" "count money" "bags money" "actions money";
-    gap: 4px 10px;
-  }
-  .register-header {
-    grid-area: header;
+    grid-template-areas: "receipt money" "count money" "bags money" "actions money";
+    gap: 4px 8px;
   }
   .register-receipt {
     grid-area: receipt;
@@ -613,41 +642,48 @@ input:focus-visible {
   .register-actions {
     grid-area: actions;
   }
-}
-/* Account for Safari's usable height and safe-area insets rather than device height. */
-.register-modal {
-  --register-safe-top: env(safe-area-inset-top, 0px);
-  --register-safe-bottom: env(safe-area-inset-bottom, 0px);
-  --register-room: calc(
-    100dvh - 12px - var(--register-safe-top) - var(--register-safe-bottom)
-  );
-  padding-top: max(6px, var(--register-safe-top));
-  padding-bottom: max(6px, var(--register-safe-bottom));
-}
-.register-dialog {
-  max-height: var(--register-room);
-}
-.register-dialog .paper-bill svg {
-  height: 100%;
-  max-height: 60px;
-}
-@media (max-height: 600px) and (max-width: 539px) {
-  .register-dialog {
-    gap: 3px;
+  :root[data-short-register="true"] .register-header {
+    right: 5px;
+    top: 5px;
   }
-  .register-dialog .money-tray {
-    grid-template-rows: repeat(
-        2,
-        clamp(48px, calc((var(--register-room) - 310px) / 2), 58px)
-      ) clamp(44px, calc(var(--register-room) - 370px), 48px);
-    gap: 4px;
+  :root[data-short-register="true"] .register-receipt {
+    margin-right: 0;
   }
-  .register-dialog .paper-bill svg {
-    height: 100%;
-    max-height: 54px;
+  :root[data-short-register="true"] .register-dialog .money-tray {
+    margin-right: 44px;
+    grid-template-rows: 58px 58px 44px;
   }
-  .register-dialog .metal-coin svg {
-    height: 100%;
-    max-height: 48px;
+  :root[data-short-register="true"] .register-dialog .paper-bill {
+    grid-column: span 2;
   }
+}
+.produce-choices .qty {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+  gap: 8px;
+}
+.produce-choices .qty button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.produce-choices .basketline p {
+  margin: 3px 0;
+}
+.order-feedback {
+  background: #f9e6ab;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.customer-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+}
+.customer-actions .btn {
+  min-height: 44px;
+  margin: 0;
+  white-space: normal;
 }

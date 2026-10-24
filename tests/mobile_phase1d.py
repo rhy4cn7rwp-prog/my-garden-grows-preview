@@ -19,6 +19,7 @@ try:
    page.evaluate('''()=>{state=Game.initial();state.bagCount=1;state.inventory={corn:3,onion:3};state.display={corn:3,onion:3};state.marketOpen=true;state.marketPlayed=true;state.customer={name:'Isabella',want:{corn:2,onion:1}};state.basket={corn:2,onion:1};state.step='choose';Game.ring(state,8);go('market');payment();}''')
    def tap(name):page.get_by_role('button',name=name,exact=True).tap()
    def fits():
+    page.wait_for_function("getComputedStyle(document.documentElement).getPropertyValue('--visible-height').trim() === visualViewport.height + 'px'")
     data=page.locator('.register-dialog').evaluate('''e=>({scroll:e.scrollHeight,height:e.clientHeight,rect:e.getBoundingClientRect().toJSON(),viewport:visualViewport.height,buttons:[...e.querySelectorAll('button')].map(b=>({name:b.getAttribute('aria-label')||b.textContent.trim(),...b.getBoundingClientRect().toJSON()})),count:e.querySelector('.register-count').getBoundingClientRect().toJSON(),bags:e.querySelector('.register-bags').getBoundingClientRect().toJSON(),actions:e.querySelector('.register-actions').getBoundingClientRect().toJSON()})''')
     assert data['scroll']<=data['height']+1,(width,height,data)
     assert data['rect']['top']>=0 and data['rect']['bottom']<=data['viewport']+1,data

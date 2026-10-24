@@ -139,10 +139,12 @@ function newCustomer() {
 }
 function ring() {
   const input = document.getElementById("total-answer");
-  act(() => {
+  try {
     Game.ring(state, input && input.value !== "" ? Number(input.value) : NaN);
     closeDialog();
-  });
+  } catch (e) {
+    order(e.message);
+  }
 }
 function finish() {
   if (state.step === "pay" && Game.bagsRemaining(state) === 0) {
@@ -160,9 +162,9 @@ function finish() {
     } else render();
   });
 }
-function advance() {
+function advance(farewell = "good") {
   act(() => {
-    Game.advanceCustomer(state);
+    Game.advanceCustomer(state, farewell);
     render();
   });
 }
@@ -378,3 +380,31 @@ function render() {
   renderedDialogKey = dialogKey;
 }
 render();
+
+// Safari's visible viewport can be shorter than CSS viewport units while toolbars move.
+function syncRegisterViewport() {
+  const viewport = window.visualViewport;
+  const root = document.documentElement;
+  root.style.setProperty(
+    "--visible-height",
+    `${viewport ? viewport.height : innerHeight}px`,
+  );
+  root.style.setProperty(
+    "--visible-width",
+    `${viewport ? viewport.width : innerWidth}px`,
+  );
+  root.style.setProperty(
+    "--visible-top",
+    `${viewport ? viewport.offsetTop : 0}px`,
+  );
+  root.style.setProperty(
+    "--visible-left",
+    `${viewport ? viewport.offsetLeft : 0}px`,
+  );
+  root.dataset.shortRegister =
+    (viewport ? viewport.height : innerHeight) < 470 ? "true" : "false";
+}
+window.visualViewport?.addEventListener("resize", syncRegisterViewport);
+window.visualViewport?.addEventListener("scroll", syncRegisterViewport);
+window.addEventListener("resize", syncRegisterViewport);
+syncRegisterViewport();

@@ -117,24 +117,22 @@ function renderScene() {
     else {
       if (!c) {
         bottom = `<h2>🍎 Farmers Market</h2>${state.marketOpen ? `<button class="btn market-primary" onclick="newCustomer()">Welcome Next Customer</button><p>${state.visitors} / ${Game.customerLimit(state)} customers welcomed</p><button class="btn alt" onclick="marketStand()">Arrange Produce</button><button class="btn alt" onclick="closeMarket()">Close market</button>` : '<p>Arrange your harvest before opening.</p><button class="btn" onclick="marketStand()">Arrange Produce / Open Market</button>'}`;
-      } else
-        bottom = `<h2>🍎 Market Day · ${Math.floor(state.hour)}:${state.hour % 1 ? "30" : "00"}</h2><p><b>${c.name}:</b> ${
-          state.step === "greet"
-            ? "Hello!"
-            : state.step === "choose"
-              ? "Could I have " +
-                Object.entries(c.want)
-                  .map(([id, n]) => n + " " + crop(id).name)
-                  .join(" and ") +
-                "?"
-              : state.step === "thanks"
-                ? "Thanks so much!"
-                : "Let’s check out!"
-        }</p><div class="row">${state.step === "greet" ? `<button class="btn" onclick="Game.greet(state);render()">😊 Welcome! What can I get you?</button><button class="btn alt" onclick="Game.greet(state);render()">Hello! How can I help?</button>` : state.step === "choose" ? `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="skip()">Sorry, sold out</button>` : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : `<button class="btn" onclick="advance()">👋 Thank you! Come again!</button><button class="btn alt" onclick="advance()">Hope to see you again!</button>`}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
+      } else {
+        const request = Object.entries(c.want)
+          .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
+          .join(" and ");
+        const greetings = `<button class="btn" onclick="greetCustomer('excellent')">Hi! Welcome to my stand! What can I help you find today?</button><button class="btn" onclick="greetCustomer('good')">Hi! What can I get for you?</button><button class="btn alt" onclick="greetCustomer('wait')">Wait quietly for the customer to ask for something.</button>`;
+        const farewells = `<button class="btn" onclick="advance('excellent')">Thank you so much! I hope to see you again!</button><button class="btn" onclick="advance('good')">Thanks for shopping with us!</button><button class="btn alt" onclick="advance('brief')">Bye!</button>`;
+        const choosing = Game.missingProduce(state).length
+          ? `<button class="btn" onclick="customerService()">Help with sold-out produce</button>`
+          : `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="customerService()">Talk about the order</button>`;
+        bottom = `<h2>🍎 Market Day · ${Math.floor(state.hour)}:${state.hour % 1 ? "30" : "00"}</h2><p><b>${c.name}:</b> ${Game.customerResponse(state)}</p>${state.step === "choose" ? `<p><strong>Customer requests:</strong> ${request}.</p>` : ""}<div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
+      }
     }
   }
   if (view === "market")
     bottom +=
+      (state.notice ? `<p role="status">${state.notice}</p>` : "") +
       bagStatus() +
       (state.lastMarketReport
         ? '<button class="btn alt" onclick="showMarketReport(true)">Previous market report</button>'
@@ -243,31 +241,55 @@ function marketItem(id) {
     `<h2>${c.icon} ${c.name}</h2><p>On hand: ${state.inventory[id] || 0} ${c.unit}</p><p>Price: ${money(c.price)} per ${c.unit}</p><p>Tap “Fill customer basket” to serve the current shopper.</p>`,
   );
 }
-function order() {
-  let c = state.customer;
+function order(feedback = "") {
+  const c = state.customer;
+  if (!c || state.step !== "choose") return;
+  if (Game.missingProduce(state).length) return customerService();
+  const available = CROPS.filter(
+    (item) => Game.marketStock(state, item.id) > 0,
+  );
   show(
-    `<h2>🧺 ${c.name}'s order</h2>${bagStatus()}<p>Every completed purchase uses 1 paper bag, regardless of items or quantities.</p><p>Customer requests: ${Object.entries(
-      c.want,
-    )
-      .map(([id, n]) => n + " " + crop(id).name)
-      .join(", ")}</p>${Object.entries(c.want)
-      .map(
-        ([id, n]) =>
-          `<div class="basketline">${crop(id).icon} ${crop(id).name} · in stock ${state.inventory[id] || 0} · ${money(crop(id).price)}/${crop(id).unit}<div class="qty"><button onclick="basketChange('${id}',-1)">−</button><b>${state.basket[id] || 0} / ${n}</b><button onclick="basketChange('${id}',1)">+</button></div></div>`,
-      )
+    `<h2>🧺 ${c.name}'s order</h2><p>Customer requests: ${Object.entries(c.want)
+      .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
       .join(
-        "",
-      )}<label>Calculate the total: $<input id="total-answer" type="number" min="0" step="0.01" inputmode="decimal"></label><button class="btn" onclick="ring()">⚖️ Check total / collect payment</button>${Object.keys(c.want).some((id) => crop(id).unit === "lb") && !Game.hasEquipment(state, "scale") ? '<button class="btn alt" onclick="rentalOffer(\'scale\')">Need a scale? Review rental</button>' : ""}`,
+        ", ",
+      )}</p><p>Choose from your market stock, then check your basket. Each purchase uses one paper bag.</p>
+    ${feedback ? `<p class="order-feedback" role="status">${feedback}</p>` : ""}
+    <div class="produce-choices">${available
+      .map((item) => {
+        const stock = Game.marketStock(state, item.id);
+        const count = state.basket[item.id] || 0;
+        return `<div class="basketline"><strong>${item.icon} ${item.name}</strong><p>${stock} ${item.unit} available · ${money(item.price)}/${item.unit}</p><div class="qty"><button aria-label="Remove ${item.name}" onclick="basketChange('${item.id}',-1)" ${count ? "" : "disabled"}>−</button><b>${count} in basket</b><button aria-label="Add ${item.name}" onclick="basketChange('${item.id}',1)" ${count < stock ? "" : "disabled"}>+</button></div></div>`;
+      })
+      .join("")}</div>
+    <p><strong>Your basket:</strong> ${
+      Object.entries(state.basket)
+        .filter(([, n]) => n > 0)
+        .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
+        .join(", ") || "Empty"
+    }</p>
+    <button class="btn alt" onclick="checkBasket()">Check basket</button>
+    <label>Calculate the total: $<input id="total-answer" type="number" min="0" step="0.01" inputmode="decimal"></label><button class="btn" onclick="ring()">⚖️ Check total / collect payment</button>${Object.keys(c.want).some((id) => crop(id).unit === "lb") && !Game.hasEquipment(state, "scale") ? '<button class="btn alt" onclick="rentalOffer(\'scale\')">Need a scale? Review rental</button>' : ""}`,
     "order",
   );
 }
 function basketChange(id, d) {
-  let need = state.customer.want[id];
-  state.basket[id] = Math.max(
-    0,
-    Math.min(need, state.inventory[id] || 0, (state.basket[id] || 0) + d),
-  );
+  if (!state.customer || state.step !== "choose" || !crop(id)) return;
+  const stock = Game.marketStock(state, id);
+  const count = Math.max(0, Math.min(stock, (state.basket[id] || 0) + d));
+  if (count) state.basket[id] = count;
+  else delete state.basket[id];
   order();
+}
+function checkBasket() {
+  try {
+    Game.checkBasket(state);
+    order(
+      "That matches the order! Multiply each quantity by its price, then add to find the total.",
+    );
+  } catch (e) {
+    order(e.message);
+  }
 }
 function totalOrder() {
   return Object.entries(state.basket).reduce(
@@ -293,9 +315,47 @@ function addMoney(n) {
   payment();
 }
 
+function greetCustomer(choice) {
+  act(() => {
+    Game.greet(state, choice);
+    render();
+  });
+}
+function customerService() {
+  if (!state.customer || state.step !== "choose") return;
+  const missing = Game.missingProduce(state);
+  show(
+    `<h2>Helping ${state.customer.name}</h2><p>Customer requests: ${Object.entries(
+      state.customer.want,
+    )
+      .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
+      .join(", ")}.</p>
+    ${missing.length ? `<p>We don't have enough ${missing.map((id) => crop(id).name.toLowerCase()).join(" and ")} on the stand today. You can explain politely or suggest something we do have.</p>` : "<p>You can fill this order, or let the customer know if you cannot help today.</p>"}
+    <div class="customer-actions"><button class="btn alt" onclick="respondSoldOut('sorry')">I'm sorry, we're sold out of that today.</button>
+    ${Game.alternativeChoices(state)
+      .map(
+        (item) =>
+          `<button class="btn" onclick="offerAlternative('${item.id}')">We're sold out of ${crop(missing[0]).name.toLowerCase()}, but would you like to try some ${item.name.toLowerCase()}?</button>`,
+      )
+      .join("")}
+    <button class="btn alt" onclick="respondSoldOut('return')">We're sold out today, but I hope you'll visit us again!</button></div>`,
+    "service",
+  );
+}
+function offerAlternative(id) {
+  act(() => {
+    Game.suggestAlternative(state, id);
+    closeDialog();
+  });
+}
+function respondSoldOut(choice) {
+  act(() => {
+    Game.declineOrder(state, choice);
+    closeDialog();
+  });
+}
 function skip() {
-  state.step = "thanks";
-  render();
+  respondSoldOut("sorry");
 }
 function settings() {
   show(

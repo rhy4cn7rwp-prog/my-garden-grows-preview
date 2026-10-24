@@ -78,8 +78,8 @@ try:
    tap('Open market')
    buttons=page.locator('.bottom button').all_text_contents()
    assert buttons[0]=='Welcome Next Customer' and 'Open market' not in buttons
-   tap('Welcome Next Customer');tap('😊 Welcome! What can I get you?');tap('🧺 Fill customer basket');tap('+')
-   page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment');tap('💵 Count change');tap('$1');tap('Give change');tap('👋 Thank you! Come again!')
+   tap('Welcome Next Customer');tap('Hi! What can I get for you?');tap('🧺 Fill customer basket');page.locator('.produce-choices button[aria-label^="Add " ]').first.tap()
+   page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment');tap('💵 Count change');tap('$1');tap('Give change');tap('Thank you so much! I hope to see you again!')
    assert page.evaluate('state.cash')==4
    tap('Close market')
    assert '$4.00' in page.locator('.accounting-report tr').filter(has_text='Deferred equipment payments').inner_text()

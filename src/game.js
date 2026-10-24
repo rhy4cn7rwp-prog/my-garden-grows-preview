@@ -629,15 +629,142 @@
       want = { [a.id]: Math.min(s.display[a.id], (s.visitors % 2) + 1) };
     if (stock.length > 1 && s.visitors % 2)
       want[stock[(s.visitors + 1) % stock.length].id] = 1;
-    s.customer = { name, want };
+    // Some shoppers come looking for a crop we do not stock today.
+    const unavailable = crops.filter((c) => !marketStock(s, c.id));
+    if ((s.day + s.visitors) % 4 === 0 && unavailable.length) {
+      const requested = unavailable[(s.day + s.visitors) % unavailable.length];
+      delete want[a.id];
+      want[requested.id] = 1;
+    }
+    s.customer = {
+      name,
+      want,
+      personality: ["curious", "thoughtful", "hurried"][
+        (s.day + s.visitors) % 3
+      ],
+      satisfaction: 50,
+      decision: (s.day * 19 + s.visitors * 37 + s.season * 11) % 100,
+      response: "arrival",
+    };
     s.visitors++;
+    s.notice = "";
     s.basket = {};
     s.change = 0;
     s.step = "greet";
   }
-  function greet(s) {
+  function marketStock(s, id) {
+    return get(id) && canSellCrop(s, id)
+      ? Math.min(s.inventory[id] || 0, s.display[id] || 0)
+      : 0;
+  }
+  function missingProduce(s) {
+    if (!s.customer) return [];
+    return Object.entries(s.customer.want)
+      .filter(([id, n]) => marketStock(s, id) < n)
+      .map(([id]) => id);
+  }
+  function alternativeChoices(s) {
+    const missing = missingProduce(s)[0];
+    if (!missing || s.customer.alternativeOffered) return [];
+    // Recommend other vegetables for vegetables, or berries for berries.
+    return crops.filter(
+      (c) =>
+        marketStock(s, c.id) > 0 &&
+        !s.customer.want[c.id] &&
+        (c.id === "strawberry") === (missing === "strawberry"),
+    );
+  }
+  function satisfaction(s, amount) {
+    s.customer.satisfaction = Math.max(
+      0,
+      Math.min(100, (s.customer.satisfaction ?? 50) + amount),
+    );
+  }
+  function greet(s, choice = "good") {
     requireRule(s.customer && s.step === "greet", "Welcome a customer first.");
-    s.step = "choose";
+    requireRule(
+      ["excellent", "good", "wait"].includes(choice),
+      "Choose a greeting.",
+    );
+    const c = s.customer;
+    c.greeting = choice;
+    satisfaction(s, choice === "excellent" ? 20 : choice === "good" ? 10 : -5);
+    const leaves = choice === "wait" && c.personality === "hurried";
+    c.response = leaves
+      ? "wait-left"
+      : choice === "wait"
+        ? "wait-stayed"
+        : choice;
+    s.step = leaves ? "thanks" : "choose";
+  }
+  function suggestAlternative(s, id) {
+    requireRule(
+      s.customer && s.step === "choose",
+      "Listen to the customer's order first.",
+    );
+    const missing = missingProduce(s)[0];
+    requireRule(
+      alternativeChoices(s).some((c) => c.id === id),
+      "Choose an available alternative from your stand.",
+    );
+    const c = s.customer;
+    c.alternativeOffered = true;
+    const chance =
+      ({ curious: 70, thoughtful: 40, hurried: 25 }[c.personality] ?? 45) +
+      (c.greeting === "excellent" ? 15 : c.greeting === "good" ? 5 : 0);
+    const accepted = (c.decision ?? 50) < chance;
+    if (accepted) {
+      const quantity = Math.min(c.want[missing], marketStock(s, id));
+      delete c.want[missing];
+      c.want[id] = quantity;
+      // Start a fresh basket for the customer's newly agreed order. No stock is consumed.
+      s.basket = {};
+      c.response = "alternative-accepted";
+      satisfaction(s, 5);
+    } else {
+      c.response = "alternative-declined";
+      s.basket = {};
+      s.step = "thanks";
+    }
+    return accepted;
+  }
+  function declineOrder(s, choice = "sorry") {
+    requireRule(
+      s.customer && s.step === "choose",
+      "Listen to the customer's order first.",
+    );
+    requireRule(
+      ["sorry", "return"].includes(choice),
+      "Choose a helpful response.",
+    );
+    s.customer.response =
+      choice === "return" ? "soldout-return" : "soldout-sorry";
+    satisfaction(s, choice === "return" ? 3 : 1);
+    s.basket = {};
+    s.step = "thanks";
+  }
+  function customerResponse(s) {
+    const responses = {
+      arrival: "Hello!",
+      excellent: "What a lovely welcome! Thank you for helping me today.",
+      good: "Hi! Thank you. I'd like to buy some produce.",
+      "wait-stayed": "Hello! May I ask about your vegetables?",
+      "wait-left":
+        "I need to hurry today, so I'll try another stand. Maybe next time!",
+      "alternative-accepted":
+        "Yes, I'd like to try that instead! Thank you for the suggestion.",
+      "alternative-declined":
+        "Thank you for offering. I need the produce on my list today, so I'll try elsewhere.",
+      "soldout-sorry":
+        "Thanks for letting me know. I'll look at another stand today.",
+      "soldout-return":
+        "Thank you! I'll come back another day to see what you've grown.",
+      "sale-complete": "Thank you for helping me with my shopping!",
+    };
+    return (
+      responses[s.customer?.response] ||
+      (s.step === "thanks" ? responses["sale-complete"] : "Hello!")
+    );
   }
   function totalOrder(s) {
     return (
@@ -647,7 +774,7 @@
       ) / 100
     );
   }
-  function ring(s, answer) {
+  function checkBasket(s) {
     requireRule(s.customer && s.step === "choose", "Prepare an order first.");
     requireRule(
       Object.entries(s.customer.want).every(
@@ -656,12 +783,15 @@
           n <= (s.display[id] || 0) &&
           n <= (s.inventory[id] || 0),
       ),
-      "Fill the requested basket.",
+      "Check the quantities against the order. You can adjust your basket and try again!",
     );
     requireRule(
       Object.keys(s.basket).every((id) => s.customer.want[id] !== undefined),
-      "Only include requested produce.",
+      "One of these vegetables is not on the order. Remove it and try again!",
     );
+  }
+  function ring(s, answer) {
+    checkBasket(s);
     requireRule(
       !Object.keys(s.basket).some((id) => get(id).unit === "lb") ||
         hasEquipment(s, "scale"),
@@ -711,6 +841,8 @@
       if (s.rentalBagsRemaining > 0) s.rentalBagsRemaining--;
       else s.bagCount--;
     }
+    s.customer.response = "sale-complete";
+    satisfaction(s, 5);
     s.customersServed++;
     s.cash = (cents(s.cash) + cents(total)) / 100;
     s.sales = (cents(s.sales) + cents(total)) / 100;
@@ -814,12 +946,14 @@
       !["greet", "choose", "pay", "thanks"].includes(s.step) ||
       !dictionary(s.basket, ids) ||
       !Object.entries(s.basket).every(
-        ([id, n]) => c.want[id] !== undefined && n <= c.want[id],
+        ([id, n]) =>
+          s.step === "thanks" ||
+          (n <= (s.inventory[id] || 0) && n <= (s.display[id] || 0)),
       )
     )
       return;
     if (
-      s.step !== "thanks" &&
+      s.step === "pay" &&
       !Object.entries(c.want).every(
         ([id, n]) => n <= (s.inventory[id] || 0) && n <= (s.display[id] || 0),
       )
@@ -828,13 +962,52 @@
     if (
       s.step === "pay" &&
       (!Object.entries(c.want).every(([id, n]) => s.basket[id] === n) ||
+        !Object.keys(s.basket).every((id) => c.want[id] !== undefined) ||
         !Number.isFinite(s.tendered) ||
         s.tendered < totalOrder(s) ||
         !Number.isFinite(s.change) ||
         s.change < 0)
     )
       return;
-    clean.customer = { name: c.name, want: { ...c.want } };
+    clean.customer = {
+      name: c.name,
+      want: { ...c.want },
+      personality: ["curious", "thoughtful", "hurried"].includes(c.personality)
+        ? c.personality
+        : "thoughtful",
+      satisfaction:
+        Number.isInteger(c.satisfaction) &&
+        c.satisfaction >= 0 &&
+        c.satisfaction <= 100
+          ? c.satisfaction
+          : 50,
+      decision:
+        Number.isInteger(c.decision) && c.decision >= 0 && c.decision < 100
+          ? c.decision
+          : 50,
+      greeting: ["excellent", "good", "wait"].includes(c.greeting)
+        ? c.greeting
+        : null,
+      response: [
+        "arrival",
+        "excellent",
+        "good",
+        "wait-stayed",
+        "wait-left",
+        "alternative-accepted",
+        "alternative-declined",
+        "soldout-sorry",
+        "soldout-return",
+        "sale-complete",
+      ].includes(c.response)
+        ? c.response
+        : s.step === "thanks"
+          ? "sale-complete"
+          : s.step === "greet"
+            ? "arrival"
+            : "good",
+      alternativeOffered: c.alternativeOffered === true,
+    };
     clean.basket = { ...s.basket };
     clean.step = s.step;
     clean.change = Number.isFinite(s.change) && s.change >= 0 ? s.change : 0;
@@ -959,11 +1132,22 @@
     );
     s.standMode = mode;
   }
-  function advanceCustomer(s) {
+  function advanceCustomer(s, farewell = "good") {
     requireRule(
       s.customer && s.step === "thanks",
       "Finish helping your customer first.",
     );
+    requireRule(
+      ["excellent", "good", "brief"].includes(farewell),
+      "Choose a farewell.",
+    );
+    satisfaction(s, farewell === "excellent" ? 3 : farewell === "good" ? 2 : 0);
+    s.notice =
+      farewell === "excellent"
+        ? "Your customer smiles: ‘Thank you! I hope to visit again!’"
+        : farewell === "good"
+          ? "Your customer says: ‘Thanks! Have a good day!’"
+          : "Your customer waves goodbye.";
     s.hour = Math.min(13, s.hour + 0.5);
     s.customer = null;
     s.basket = {};
@@ -999,6 +1183,12 @@
     return `Your neighbors shared ${[needsSeeds ? "3 carrot seeds" : "", donatedBags ? "3 paper bags" : ""].filter(Boolean).join(" and ")}. Grow and sell from a free blanket. No repayment is needed.`;
   }
   const api = {
+    marketStock,
+    missingProduce,
+    alternativeChoices,
+    suggestAlternative,
+    declineOrder,
+    customerResponse,
     bagsRemaining,
     orderNeedsBag,
     buyBagPacks,
@@ -1042,6 +1232,7 @@
     newCustomer,
     greet,
     totalOrder,
+    checkBasket,
     ring,
     finish,
   };
