@@ -1,0 +1,36 @@
+/* Safari's page canvas is larger than its visible game while chrome is open.
+   Paint it without enlarging the interactive world or moving its destinations. */
+:root {
+  --page-layout-height: 100vh;
+}
+@supports (height: 100lvh) {
+  :root {
+    --page-layout-height: 100lvh;
+  }
+}
+html[data-village-canvas] {
+  min-height: var(--page-layout-height);
+  overflow: hidden;
+  background-color: var(--page-sky, #c8e6f0);
+  background-image: url("../assets/town/seasons.webp");
+  background-repeat: no-repeat;
+  background-size: var(--page-art-size);
+  background-position: var(--page-art-position);
+}
+html[data-village-canvas]::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: var(--page-layout-height);
+  visibility: hidden;
+  pointer-events: none;
+}
+html[data-village-canvas] body {
+  background: transparent;
+}
+/* Avoid a green matte even if Safari exposes a fractional gap in the game layer. */
+html[data-village-canvas] .town-game {
+  background: transparent;
+}

@@ -5,6 +5,31 @@ Changes and deployment are restricted to `my-garden-grows-preview`. The original
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
 
+## Safari page-edge canvas follow-up
+
+The illustrated game viewport already filled its available area, but the larger
+HTML/body page canvas still had a solid green fallback. Safari can expose that
+canvas around expanded/collapsing browser toolbars and safe areas. The page now
+paints the same seasonal terrain atlas proportionally across its large viewport,
+with transparent town body/game fallback layers. The visible game, destinations, HUD, savings and
+walking geometry remain unchanged. No new artwork downloads are needed.
+
+`src/village-canvas.js` and `.css` measure resolved `100lvh` (with `100vh` fallback)
+for background painting while retaining `visualViewport` sizing for the controls.
+They select the correct atlas quadrant and keep Safari's theme-color matched to
+that season's sky instead of green. Updates are idempotent and also run on
+`pageshow`/orientation changes. Other locations retain their existing layout.
+`viewport-fit=cover` remains enabled; Safari's controls and safe-area padding stay
+in place. Safari owns its opaque browser/status UI and may show a tint there;
+a website cannot force illustrated content into every native toolbar.
+
+Validation in this workspace covers mobile viewport/safe-area models and exposed
+page screenshots. Actual iPhone Safari is **not verified**: no physical iPhone is
+attached, and the Playwright WebKit browser download returned HTTP 403 from the
+environment's network proxy. The user reports iPhone 12 Pro Max with iOS 27.0.1; that native Safari version
+is not available here. The preview needs a real Safari check, particularly
+with the address bar expanded/collapsed. Refresh without clearing website data.
+
 ## Phase 2B final refinements: immersive shell, Clubhouse and paved routes
 
 The village is edge-to-edge: the outer brown frame and margins are removed.
@@ -256,6 +281,12 @@ day has complete accounting. Do not clear Safari data or restart to update.
 
 ## Tests and validation
 
+- `python3 tests/mobile_safari_canvas.py`: seven phone-sized large/visible viewport
+  models (including iPhone 12 Pro Max 428 × 926 with 428 × 746 visible-area
+  conditions and 926 × 428 landscape), four seasons, expanded/collapsed toolbar metrics, exposed page-strip
+  screenshot colors, proportional atlas coverage, safe HUD/savings controls,
+  matching browser tint, page-cache restoration, navigation and saved progress.
+  This does not emulate native Safari chrome or constitute a physical Safari test.
 - `python3 tests/mobile_village_refinements.py`: edge-to-edge and proportional
   terrain, Clubhouse label/action, actual shoe positions sampled against source
   pavement colors in every season, source-alpha sprite bounds checked for building,

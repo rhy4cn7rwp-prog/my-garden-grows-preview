@@ -67,9 +67,12 @@ function syncGameViewport() {
     (viewport ? viewport.height : innerHeight) - top - bottom < 470
       ? "true"
       : "false";
+  if (typeof syncVillagePageCanvas === "function") syncVillagePageCanvas();
   if (typeof syncVillageWalkers === "function") syncVillageWalkers();
 }
 window.visualViewport?.addEventListener("resize", syncGameViewport);
 window.visualViewport?.addEventListener("scroll", syncGameViewport);
 window.addEventListener("resize", syncGameViewport);
+window.addEventListener("pageshow", syncGameViewport);
+window.addEventListener("orientationchange", syncGameViewport);
 syncGameViewport();

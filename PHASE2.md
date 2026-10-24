@@ -37,6 +37,16 @@
   around visible obstacles. Residents turn and pause; reduced motion keeps them
   still. No animation frame loop, game-state changes or new artwork assets.
 
+## Safari page-edge canvas follow-up
+
+The underlying HTML page now paints the existing seasonal terrain instead of a
+solid green fallback outside the visual game rectangle. Background painting uses
+large-viewport bounds while controls keep their visual-viewport/safe-area layout.
+Safari receives a matching sky theme-color; native opaque chrome remains owned
+by the browser. No gameplay, artwork, destination layout or animation changes.
+Mobile simulations passed; actual iPhone Safari remains unverified because no
+iPhone is attached and WebKit installation is blocked by the environment proxy.
+
 ## Phase 2C and later — interiors remain deferred
 
 Preserve prototype 0.9's colorful storybook appearance, characters and atmosphere.
