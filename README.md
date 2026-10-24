@@ -94,7 +94,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
 
 ## Tests and validation
 
-- `npm test`: 48 rule tests covering prior features plus bag packs/consumption,
+- `npm test`: 49 rule tests covering prior features plus bag packs/consumption,
   active restocking, save migration/resumption, cash-matched accounting,
   settlement idempotency and exact change.
 - `python3 tests/mobile_finances.py`: original touch-only financial recovery loop.
@@ -114,3 +114,7 @@ manual playtesting; it has not been claimed as automated validation.
 Source responsibilities: `game.js` owns rules/accounting data, `accounting.js`
 renders reports without money mutations, `money.js` draws play-money controls,
 and `scenes.js` / `interactions.js` render scenes and connect UI actions.
+
+Seed-help eligibility also accounts for missing bags: a cash-poor farm with
+only loose produce and no usable bags can receive carrot seeds and recover
+through unbagged blanket sales, even while old debt blocks new borrowing.

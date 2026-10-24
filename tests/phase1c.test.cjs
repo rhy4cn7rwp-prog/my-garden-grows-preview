@@ -313,3 +313,37 @@ test("cent denominations combine into exact change and leave one successful tran
   assert.equal(s.bagCount, 0);
   assert.equal(s.customersServed, 1);
 });
+
+test("no-bag debt-bound loose-produce farms can recover through free seeds and blanket sales", () => {
+  const s = stock(0);
+  s.inventory = { beans: 10 };
+  s.display = {};
+  s.owned.scale = 1;
+  G.rentEquipment(s, "table", "deferred");
+  G.rentEquipment(s, "bags", "deferred");
+  G.endDay(s);
+  assert.equal(s.bagCount, 0);
+  assert.throws(() => G.rentEquipment(s, "bags", "deferred"));
+  assert.equal(G.canReceiveSeedHelp(s), true);
+  G.receiveSeedHelp(s);
+  G.plan(s, 0, "carrot");
+  G.plantPlan(s);
+  for (let i = 0; i < 3; i++) {
+    G.water(s);
+    G.endDay(s);
+  }
+  G.harvest(s, 0);
+  s.display.carrot = s.inventory.carrot;
+  G.openMarket(s);
+  G.newCustomer(s, "Maya");
+  G.greet(s);
+  s.basket = { ...s.customer.want };
+  G.ring(s, G.totalOrder(s));
+  s.change = s.tendered - G.totalOrder(s);
+  G.finish(s);
+  G.closeMarket(s);
+  assert.equal(s.sales, 2);
+  assert.equal(G.debtTotal(s), 2);
+  assert.equal(s.bagCount, 0);
+  assert.equal(s.seeds.carrot, 2);
+});

@@ -978,7 +978,8 @@
   }
   function canReceiveSeedHelp(s) {
     if (cents(s.cash) >= 100) return false;
-    const sellable = (id) => s.owned.scale || get(id).unit === "each";
+    const sellable = (id) =>
+      get(id).unit === "each" || (s.owned.scale && s.bagCount > 0);
     return (
       !crops.some(
         (c) =>

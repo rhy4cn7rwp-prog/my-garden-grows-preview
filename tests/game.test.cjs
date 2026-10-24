@@ -170,6 +170,7 @@ test("help eligibility considers spendable money, seeds, plants, harvest and wei
   s.seeds.beans = 2;
   assert.equal(G.canReceiveSeedHelp(s), true);
   s.owned.scale = 1;
+  s.bagCount = 1;
   assert.equal(G.canReceiveSeedHelp(s), false);
   s.seeds = {};
   s.inventory.corn = 2;
