@@ -55,7 +55,7 @@ function townScene() {
   const theme = villageSeason(state.season);
   const goal = DREAMS[state.goal];
   const progress = Math.min(100, (100 * Game.savings(state)) / goal[3]);
-  return `<section class="town-intro"><h1>My Garden Grows <span class="village-season-name">${theme.name}</span></h1><p>Pick a place. A little adventure awaits.</p></section>
-    <section class="town-world" data-season="${theme.key}" aria-label="Village locations">${villageScenery(theme)}${townLandscape(theme)}${TOWN_LOCATIONS.map(townBuilding).join("")}${villageResidents(theme)}<div class="village-attachment-layer" data-village-layer="future-decorations" aria-hidden="true"></div></section>
+  return `${villageTerrain(theme)}<section class="town-intro"><h1>My Garden Grows <span class="village-season-name">${theme.name}</span></h1><p>Pick a place. A little adventure awaits.</p></section>
+    <section class="town-world" data-season="${theme.key}" aria-label="Village locations">${villageScenery(theme)}${townLandscape(theme)}<div class="village-locations" data-village-layer="destinations">${TOWN_LOCATIONS.map(townBuilding).join("")}</div>${villageResidents(theme)}<div class="village-attachment-layer" data-village-layer="future-decorations" aria-hidden="true"></div></section>
     <div class="town-bottom bottom"><div class="town-goal"><span>Saving for <strong>${goal[2]}</strong></span><span>${money(Game.savings(state))} / ${money(goal[3])}</span><div class="town-progress" role="progressbar" aria-label="Savings goal" aria-valuemin="0" aria-valuemax="${goal[3]}" aria-valuenow="${Math.min(goal[3], Game.savings(state))}"><span style="width:${progress}%"></span></div>${Game.debtTotal(state) ? `<span class="town-debt">Equipment owed: ${money(Game.debtTotal(state))}</span>` : ""}</div><button class="town-help" onclick="seedHelp()" aria-label="Community seed help">${navigationIcon("leaf")}</button></div>`;
 }

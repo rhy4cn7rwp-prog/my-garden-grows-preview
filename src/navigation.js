@@ -1,7 +1,8 @@
 /* One live navigation/status component, shared by the village and all interiors. */
 const NAV_ICONS = {
   back: '<path d="m14 5-7 7 7 7M7 12h14"/>',
-  home: '<path d="m3 11 9-8 9 8M5 10v11h5v-7h4v7h5V10"/>',
+  clubhouse:
+    '<path d="m3 9 9-6 9 6" stroke="#fff2cb"/><path d="M5 9h14v13H5Z" fill="#ad7547" stroke="#fff2cb"/><path d="M8 22V12a4 4 0 0 1 8 0v10" fill="#e8b66c" stroke="#68442d"/><path d="M10.5 13v8m3-8v8" stroke="#bf8a4f" stroke-width=".8"/><circle cx="12" cy="10.5" r="1.5" fill="#8db8b7" stroke="#68442d" stroke-width=".8"/><circle cx="14.5" cy="17" r=".8" fill="#68442d" stroke="none"/>',
   settings:
     '<path d="m10 3-1 3-3 1-3 3 3 2-1 4 3 2 3-1 3 2 3-2-1-4 3-2-1-4-4-1-2-3Z"/><circle cx="12" cy="12" r="3"/>',
   leaf: '<path d="M20 3C8 2 2 7 5 15c8 6 15-1 15-12ZM4 21 16 8"/>',
@@ -15,7 +16,7 @@ function header() {
   return `<nav class="hud" aria-label="Farm navigation">
     <button class="nav" onclick="${view === "town" ? "settings()" : "go('town')"}" aria-label="${view === "town" ? "Settings" : "Back to village"}">${navigationIcon(view === "town" ? "settings" : "back")}</button>
     <div class="farm-status"><output class="balance" aria-label="Money balance">${navigationIcon("wallet")}${money(state.cash)}</output><span class="calendar" aria-label="Season and day">Season ${state.season} · Day ${state.day}/20</span></div>
-    <button class="nav home-nav" onclick="go('town')" aria-label="Home" ${view === "town" ? 'aria-current="page"' : ""}>${navigationIcon("home")}</button>
+    <button class="nav clubhouse-nav" onclick="go('town')" aria-label="Clubhouse" ${view === "town" ? 'aria-current="page"' : ""}>${navigationIcon("clubhouse")}</button>
   </nav>`;
 }
 
@@ -66,6 +67,7 @@ function syncGameViewport() {
     (viewport ? viewport.height : innerHeight) - top - bottom < 470
       ? "true"
       : "false";
+  if (typeof syncVillageWalkers === "function") syncVillageWalkers();
 }
 window.visualViewport?.addEventListener("resize", syncGameViewport);
 window.visualViewport?.addEventListener("scroll", syncGameViewport);

@@ -91,7 +91,6 @@
   overflow: hidden;
 }
 .village-walk-track,
-.village-market-neighbor,
 .village-bird-track {
   position: absolute;
   inset: 0;
@@ -102,28 +101,7 @@
   width: clamp(30px, 8vw, 46px);
   height: clamp(30px, 8vw, 46px);
 }
-.neighbor-walk {
-  left: 35%;
-  top: 28%;
-}
-.child-walk {
-  left: 37%;
-  top: 76%;
-}
-.market-neighbor {
-  left: 44%;
-  top: 62%;
-  width: clamp(28px, 7vw, 40px);
-  height: clamp(28px, 7vw, 40px);
-  transform-origin: 50% 95%;
-  animation: market-hello 29s -8s ease-in-out infinite;
-}
-.walk-to-square {
-  animation: neighbor-to-square 36s -7s linear infinite;
-}
-.walk-from-garden {
-  animation: neighbor-from-garden 43s -28s linear infinite;
-}
+
 .village-bird-track {
   opacity: 0;
   animation: occasional-birds 53s -16s linear infinite;
@@ -196,47 +174,6 @@
   }
   to {
     transform: rotate(0.7deg);
-  }
-}
-@keyframes neighbor-to-square {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0);
-  }
-  7% {
-    opacity: 1;
-  }
-  43% {
-    opacity: 1;
-    transform: translate(4%, 28%);
-  }
-  51% {
-    opacity: 1;
-    transform: translate(4%, 28%);
-  }
-  57%,
-  100% {
-    opacity: 0;
-    transform: translate(4%, 28%);
-  }
-}
-@keyframes neighbor-from-garden {
-  0%,
-  12% {
-    opacity: 0;
-    transform: translate(0, 0);
-  }
-  19% {
-    opacity: 1;
-  }
-  52% {
-    opacity: 1;
-    transform: translate(-1%, -16%);
-  }
-  59%,
-  100% {
-    opacity: 0;
-    transform: translate(-1%, -16%);
   }
 }
 @keyframes market-hello {
@@ -344,18 +281,6 @@
     width: 12%;
     height: 32%;
   }
-  :root[data-compact-town="true"] .market-neighbor {
-    left: 64%;
-    top: 67%;
-    width: 28px;
-    height: 28px;
-  }
-  :root[data-compact-town="true"] .neighbor-walk {
-    left: 28%;
-    top: 35%;
-    width: 30px;
-    height: 30px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .town-world * {
@@ -371,24 +296,46 @@
     display: none;
   }
 }
-/* One lightweight pose/bob is enough for ambient walkers; no sprite timers. */
-.neighbor-walk,
-.child-walk {
-  transform-origin: 50% 96%;
-  animation: neighbor-step 1.25s ease-in-out infinite;
+/* The feet are the route anchor. Only compiled transforms move a resident. */
+.village-walk-track {
+  inset: auto;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  --walker-size: clamp(24px, calc(var(--visible-width, 100vw) * 0.075), 36px);
+  visibility: hidden;
+  opacity: 1;
+  animation: none;
+  pointer-events: none;
 }
-@keyframes neighbor-step {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-0.5deg);
-  }
-  50% {
-    transform: translateY(1px) rotate(0.5deg);
-  }
+.village-walk-track .village-person {
+  left: calc(var(--walker-size) * -0.5);
+  top: calc(var(--walker-size) * -0.94);
+  width: var(--walker-size);
+  height: var(--walker-size);
+  transform-origin: 50% 94%;
+  animation: village-walk-sway 1.4s ease-in-out infinite;
+}
+.villager-market-stop .market-neighbor {
+  animation: market-hello 29s -8s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .neighbor-walk,
-  .child-walk {
+  .villager-market-stop .market-neighbor {
     animation: none !important;
   }
+}
+
+@keyframes village-walk-sway {
+  0%,
+  100% {
+    transform: rotate(-0.4deg);
+  }
+  50% {
+    transform: rotate(0.4deg);
+  }
+}
+
+.villager-market-stop {
+  --walker-size: clamp(24px, calc(var(--visible-width, 100vw) * 0.075), 32px);
 }

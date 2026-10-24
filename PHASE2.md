@@ -6,7 +6,7 @@
   buttons, a painted terrain layer and separate animated environmental objects.
 - Labels, savings progress, harvest readiness and market-open badges reflect
   real state. There are no old town-image hotspots or baked money/day controls.
-- One functional header provides money, season/day, Home and appropriate Back.
+- One functional header provides money, season/day, Clubhouse and appropriate Back.
   Interior source images are preserved, with their old HUD regions display-cropped.
 - Existing gameplay/save logic is unchanged. The Job Board remains a placeholder.
 - The old prototype images remain intact. New art details and limitations are in
@@ -27,11 +27,24 @@
   fields were added. Original artwork and all interiors remain preserved.
 - Three cached WebP atlases total about 2 MB, including all seasonal scenery.
 
+## Final Phase 2B refinements delivered
+
+- Edge-to-edge proportional scenery with no outer brown frame; light live HUD
+  and savings overlays respect safe areas and visible Safari viewport dimensions.
+- The Home identity is now **Clubhouse**, using a wooden-door icon and accessible
+  label. It still returns to the village; no clubhouse room or new saved fields.
+- Paved, curved walking routes are mapped to the actual terrain image and trimmed
+  around visible obstacles. Residents turn and pause; reduced motion keeps them
+  still. No animation frame loop, game-state changes or new artwork assets.
+
 ## Phase 2C and later — interiors remain deferred
 
 Preserve prototype 0.9's colorful storybook appearance, characters and atmosphere.
 Phase 2B is exterior-only. Do not start Phase 2C before the user reviews the preview.
 The following interior changes are still pending:
+
+- Give the Clubhouse button its future personal-room destination, displaying
+  purchased Dream Shop items and earned achievements after that work is approved.
 
 - Remove baked-in money bubbles, seasons, day labels, navigation, prices, and
   other controls from background art. Render only one live set of controls and

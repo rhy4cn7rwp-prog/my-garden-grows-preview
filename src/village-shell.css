@@ -1,0 +1,127 @@
+/* Immersive village only. The preserved interiors retain their existing shell. */
+:root {
+  --village-safe-left: env(safe-area-inset-left, 0px);
+  --village-safe-right: env(safe-area-inset-right, 0px);
+}
+body[data-view="town"] #app {
+  padding: 0;
+}
+.town-game {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: #b5ce93;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+.town-game > .village-terrain {
+  overflow: hidden;
+  z-index: 0;
+}
+.town-game > .village-terrain .village-terrain-art {
+  position: absolute;
+  width: max(100%, calc(var(--visible-height, 100svh) * 0.75));
+  height: max(100%, calc(var(--visible-width, 100vw) * 1.333333333));
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.town-game .hud {
+  z-index: 20;
+  background: transparent;
+  border: 0;
+  padding: max(6px, var(--viewport-safe-top))
+    max(8px, var(--village-safe-right)) 4px max(8px, var(--village-safe-left));
+  gap: 12px;
+  min-height: 56px;
+}
+.town-game .farm-status {
+  justify-self: center;
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: #fff9e9ed;
+  box-shadow: 0 2px 8px #3d58212b;
+  border: 1px solid #fff9e2a8;
+}
+.town-game .nav {
+  box-shadow: 0 2px 7px #203b3233;
+}
+.town-game .town-intro {
+  z-index: 12;
+  padding: 4px 3px 7px;
+  background: transparent;
+}
+.town-game .town-intro h1 {
+  font-size: 23px;
+  text-shadow:
+    0 1px 2px #fff4d8,
+    0 0 9px #fff4d8;
+}
+.town-game .town-intro p {
+  display: none;
+}
+.town-game .village-season-name {
+  text-shadow: none;
+  background: #fff9e8ed;
+}
+.town-game .town-world {
+  z-index: 1;
+  background: transparent;
+}
+.village-locations {
+  position: absolute;
+  inset: 0 var(--village-safe-right) 0 var(--village-safe-left);
+  pointer-events: none;
+}
+.village-locations .town-building {
+  pointer-events: auto;
+}
+.town-game .town-bottom.bottom {
+  z-index: 20;
+  background: transparent;
+  border: 0;
+  padding: 5px max(8px, var(--village-safe-right))
+    max(6px, var(--viewport-safe-bottom)) max(8px, var(--village-safe-left));
+}
+.town-game .town-goal {
+  padding: 7px 10px;
+  border: 1px solid #fff8ddad;
+  border-radius: 14px;
+  background: #fff8e6ed;
+  box-shadow: 0 2px 8px #3d58212b;
+}
+.town-game .town-help {
+  background: #fff8e6ed;
+  border: 1px solid #fdf7da;
+  box-shadow: 0 2px 8px #3d58212b;
+}
+:root[data-compact-town="true"] .town-game {
+  width: 100%;
+}
+:root[data-compact-town="true"] .town-game .hud {
+  padding: max(4px, var(--viewport-safe-top))
+    max(8px, var(--village-safe-right)) 3px max(8px, var(--village-safe-left));
+}
+:root[data-compact-town="true"] .town-game .town-intro h1 {
+  font-size: 20px;
+}
+:root[data-compact-town="true"] .town-game .town-bottom.bottom {
+  padding: 3px max(8px, var(--village-safe-right))
+    max(4px, var(--viewport-safe-bottom)) max(8px, var(--village-safe-left));
+}
+@media (min-width: 540px) {
+  :root[data-compact-town="true"] .town-game {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  :root[data-compact-town="true"]
+    .town-game
+    > .village-terrain
+    .village-terrain-art {
+    top: 60%;
+    transform: translate(-50%, -60%);
+  }
+}

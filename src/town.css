@@ -52,7 +52,7 @@ body[data-view="town"] #app {
   width: 25px;
   height: 25px;
 }
-.home-nav[aria-current] {
+.clubhouse-nav[aria-current] {
   background: #487a4b;
 }
 .farm-status {

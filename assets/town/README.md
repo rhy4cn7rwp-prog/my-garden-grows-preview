@@ -64,3 +64,15 @@ animations, not skeletal character rigs or pathfinding AI. The terrain paths are
 painted scenery. Building exteriors remain the same illustrations in every
 season; seasonal variation currently lives mainly in terrain, trees and ambient
 details. Winter does not impose new farming rules. Interior redesign is Phase 2C.
+
+## Final Phase 2B display and route refinement
+
+All image files above are unchanged. The immersive village now covers the visible
+viewport proportionally, with buildings/characters rendered separately and live
+UI overlaid. `village-walks.js` maps authored curves to the terrain's real display
+bounds, including cover crops and Safari resizing, then checks pavement and solid
+object clearance before compiling motion. This is a small authored route system,
+not general pathfinding AI. It keeps visible residents on safe path segments even
+when compact layouts obscure part of a road. Some smaller layouts consequently
+use shorter walks or fewer residents. Reduced motion pauses their browser-managed
+animations in place. Source images and gameplay/save data are never changed.

@@ -78,9 +78,11 @@ function villageSprite(kind, column, row, id, className) {
     <g clip-path="url(#village-${id})"><image href="${art.href}" width="${art.columns * art.width}" height="${art.rows * art.height}" x="${-frame.x}" y="${-frame.y}"/></g>
   </svg>`;
 }
+function villageTerrain(theme) {
+  return `<div class="village-terrain" data-village-layer="terrain">${villageSprite("terrain", theme.column, theme.row, "terrain", "village-terrain-art")}</div>`;
+}
 function villageScenery(theme) {
-  return `<div class="village-terrain" data-village-layer="terrain">${villageSprite("terrain", theme.column, theme.row, "terrain", "village-terrain-art")}</div>
-    <div class="village-trees" data-village-layer="trees" aria-hidden="true">
+  return `    <div class="village-trees" data-village-layer="trees" aria-hidden="true">
       <span class="village-tree tree-back">${villageSprite("life", theme.tree, 0, "tree-back", "village-tree-art")}</span>
       <span class="village-tree tree-square">${villageSprite("life", theme.tree, 0, "tree-square", "village-tree-art")}</span>
       <span class="village-tree tree-front">${villageSprite("life", theme.tree, 0, "tree-front", "village-tree-art")}</span>
@@ -91,9 +93,9 @@ function villageScenery(theme) {
 }
 function villageResidents(theme) {
   return `<div class="village-residents" data-village-layer="ambient" aria-hidden="true">
-    <div class="village-walk-track walk-to-square">${villageSprite("life", 0, 1, "neighbor-walk", "village-person neighbor-walk")}</div>
-    <div class="village-walk-track walk-from-garden">${villageSprite("life", 1, 1, "child-walk", "village-person child-walk")}</div>
-    <div class="village-market-neighbor">${villageSprite("life", 2, 1, "market-neighbor", "village-person market-neighbor")}</div>
+    <div class="village-walk-track walk-to-square" data-village-walker="neighbor">${villageSprite("life", 0, 1, "neighbor-walk", "village-person neighbor-walk")}</div>
+    <div class="village-walk-track walk-from-garden" data-village-walker="child">${villageSprite("life", 1, 1, "child-walk", "village-person child-walk")}</div>
+    <div class="village-walk-track villager-market-stop" data-village-walker="market">${villageSprite("life", 2, 1, "market-neighbor", "village-person market-neighbor")}</div>
     <div class="village-bird-track"><svg class="village-flying-birds" viewBox="0 0 64 32" fill="none" stroke="${theme.key === "winter" ? "#526579" : "#466861"}" stroke-width="2.3" stroke-linecap="round"><path d="M3 15q7-10 14 0 7-10 14 0M37 25q5-7 10 0 5-7 10 0"/></svg></div>
     ${theme.key === "autumn" ? '<span class="village-leaf leaf-one"></span><span class="village-leaf leaf-two"></span>' : ""}
   </div>`;

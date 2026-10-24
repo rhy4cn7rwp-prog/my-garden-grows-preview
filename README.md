@@ -5,6 +5,34 @@ Changes and deployment are restricted to `my-garden-grows-preview`. The original
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
 
+## Phase 2B final refinements: immersive shell, Clubhouse and paved routes
+
+The village is edge-to-edge: the outer brown frame and margins are removed.
+Terrain fills the visible Safari viewport behind the UI using proportional cover
+scaling. Building and character sprites retain their aspect ratios. Money,
+season/day and savings remain live, on light readable overlays. Safe-area insets
+protect controls and location labels while the artwork reaches both screen edges.
+Interior artwork and the existing interior shell remain unchanged.
+
+The former Home control is now a cozy wooden-door icon with the accessible label
+**Clubhouse**. Its action still returns to the town. Phase 2C may introduce the
+personal clubhouse and item/achievement displays; none of that exists yet.
+
+`src/village-walks.js` traces curved lanes and town-square arcs in the preserved
+terrain's coordinate system. At layout/season/safe-area changes it maps these
+curves onto the actual covered image, samples paved regions and excludes segments
+where a resident's body would overlap buildings, labels, trees or the bench.
+A smaller layout may use a shorter safe square walk rather than crossing scenery.
+Walkers travel in both directions, turn during pauses and stop along connected
+shop/market approaches. The market neighbor also stands on verified paving.
+
+Motion is compiled into browser-managed transform keyframes, with easing,
+arc-length spacing and pauses. There is no JavaScript frame loop or animation
+write to game state/local storage. Animation instances are canceled when leaving
+town; reduced-motion settings keep residents still on safe path positions.
+Artwork, six destination functions, the seasonal cycle and all save fields are
+preserved. `src/village-shell.css` contains the village-only immersive presentation.
+
 ## Phase 2B: living, seasonal village
 
 The existing six destinations now sit at staggered heights and unequal scales,
@@ -25,8 +53,8 @@ These are visual changes, not seasonal crop restrictions or new earning rules.
 A few original illustrated neighbors stroll along preset paths or greet people
 at the market. Butterflies move between flower verges; trees/flowers sway; birds
 occasionally cross overhead. These are decorative actors, unrelated to customer
-orders or money. CSS transforms drive motion without timers, random game rolls,
-or repeated state/storage writes. All decorations ignore pointer events.
+orders or money. Browser-managed transforms drive motion without a JavaScript frame loop, random
+game rolls or repeated state/storage writes. All decorations ignore pointer events.
 Reduced-motion preferences stop movement, leave neighbors still, and hide passing
 birds/falling leaves. On compact screens fewer walkers are displayed.
 
@@ -53,7 +81,7 @@ badges, savings progress and animated environmental details compose the village.
 The Job Board still opens its existing placeholder; no earning minigames were added.
 Community seed help remains available through the leaf button and Job Board.
 
-One live navigation component shows money, season/day, Home and, in interiors,
+One live navigation component shows money, season/day, Clubhouse and, in interiors,
 Back to village. Settings remains on the town header. All navigation and town
 buttons have at least 44px targets. Town layouts adapt to the visual viewport,
 safe-area insets and landscape orientation, fitting all six places without
@@ -85,7 +113,7 @@ are also deferred; Phase 2A only removes their old navigation/status strips.
 See `PHASE2.md`. Phase 2B is now complete; Phase 2C has not begun.
 
 To playtest, open the preview in Safari and refresh if necessary. Keep website
-data to retain your farm. Tap each building (or its wooden sign), use Home/Back,
+data to retain your farm. Tap each building (or its wooden sign), use Clubhouse/Back,
 and check that money/day values match your existing farm. No download is needed.
 
 ## Phase 1E customer service and order filling
@@ -228,6 +256,12 @@ day has complete accounting. Do not clear Safari data or restart to update.
 
 ## Tests and validation
 
+- `python3 tests/mobile_village_refinements.py`: edge-to-edge and proportional
+  terrain, Clubhouse label/action, actual shoe positions sampled against source
+  pavement colors in every season, source-alpha sprite bounds checked for building,
+  tree, bench and sign overlaps, out-and-back motion/facing/pauses, small-screen
+  safe-area changes, route lifecycle cleanup and reduced-motion stillness.
+  Uses Pillow to inspect preserved source pixels without changing the artwork.
 - `python3 tests/mobile_phase2b.py`: all four seasons and repeating visual years,
   actual winter-to-spring End Day/reload, stable staggered destination geometry,
   no-scroll layouts and >=44px targets at six mobile sizes, safe-area/toolbar
@@ -266,6 +300,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
   390 × 844 and 320 × 568.
 
 Browser tests require Python Playwright and Chromium at `/usr/bin/chromium`.
+The refinement visual checks also require Pillow.
 They use isolated browser contexts; real player saves are never touched.
 `PREVIEW_URL` optionally selects the HTTPS preview instead of each test's local
 server. Automated tests simulate mobile Chromium. Actual iPhone Safari remains

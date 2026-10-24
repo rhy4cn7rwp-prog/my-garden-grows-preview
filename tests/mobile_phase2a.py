@@ -45,7 +45,7 @@ try:
     assert page.locator('[aria-label="Money balance"]').count()==1
     assert page.locator('[aria-label="Season and day"]').count()==1
     assert page.locator('nav[aria-label="Farm navigation"]').count()==1
-    assert page.get_by_role('button',name='Home',exact=True).count()==1
+    assert page.get_by_role('button',name='Clubhouse',exact=True).count()==1
    fit()
    page.screenshot(path=f'/tmp/phase2a-town-{width}x{height}.png')
    before=saved()
@@ -73,7 +73,7 @@ try:
       target.tap()
       assert page.locator('.dialog').is_visible(),(scene,index)
       tap('Close ✕')
-    tap('Back to village' if scene in ['dream','garden'] else 'Home');fit()
+    tap('Back to village' if scene in ['dream','garden'] else 'Clubhouse');fit()
    tap('Job Board');assert 'Coming soon' in page.locator('.dialog').inner_text()
    assert page.locator('.dialog input').count()==0
    tap('Close ✕');assert saved()==before;fit()
@@ -92,17 +92,17 @@ try:
    assert page.locator('.balance').inner_text()=='$26.50'
    page.reload()
    assert page.evaluate('JSON.stringify([state.cash,state.day,state.season,state.goal,state.bagCount,state.seeds,state.inventory,state.plots,state.rentals,state.marketExpenses])')==stable
-   fit();tap('My Garden');tap('Harvest All Ready Crops');tap('Home')
+   fit();tap('My Garden');tap('Harvest All Ready Crops');tap('Clubhouse')
    assert page.locator('.town-garden .town-badge').count()==0
    assert page.evaluate('state.inventory.carrot')==6
    # The existing market can be left and revisited without losing customer or counted change.
    page.evaluate('''()=>{state.marketOpen=state.marketPlayed=true;state.customer={name:'Maya',want:{carrot:1}};state.basket={carrot:1};state.step='choose';Game.ring(state,2);state.change=1;render();}''')
    pending=page.evaluate('JSON.stringify([state.customer,state.step,state.basket,state.change,state.cash,state.bagCount])')
    assert 'Market open' in page.locator('.town-market').inner_text()
-   tap('Farmers Market');tap('Home');tap('Seed & Feed');tap('Home');tap('Farmers Market')
+   tap('Farmers Market');tap('Clubhouse');tap('Seed & Feed');tap('Clubhouse');tap('Farmers Market')
    assert page.evaluate('JSON.stringify([state.customer,state.step,state.basket,state.change,state.cash,state.bagCount])')==pending
    page.reload();assert page.evaluate('[state.step,state.change,state.bagCount]')==['pay',1,7]
-   tap('Home');fit()
+   tap('Clubhouse');fit()
    if width==390:
     # Safari chrome: the layout viewport stays tall while visible space/insets change.
     page.evaluate("()=>{document.documentElement.style.setProperty('--viewport-safe-top','47px');document.documentElement.style.setProperty('--viewport-safe-bottom','34px');Object.defineProperty(visualViewport,'offsetTop',{configurable:true,get:()=>12});}")
@@ -116,11 +116,11 @@ try:
    page.evaluate("()=>{state=Game.initial();state.cash=0;Game.rentEquipment(state,'table','deferred');go('town')}")
    fit();assert 'Equipment owed: $3.00' in page.locator('.town-debt').inner_text()
    assert page.evaluate('Game.savings(state)')==0
-   owed=saved();tap('My Garden');tap('Home');assert saved()==owed
+   owed=saved();tap('My Garden');tap('Clubhouse');assert saved()==owed
    page.emulate_media(reduced_motion='reduce')
    page.get_by_role('button',name='Dream Shop',exact=True).focus();page.keyboard.press('Enter')
    assert page.locator('.game').get_attribute('data-scene')=='dream'
-   tap('Home');assert page.evaluate('document.getAnimations().filter(a=>a.playState==="running").length')==0
+   tap('Clubhouse');assert page.evaluate('document.getAnimations().filter(a=>a.playState==="running").length')==0
    assert not errors,errors
    page.close()
   browser.close()

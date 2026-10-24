@@ -37,7 +37,10 @@ function go(v) {
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document.querySelector(".interior-crop, .town-world")?.animate(
         [
-          { opacity: 0.6, transform: "translateY(4px)" },
+          {
+            opacity: 0.6,
+            transform: view === "town" ? "translateY(0)" : "translateY(4px)",
+          },
           { opacity: 1, transform: "translateY(0)" },
         ],
         { duration: 180, easing: "ease-out" },
