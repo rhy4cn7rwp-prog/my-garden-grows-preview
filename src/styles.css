@@ -446,6 +446,10 @@ input:focus-visible {
 }
 
 /* Phase 1E: fit the visible Safari viewport, including toolbar transitions. */
+:root {
+  --viewport-safe-top: env(safe-area-inset-top, 0px);
+  --viewport-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 .register-modal {
   --register-safe-top: env(safe-area-inset-top, 0px);
   --register-safe-bottom: env(safe-area-inset-bottom, 0px);

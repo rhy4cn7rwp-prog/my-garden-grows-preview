@@ -75,6 +75,11 @@ try:
     for available in [350,440,380]:
      page.evaluate(f"()=>{{Object.defineProperty(visualViewport,'height',{{configurable:true,get:()=>{available}}});visualViewport.dispatchEvent(new Event('resize'));}}")
      fit()
+    page.locator('.register-modal').evaluate("e=>e.style.setProperty('--register-safe-top','47px')")
+    for available in [480,440]:
+     page.evaluate(f"()=>{{Object.defineProperty(visualViewport,'height',{{configurable:true,get:()=>{available}}});visualViewport.dispatchEvent(new Event('resize'));}}")
+     fit()
+    page.locator('.register-modal').evaluate("e=>e.style.removeProperty('--register-safe-top')")
     page.evaluate("()=>{delete visualViewport.height;delete visualViewport.offsetTop;visualViewport.dispatchEvent(new Event('resize'));}")
     page.locator('.register-modal').evaluate("e=>e.style.removeProperty('--register-safe-bottom')")
     fit()

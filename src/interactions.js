@@ -378,6 +378,7 @@ function render() {
   });
   renderedView = view;
   renderedDialogKey = dialogKey;
+  syncRegisterViewport();
 }
 render();
 
@@ -401,8 +402,24 @@ function syncRegisterViewport() {
     "--visible-left",
     `${viewport ? viewport.offsetLeft : 0}px`,
   );
+  const modal = document.querySelector(".register-modal");
+  const insets = getComputedStyle(modal || root);
+  const top =
+    parseFloat(
+      insets.getPropertyValue(
+        modal ? "--register-safe-top" : "--viewport-safe-top",
+      ),
+    ) || 0;
+  const bottom =
+    parseFloat(
+      insets.getPropertyValue(
+        modal ? "--register-safe-bottom" : "--viewport-safe-bottom",
+      ),
+    ) || 0;
   root.dataset.shortRegister =
-    (viewport ? viewport.height : innerHeight) < 470 ? "true" : "false";
+    (viewport ? viewport.height : innerHeight) - top - bottom < 470
+      ? "true"
+      : "false";
 }
 window.visualViewport?.addEventListener("resize", syncRegisterViewport);
 window.visualViewport?.addEventListener("scroll", syncRegisterViewport);
