@@ -22,10 +22,19 @@ try:
    page.goto(f'http://127.0.0.1:{server.server_port}/')
    page.emulate_media(reduced_motion='reduce')
    page.evaluate('''([top,bottom])=>{document.documentElement.style.setProperty('--viewport-safe-top',top+'px');document.documentElement.style.setProperty('--viewport-safe-bottom',bottom+'px');if(innerWidth>600){document.documentElement.style.setProperty('--village-safe-left','44px');document.documentElement.style.setProperty('--village-safe-right','44px');}syncGameViewport();}''',[top,bottom])
-   def tap(name): page.get_by_role('button',name=name,exact=True).tap()
+   def tap(name):
+    target=page.get_by_role('button',name=name,exact=True)
+    if ' · ' in name:
+     page.wait_for_function("document.querySelector('.clubhouse-world')?.dataset.painted==='true'")
+    if ' · ' in name and not target.is_visible():
+     page.get_by_role('button',name='My treasures',exact=True).tap()
+     page.get_by_role('button',name='Find '+name.split(' · ')[0],exact=True).tap()
+    target.tap()
    def state(): return page.evaluate('JSON.stringify(state)')
    def fit():
-    data=page.evaluate('''()=>({width:visualViewport.width,height:visualViewport.height,top:visualViewport.offsetTop,rect:document.querySelector('.clubhouse-game').getBoundingClientRect().toJSON(),buttons:[...document.querySelectorAll('.clubhouse-game button')].map(e=>({name:e.getAttribute('aria-label')||e.textContent,...e.getBoundingClientRect().toJSON()}))})''')
+    page.wait_for_function("document.querySelector('.clubhouse-world')?.dataset.painted==='true'")
+    page.wait_for_timeout(30)
+    data=page.evaluate('''()=>({width:visualViewport.width,height:visualViewport.height,top:visualViewport.offsetTop,rect:document.querySelector('.clubhouse-game').getBoundingClientRect().toJSON(),buttons:[...document.querySelectorAll('.clubhouse-game button:not([hidden])')].map(e=>({name:e.getAttribute('aria-label')||e.textContent,...e.getBoundingClientRect().toJSON()}))})''')
     assert data['rect']['top']>=data['top']-1 and data['rect']['bottom']<=data['top']+data['height']+1,data
     for b in data['buttons']:
      assert b['width']>=44 and b['height']>=44,(width,height,b)
@@ -92,7 +101,7 @@ try:
    page.wait_for_function("performance.getEntriesByType('resource').some(e=>e.name.endsWith('/assets/clubhouse/rewards.webp')&&e.responseEnd>0)")
    fit();assert page.locator('.clubhouse-item').count()==6
    for item in page.locator('.clubhouse-item').all():
-    label=item.get_attribute('aria-label');item.tap();assert label.split(' · ')[0] in page.locator('.dialog h2').inner_text();tap('Close ✕')
+    label=item.get_attribute('aria-label');tap(label);assert label.split(' · ')[0] in page.locator('.dialog h2').inner_text();tap('Close ✕')
    page.screenshot(path=f'/tmp/clubhouse-full-{width}x{height}.png')
    tap('Back to village');assert page.locator('.town-world').is_visible()
    assert page.locator('html').get_attribute('data-clubhouse-canvas') is None
@@ -155,7 +164,7 @@ try:
   assert page.evaluate('[state.goal,state.cash,state.won]')==[1,0,False]
   assert not page.evaluate("Game.ownsDream(state,'bike')")
   assert page.get_by_role('button',name='Soccer ball',exact=True).count()==0
-  tap_goal('My Clubhouse');tap_goal('Soccer ball · Sports corner')
+  tap_goal('My Clubhouse');page.wait_for_timeout(220);tap_goal('Soccer ball · Sports corner')
   assert 'Season 1, Day 1' in page.locator('.dialog').inner_text();tap_goal('Close ✕')
   page.reload();tap_goal('Clubhouse')
   assert page.locator('[data-dream=ball]').count()==1

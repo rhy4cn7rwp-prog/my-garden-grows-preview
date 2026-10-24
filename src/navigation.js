@@ -69,6 +69,8 @@ function syncGameViewport() {
       : "false";
   if (typeof syncVillagePageCanvas === "function") syncVillagePageCanvas();
   if (typeof syncClubhouseCanvas === "function") syncClubhouseCanvas();
+  if (typeof syncInteractiveClubhouse === "function")
+    syncInteractiveClubhouse();
   if (typeof syncVillageWalkers === "function") syncVillageWalkers();
 }
 window.visualViewport?.addEventListener("resize", syncGameViewport);

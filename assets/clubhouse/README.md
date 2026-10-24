@@ -14,3 +14,15 @@ The puppy-fund reward is a paw-print keepsake box, not a live pet.
 
 The timber room contains no money/day/season labels, navigation controls or
 purchased goods. All such controls and ownership are live game elements.
+
+## Phase 2D panorama
+
+- `source/panorama.png`: original generated 2172 × 724 connected room expansion,
+  derived from the preserved Phase 2C room using the image-generation editing tool.
+- `panorama.webp`: quality-88 runtime encoding, 464,076 bytes.
+
+The expanded painting retains the central round-window alcove, original rug,
+seating nook, shelves and chest, and adds a left reading/bench wall and right
+shelf/cabinet wall. It contains no rewards or interface. The original room and
+reward assets above remain byte-for-byte unchanged. Canvas 2D samples this one
+continuous image; rewards remain separate touch controls.

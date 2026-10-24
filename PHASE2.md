@@ -69,6 +69,24 @@ iPhone is attached and WebKit installation is blocked by the environment proxy.
   interiors and village artwork are preserved. No furniture editor, decorations
   purchasing system, new minigames or achievement system is included.
 
+## Phase 2D delivered: interactive panoramic Clubhouse
+
+- Connected illustrated room wings and a fixed-position ±80° camera, rendered
+  with a bounded cylindrical Canvas 2D projection. Original room/reward source
+  artwork is preserved. The room remains a layered storybook environment.
+- Swipe to turn; hold an owned treasure for 420 ms to drag. Suitable surfaces
+  glow while carrying, occupied/invalid drops revert, and holding near an edge
+  gently turns the view. UI/safe-area bounds remain protected.
+- Positions save in optional room coordinates; old or malformed layouts never
+  reset a valid farm. Purchased ownership, goal behavior and all other game rules
+  remain intact. Find controls reach offscreen treasures. Per-item or all-item
+  restores change only positions; blockers in a restored home spot return home.
+- Reduced-motion settings skip animated button turns. One mobile-resolution
+  canvas repaints only on demand; the new runtime painting is about 464 KB.
+- Pure rules, touch gestures, save recovery, navigation exclusion, goal/purchase
+  behavior and existing gameplay are tested. Physical iPhone Safari still needs
+  manual checks of long press, edge turns, real toolbar transitions and speed.
+
 ## Later phases — other interiors remain deferred
 
 Preserve prototype 0.9's colorful storybook appearance, characters and atmosphere.

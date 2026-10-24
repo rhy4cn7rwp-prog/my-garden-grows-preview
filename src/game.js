@@ -1,6 +1,10 @@
 /* Game rules have no DOM or storage dependencies. Money calculations use integer cents at transaction boundaries. */
 (function (root) {
   "use strict";
+  const roomLayout =
+    typeof module !== "undefined"
+      ? require("./clubhouse-layout.js")
+      : root.ClubhouseLayout;
   const crops = [
     {
       id: "carrot",
@@ -144,6 +148,7 @@
       season: 1,
       goal: 1,
       dreamPurchases: {},
+      clubhousePositions: {},
       seeds: {},
       plots: Array(25).fill(null),
       inventory: {},
@@ -293,6 +298,17 @@
           };
         }
       }
+      // A failed optional room-script download must never reset a valid farm.
+      clean.clubhousePositions = roomLayout
+        ? roomLayout.recoverPositions(
+            s.clubhousePositions,
+            clean.dreamPurchases,
+          )
+        : s.clubhousePositions &&
+            typeof s.clubhousePositions === "object" &&
+            !Array.isArray(s.clubhousePositions)
+          ? s.clubhousePositions
+          : {};
       requireRule(
         typeof s.marketOpen === "boolean" &&
           typeof s.marketPlayed === "boolean" &&
@@ -462,6 +478,57 @@
     };
     if (dreams[s.goal].id === id) s.won = true;
     return item.price;
+  }
+  function moveClubhouseItem(s, id, position) {
+    requireRule(
+      roomLayout,
+      "Room controls are still loading. Please refresh and try again.",
+    );
+    requireRule(
+      ownsDream(s, id),
+      "Only your purchased treasures can be moved.",
+    );
+    requireRule(
+      roomLayout.valid(id, position),
+      "Try the floor or a suitable display surface.",
+    );
+    requireRule(
+      !roomLayout.blockers(id, position, s.clubhousePositions, s.dreamPurchases)
+        .length,
+      "Give each treasure a little space. Try another spot.",
+    );
+    s.clubhousePositions = {
+      ...s.clubhousePositions,
+      [id]: { surface: position.surface, angle: position.angle, y: position.y },
+    };
+  }
+  function resetClubhouseItem(s, id) {
+    requireRule(
+      roomLayout,
+      "Room controls are still loading. Please refresh and try again.",
+    );
+    requireRule(ownsDream(s, id), "Choose one of your purchased treasures.");
+    const positions = { ...s.clubhousePositions },
+      reset = [id];
+    delete positions[id];
+    // If someone moved a treasure into this home spot, return that blocker
+    // home too. At most six entries can clear; default spots are disjoint.
+    for (let i = 0; i < reset.length; i++)
+      for (const blocker of roomLayout.blockers(
+        reset[i],
+        roomLayout.defaults[reset[i]],
+        positions,
+        s.dreamPurchases,
+      ))
+        if (!reset.includes(blocker)) {
+          delete positions[blocker];
+          reset.push(blocker);
+        }
+    s.clubhousePositions = positions;
+    return reset;
+  }
+  function resetClubhouseLayout(s) {
+    s.clubhousePositions = {};
   }
   function cartTotal(s, kind) {
     const obj = kind === "seeds" ? s.cart : s.supcart;
@@ -1260,6 +1327,9 @@
     return `Your neighbors shared ${[needsSeeds ? "3 carrot seeds" : "", donatedBags ? "3 paper bags" : ""].filter(Boolean).join(" and ")}. Grow and sell from a free blanket. No repayment is needed.`;
   }
   const api = {
+    moveClubhouseItem,
+    resetClubhouseItem,
+    resetClubhouseLayout,
     dreams,
     ownsDream,
     acknowledgeGoal,

@@ -20,19 +20,21 @@ function clubhouseDisplaySupport(id) {
 }
 function clubhouseScene() {
   const owned = Game.dreams.filter((d) => Game.ownsDream(state, d.id));
-  return `<section class="clubhouse-heading"><h1>My Clubhouse</h1><p>${owned.length ? "Tap a treasure to remember your adventure." : "A little hideaway, ready for your dreams."}</p></section>
-    <section class="clubhouse-world" aria-label="Your illustrated clubhouse"><div class="clubhouse-room">
-      <img class="clubhouse-room-art" src="assets/clubhouse/room.webp" alt="A sunny wooden hideaway with an arched window seat, empty display shelves, a toy chest and a braided rug." fetchpriority="high"/>
+  return `<section class="clubhouse-heading"><h1>My Clubhouse</h1><p>Swipe to look · Hold a treasure to move</p></section>
+    <section class="clubhouse-world" tabindex="0" aria-label="Clubhouse panorama. Swipe to turn or use the Look buttons."><div class="clubhouse-room">
+      <img class="clubhouse-room-art" src="assets/clubhouse/panorama.webp" alt="A connected wooden hideaway: reading bench to the left, round window and seating nook in the middle, shelves and toy chest to the right, and a wooden floor with a braided rug." fetchpriority="high"/>
+      <canvas class="clubhouse-panorama" aria-hidden="true"></canvas>
+      <svg class="clubhouse-drop-surfaces" aria-hidden="true"></svg>
       <div class="clubhouse-displays" aria-label="Purchased dream collection">${owned.map((d) => `<button class="clubhouse-item clubhouse-${d.id}" data-dream="${d.id}" onclick="clubhouseItem('${d.id}')" aria-label="${d.name} · ${CLUBHOUSE_DISPLAYS[d.id].area}">${clubhouseRewardArt(d.id)}${clubhouseDisplaySupport(d.id)}</button>`).join("")}</div>
     </div></section>
-    <div class="clubhouse-bottom bottom"><p>${owned.length ? `${owned.length} of ${Game.dreams.length} dreams collected · Made yours, one dream at a time.` : "Earn and save at your farm, then visit the Dream Shop."}</p><button class="btn" onclick="go('town')">Return to village</button><button class="btn alt" onclick="go('dream')">Dream Shop</button></div>`;
+    <div class="clubhouse-bottom bottom"><div class="clubhouse-look-controls" aria-label="Look around the clubhouse"><button class="btn" onclick="turnClubhouse(-30)" aria-label="Look left">←</button><button class="btn alt" onclick="lookClubhouse(0)" aria-label="Look straight ahead">Center</button><button class="btn" onclick="turnClubhouse(30)" aria-label="Look right">→</button><button class="btn alt" onclick="clubhouseTreasures()">My treasures</button></div><output class="clubhouse-direction" aria-label="Viewing direction">Looking straight ahead</output><button class="btn" onclick="go('town')">Return to village</button><button class="btn alt" onclick="go('dream')">Dream Shop</button><span class="clubhouse-status" role="status" aria-live="polite"></span></div>`;
 }
 function clubhouseItem(id) {
   if (!Game.ownsDream(state, id)) return;
   const item = Game.dreams.find((d) => d.id === id),
     record = state.dreamPurchases[id];
   show(
-    `<h2>${item.name}</h2>${clubhouseRewardArt(id, "dream-preview-art")}<p>${CLUBHOUSE_DISPLAYS[id].area} · Yours to keep!</p><p>${record.season && record.day ? `Purchased in Season ${record.season}, Day ${record.day}.` : "Purchase date was not recorded."}</p>${record.price !== null && record.price !== undefined ? `<p>Saved and purchased for ${money(record.price)}.</p>` : ""}${id === "puppy" ? "<p>Your puppy-fund keepsake celebrates saving for a future furry friend.</p>" : ""}${view === "clubhouse" ? "" : '<button class="btn" onclick="go(\'clubhouse\')">See it in my Clubhouse</button>'}`,
+    `<h2>${item.name}</h2>${clubhouseRewardArt(id, "dream-preview-art")}<p>${CLUBHOUSE_DISPLAYS[id].area} · Yours to keep!</p><p>${record.season && record.day ? `Purchased in Season ${record.season}, Day ${record.day}.` : "Purchase date was not recorded."}</p>${record.price !== null && record.price !== undefined ? `<p>Saved and purchased for ${money(record.price)}.</p>` : ""}${id === "puppy" ? "<p>Your puppy-fund keepsake celebrates saving for a future furry friend.</p>" : ""}${view === "clubhouse" ? '<button class="btn" onclick="restoreClubhouseItem(\'' + id + "')\">Restore default position</button>" : '<button class="btn" onclick="go(\'clubhouse\')">See it in my Clubhouse</button>'}`,
     "clubhouse-" + id,
   );
 }

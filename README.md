@@ -1,9 +1,85 @@
-# My Garden Grows 1.0 preview — Phase 2C: The Clubhouse
+# My Garden Grows 1.0 preview — Phase 2D: Interactive Clubhouse
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 2D: look around and make the Clubhouse yours
+
+Open the wooden-door **Clubhouse** button. Swipe across the room to turn your head
+from **80° left to 80° right**, without moving your standing position. The left
+and right buttons work too, and **Center** looks straight ahead. The original
+round-window nook, wooden floor, rug, empty shelves and toy chest continue into
+new illustrated reading and display areas. The original Phase 2C room/reward
+assets and all earlier prototype/village artwork are preserved unchanged.
+
+**Tap** an owned treasure for its name/purchase history. **Hold for about half a
+second**, then drag it to a glowing floor or suitable display surface. A quick
+swipe over an item still turns the room; it does not move the item. Holding a
+moving item near a side edge slowly turns the view so it can be carried to a side
+area. A valid drop saves immediately. An invalid, occupied, canceled, or
+out-of-room drop returns to the last saved spot. The view keeps items above the
+navigation controls and inside phone safe areas.
+
+**My treasures** finds any purchased item, including one in another part of the
+panorama. The item information dialog offers **Restore default position**. If
+another moved item is occupying its original spot, that blocker returns home too;
+no item is lost. **Restore all item positions** in My treasures resets only room
+placements, never the farm, money, inventory or ownership. Unpurchased items do
+not appear and cannot be moved. Dream Shop prices, explicit purchases, goal
+congratulations/selection and existing market/farming rules are unchanged.
+
+### Panorama and saved layout implementation
+
+- `src/clubhouse-layout.js` holds shared pure placement/projection rules. It loads
+  before `game.js`; missing optional room code cannot erase a recoverable farm.
+- `src/clubhouse-room.js` owns Pointer Events, the 420 ms hold gesture, collision
+  checks through Game, safe-area layout, look/find/reset controls and Canvas 2D.
+  It also handles a short button tap immediately after panning without losing or
+  double-firing a mobile compatibility click. It cleans up captures/listeners
+  when leaving the room and cancels incomplete placement on toolbar/rotation
+  changes instead of silently saving a half-finished move.
+- The continuous 2172 × 724 painting is sampled by cylindrical viewing rays,
+  with matching vertical correction. This is a layered illustrated 2D panorama,
+  not a walkable 3D reconstruction. It never stretches the old portrait image
+  into a wide strip. Changing yaw keeps the same eye position; screen resizing
+  changes the field of view/crop rather than stored room coordinates.
+- The new panorama WebP is about **464 KB**. A single canvas caps its pixel ratio
+  at 1.5 and draws only during input, viewport changes or a short button turn.
+  There is no idle paint loop, WebGL context, video or collection of room copies.
+  Reduced motion makes button-driven turns immediate; direct finger movement
+  remains direct, without inertia.
+- The additive version-1 `clubhousePositions` field stores each owned item's
+  `{surface, angle, y}` in room coordinates. Valid surface types/angle bounds are
+  enforced; malformed optional layouts are ignored independently of the farm.
+  Old saves without placements use the new sensible default spots. Normal and
+  backup save recovery retain ownership and valid custom positions. Existing
+  `mgg10` / `mgg10-backup` storage keys remain unchanged.
+
+### Phase 2D validation and remaining manual checks
+
+`npm test` passes all **87 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
+painted-edge bounds, valid defaults, owned-only moves, compatible surfaces,
+collision rejection, exact save recovery, old/malformed layouts, per-item/cascade
+and whole-room resets, and recovery when optional room code is unavailable.
+
+`python3 tests/mobile_clubhouse_room.py` uses actual touch pointer sequences in
+isolated Chromium contexts for panning, quick swipes over items, long presses,
+floor/shelf drops, invalid/canceled drops, edge turning during a drag, immediate
+post-pan button taps, leave/reenter/reload persistence, finding every reward,
+individual/all restores, safe-area phone sizes, reduced motion and idle repaint
+checks. `tests/mobile_clubhouse.py` retains the Phase 2C purchase/goal/accounting
+flow and now finds rewards across the panoramic room. Existing Phase 1 and
+village suites remain required regression coverage.
+
+**Physical iPhone Safari is still unverified.** No iPhone is attached and WebKit
+installation is blocked by the environment's network proxy. On the reported
+12 Pro Max/iOS 27.0.1, please check the swipe/hold distinction, comfortable turn
+speed, edge carrying, finger placement on shelves, toolbar expansion/collapse,
+rotation, restore buttons and refreshing a custom layout. Safari owns opaque
+native chrome; artwork cannot be forced into every browser toolbar. Refresh the
+preview without clearing website data, which would remove saved progress.
 
 ## Phase 2C: The Clubhouse
 
@@ -385,7 +461,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
   changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
   readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
   and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
-- `npm test`: 75 rule tests covering clubhouse ownership/checkout, goal congratulations
+- `npm test`: 87 rule tests covering clubhouse ownership/checkout, goal congratulations
   without auto-purchase, explicit next-goal selection, prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,
