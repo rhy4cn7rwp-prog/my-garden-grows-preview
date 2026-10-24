@@ -1,0 +1,394 @@
+/* Phase 2B: seasonal exterior layers. All ambient elements ignore input.
+   New decorations can use existing per-building slots or the independent world
+   attachment layer; there is intentionally no upgrade model or save schema. */
+.town-intro h1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+}
+.village-season-name {
+  font:
+    700 12px/1.1 system-ui,
+    sans-serif;
+  padding: 4px 7px;
+  color: #4e6744;
+  background: #f6f0d5;
+  border: 1px solid #b4bd91;
+  border-radius: 12px;
+}
+.village-terrain,
+.village-trees,
+.village-fixtures,
+.village-residents,
+.village-attachment-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.village-terrain {
+  z-index: 0;
+}
+.village-terrain-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.village-trees,
+.village-fixtures {
+  z-index: 1;
+}
+.town-landscape {
+  z-index: 1;
+}
+.village-tree,
+.village-square-bench {
+  position: absolute;
+  display: block;
+}
+.village-tree-art,
+.village-fixture-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.tree-back {
+  left: -4%;
+  top: 16%;
+  width: 22%;
+  height: 24%;
+}
+.tree-square {
+  left: 24%;
+  top: 40%;
+  width: 18%;
+  height: 23%;
+}
+.tree-front {
+  left: -7%;
+  top: 85%;
+  width: 25%;
+  height: 29%;
+}
+.village-tree-art {
+  transform-origin: 50% 94%;
+  animation: canopy-breeze 9s ease-in-out infinite alternate;
+}
+.tree-square .village-tree-art {
+  animation-delay: -3s;
+}
+.tree-front .village-tree-art {
+  animation-delay: -6s;
+}
+.village-square-bench {
+  left: 26%;
+  top: 59%;
+  width: 19%;
+  height: 14%;
+}
+.village-residents {
+  z-index: 9;
+  overflow: hidden;
+}
+.village-walk-track,
+.village-market-neighbor,
+.village-bird-track {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.village-person {
+  position: absolute;
+  width: clamp(30px, 8vw, 46px);
+  height: clamp(30px, 8vw, 46px);
+}
+.neighbor-walk {
+  left: 35%;
+  top: 28%;
+}
+.child-walk {
+  left: 37%;
+  top: 76%;
+}
+.market-neighbor {
+  left: 44%;
+  top: 62%;
+  width: clamp(28px, 7vw, 40px);
+  height: clamp(28px, 7vw, 40px);
+  transform-origin: 50% 95%;
+  animation: market-hello 29s -8s ease-in-out infinite;
+}
+.walk-to-square {
+  animation: neighbor-to-square 36s -7s linear infinite;
+}
+.walk-from-garden {
+  animation: neighbor-from-garden 43s -28s linear infinite;
+}
+.village-bird-track {
+  opacity: 0;
+  animation: occasional-birds 53s -16s linear infinite;
+}
+.village-flying-birds {
+  position: absolute;
+  left: 20%;
+  top: 5%;
+  width: 38px;
+  height: 22px;
+}
+.village-attachment-layer {
+  z-index: 10;
+}
+.town-attachments {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+/* A quiet winter keeps the same buildings and growing rules; only artwork changes. */
+.town-world[data-season="winter"] .town-garden .town-building-art {
+  filter: saturate(0.5) brightness(1.05) drop-shadow(0 3px 2px #45603040);
+}
+.town-world[data-season="winter"] .market-neighbor {
+  animation: none;
+}
+.town-world[data-season="winter"] .walk-from-garden {
+  display: none;
+}
+.town-world[data-season="winter"] {
+  background: #c1d4cf;
+}
+.town-world[data-season="autumn"] {
+  background: #bda567;
+}
+.village-leaf {
+  position: absolute;
+  width: 6px;
+  height: 10px;
+  background: #d99a3b;
+  border: 1px solid #b77835;
+  border-radius: 70% 0 70% 0;
+  opacity: 0.85;
+  animation: falling-leaf 19s ease-in-out infinite;
+}
+.leaf-one {
+  left: 37%;
+  top: 43%;
+}
+.leaf-two {
+  left: 4%;
+  top: 83%;
+  background: #bd7138;
+  animation-delay: -9s;
+}
+/* Butterflies cross the open flower verges, not a tight hovering loop. */
+.butterfly-one {
+  left: 35%;
+  top: 26%;
+  animation: butterfly-between-flowers 25s ease-in-out infinite;
+}
+.butterfly-two {
+  left: 43%;
+  top: 67%;
+  animation: butterfly-between-flowers 32s -12s ease-in-out infinite reverse;
+}
+@keyframes canopy-breeze {
+  from {
+    transform: rotate(-0.7deg);
+  }
+  to {
+    transform: rotate(0.7deg);
+  }
+}
+@keyframes neighbor-to-square {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  7% {
+    opacity: 1;
+  }
+  43% {
+    opacity: 1;
+    transform: translate(4%, 28%);
+  }
+  51% {
+    opacity: 1;
+    transform: translate(4%, 28%);
+  }
+  57%,
+  100% {
+    opacity: 0;
+    transform: translate(4%, 28%);
+  }
+}
+@keyframes neighbor-from-garden {
+  0%,
+  12% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  19% {
+    opacity: 1;
+  }
+  52% {
+    opacity: 1;
+    transform: translate(-1%, -16%);
+  }
+  59%,
+  100% {
+    opacity: 0;
+    transform: translate(-1%, -16%);
+  }
+}
+@keyframes market-hello {
+  0%,
+  64%,
+  100% {
+    transform: rotate(0);
+  }
+  68%,
+  74% {
+    transform: rotate(-2deg);
+  }
+  71%,
+  77% {
+    transform: rotate(1deg);
+  }
+}
+@keyframes occasional-birds {
+  0%,
+  64% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  67% {
+    opacity: 0.75;
+  }
+  84% {
+    opacity: 0.75;
+    transform: translate(45%, 2%);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate(52%, 1%);
+  }
+}
+@keyframes falling-leaf {
+  0%,
+  68%,
+  100% {
+    transform: translate(0, 0) rotate(-15deg);
+    opacity: 0;
+  }
+  9% {
+    opacity: 0.7;
+  }
+  42% {
+    opacity: 0.7;
+    transform: translate(10px, 21px) rotate(45deg);
+  }
+  60% {
+    opacity: 0;
+    transform: translate(-2px, 34px) rotate(110deg);
+  }
+}
+@keyframes butterfly-between-flowers {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-9deg);
+  }
+  25% {
+    transform: translate(16px, 13px) rotate(11deg);
+  }
+  53% {
+    transform: translate(24px, 38px) rotate(-8deg);
+  }
+  78% {
+    transform: translate(-8px, 20px) rotate(8deg);
+  }
+}
+:root[data-compact-town="true"] .walk-from-garden {
+  display: none;
+}
+@media (min-width: 540px) {
+  :root[data-compact-town="true"] .village-terrain-art {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3/4;
+    transform: translateY(-63%);
+  }
+
+  :root[data-compact-town="true"] .tree-back {
+    left: 25%;
+    top: -5%;
+    width: 14%;
+    height: 40%;
+  }
+  :root[data-compact-town="true"] .tree-square {
+    left: 64%;
+    top: 27%;
+    width: 15%;
+    height: 41%;
+  }
+  :root[data-compact-town="true"] .tree-front {
+    left: -7%;
+    top: 70%;
+    width: 18%;
+    height: 60%;
+  }
+  :root[data-compact-town="true"] .village-square-bench {
+    left: 29%;
+    top: 48%;
+    width: 12%;
+    height: 32%;
+  }
+  :root[data-compact-town="true"] .market-neighbor {
+    left: 64%;
+    top: 67%;
+    width: 28px;
+    height: 28px;
+  }
+  :root[data-compact-town="true"] .neighbor-walk {
+    left: 28%;
+    top: 35%;
+    width: 30px;
+    height: 30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .town-world * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .village-walk-track {
+    opacity: 1;
+    transform: none;
+  }
+  .village-bird-track,
+  .village-leaf {
+    display: none;
+  }
+}
+/* One lightweight pose/bob is enough for ambient walkers; no sprite timers. */
+.neighbor-walk,
+.child-walk {
+  transform-origin: 50% 96%;
+  animation: neighbor-step 1.25s ease-in-out infinite;
+}
+@keyframes neighbor-step {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.5deg);
+  }
+  50% {
+    transform: translateY(1px) rotate(0.5deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .neighbor-walk,
+  .child-walk {
+    animation: none !important;
+  }
+}

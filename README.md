@@ -1,9 +1,47 @@
-# My Garden Grows 1.0 preview — Phase 2A
+# My Garden Grows 1.0 preview — Phase 2B
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 2B: living, seasonal village
+
+The existing six destinations now sit at staggered heights and unequal scales,
+with the Dream Shop farther back, foreground garden/supplies, winding connections,
+and a small cobbled gathering area, bench and birdbath beside the Farmers Market.
+Phone layouts show the entire village without scrolling, with labels and touch
+regions kept large. Short landscape screens use a separately staggered arrangement.
+All four seasons preserve the same destination positions in each layout.
+
+Visual seasons derive only from the existing numbered season: 1=Spring,
+2=Summer, 3=Autumn, 4=Winter, then repeat. Existing 20-day progression is unchanged.
+Four painted scenery variants and seasonal tree cutouts show blossoms, lush leaves,
+autumn colors/leaves, and frosty winter greenery with warm tree lights. Winter
+has fewer ambient actors and no butterflies or blooming flower overlays. Building
+art is shared across seasons; the small winter garden icon is gently muted.
+These are visual changes, not seasonal crop restrictions or new earning rules.
+
+A few original illustrated neighbors stroll along preset paths or greet people
+at the market. Butterflies move between flower verges; trees/flowers sway; birds
+occasionally cross overhead. These are decorative actors, unrelated to customer
+orders or money. CSS transforms drive motion without timers, random game rolls,
+or repeated state/storage writes. All decorations ignore pointer events.
+Reduced-motion preferences stop movement, leave neighbors still, and hide passing
+birds/falling leaves. On compact screens fewer walkers are displayed.
+
+`src/village-life.js` owns the pure season mapping, normalized atlas renderer,
+seasonal scenery and ambient residents; `src/village-life.css` owns their visuals
+and motion. `src/town.js` retains destination functions, live badges and savings.
+The per-building `data-attachment-slot` elements and a separate world-decoration
+layer are reserved for future visual additions. They are empty, noninteractive
+hooks: no upgrade system, costs, unlocks, or save-schema fields were added.
+
+The mobile renderer downloads three shared WebP atlases totaling approximately
+2 MB, including all four seasons, versus roughly 6 MB in Phase 2A. Original PNG
+artwork is preserved; new source atlases are retained under `assets/town/source/`.
+See `assets/town/README.md` for frames, export commands and limitations. No interior
+art or game-rule file was changed. Phase 2C interiors have not begun.
 
 ## Phase 2A: interactive village and shared navigation
 
@@ -38,13 +76,13 @@ logic are unchanged.
 | `src/scenes.js`     | Existing scene rendering, display-only interior crop and navigation transitions      |
 | `assets/town/`      | New original building atlas and scenery, with art notes                              |
 
-The new PNG sources total about 6 MB; they are preloaded and cached, with one
-atlas request reused by all six building components. A later asset pipeline can
-optimize formats. The miniature garden and produce in the location sprites are
+Phase 2A originally used approximately 6 MB of PNG sources. Phase 2B retains those
+sources but renders the smaller WebP exports described above. The miniature
+garden and produce in the location sprites are
 recognition art; detailed growing plants and dynamic market equipment remain
 future work. Interior baked prices/dialogue and decorative Water/End Day artwork
 are also deferred; Phase 2A only removes their old navigation/status strips.
-See `PHASE2.md`. Phase 2B has not begun.
+See `PHASE2.md`. Phase 2B is now complete; Phase 2C has not begun.
 
 To playtest, open the preview in Safari and refresh if necessary. Keep website
 data to retain your farm. Tap each building (or its wooden sign), use Home/Back,
@@ -190,6 +228,12 @@ day has complete accounting. Do not clear Safari data or restart to update.
 
 ## Tests and validation
 
+- `python3 tests/mobile_phase2b.py`: all four seasons and repeating visual years,
+  actual winter-to-spring End Day/reload, stable staggered destination geometry,
+  no-scroll layouts and >=44px targets at six mobile sizes, safe-area/toolbar
+  simulation, passive animation clocks with zero gameplay mutations, decorative
+  pointer-event safety, reduced motion, cached exterior asset budget and empty
+  future-decoration hooks. Seasonal screenshots are written to `/tmp/phase2b-*.png`.
 - `python3 tests/mobile_phase2a.py`: all six village locations and five interiors,
   no-scroll town at 320 × 360, 320 × 440, 375 × 548, 390 × 664, 430 × 740 and
   667 × 320 landscape; all targets >=44px; all 25 existing plots and all shop/market

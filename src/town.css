@@ -38,6 +38,7 @@ body[data-view="town"] #app {
   z-index: 8;
 }
 .nav {
+  color: #fff;
   width: 44px;
   height: 44px;
   border-radius: 14px;
@@ -121,7 +122,7 @@ body[data-view="town"] #app {
   color: #656440;
 }
 .town-world {
-  background: url("../assets/town/landscape.png") center / 100% 100% no-repeat;
+  background: #a9bf7c;
   position: relative;
   min-height: 0;
   isolation: isolate;
@@ -195,40 +196,46 @@ body[data-view="town"] #app {
   right: 3px;
 }
 .town-dream {
-  left: 3%;
+  left: 7%;
   top: 3%;
-  width: 43%;
-  height: 30%;
+  width: 35%;
+  height: 25%;
+  z-index: 2;
 }
 .town-seeds {
-  left: 53%;
-  top: 0%;
-  width: 44%;
-  height: 30%;
-}
-.town-supplies {
-  left: 1%;
-  top: 35%;
-  width: 46%;
-  height: 30%;
-}
-.town-market {
-  left: 53%;
-  top: 35%;
-  width: 46%;
-  height: 30%;
-}
-.town-garden {
-  left: 1%;
-  top: 68%;
-  width: 48%;
-  height: 30%;
-}
-.town-jobs {
-  left: 57%;
-  top: 71%;
+  left: 58%;
+  top: 11%;
   width: 39%;
   height: 27%;
+  z-index: 3;
+}
+.town-jobs {
+  left: 5%;
+  top: 33%;
+  width: 30%;
+  height: 24%;
+  z-index: 4;
+}
+.town-market {
+  left: 46%;
+  top: 43%;
+  width: 52%;
+  height: 30%;
+  z-index: 5;
+}
+.town-supplies {
+  left: 0%;
+  top: 62%;
+  width: 43%;
+  height: 28%;
+  z-index: 6;
+}
+.town-garden {
+  left: 47%;
+  top: min(76%, calc(100% - 46px));
+  width: 51%;
+  height: 23%;
+  z-index: 7;
 }
 .town-building:hover {
   transform: translateY(-2px);
@@ -406,45 +413,42 @@ body[data-view="town"] #app {
   :root[data-compact-town="true"] .town-intro {
     display: none;
   }
-  :root[data-compact-town="true"] .town-world {
-    background-size: cover;
-    background-position: center 70%;
-  }
+  /* Wide, short screens keep the same stagger/depth rather than aligned rows. */
   :root[data-compact-town="true"] .town-dream {
     left: 1%;
     top: 1%;
-    width: 29%;
-    height: 48%;
+    width: 27%;
+    height: 43%;
   }
   :root[data-compact-town="true"] .town-seeds {
-    left: 35%;
-    top: 1%;
-    width: 29%;
-    height: 48%;
-  }
-  :root[data-compact-town="true"] .town-supplies {
-    left: 69%;
-    top: 1%;
-    width: 29%;
-    height: 48%;
-  }
-  :root[data-compact-town="true"] .town-garden {
-    left: 1%;
-    top: 52%;
-    width: 29%;
-    height: 47%;
-  }
-  :root[data-compact-town="true"] .town-market {
-    left: 35%;
-    top: 52%;
-    width: 29%;
-    height: 47%;
+    left: 34%;
+    top: 8%;
+    width: 28%;
+    height: 43%;
   }
   :root[data-compact-town="true"] .town-jobs {
-    left: 69%;
+    left: 73%;
+    top: 2%;
+    width: 24%;
+    height: 38%;
+  }
+  :root[data-compact-town="true"] .town-supplies {
+    left: 2%;
     top: 52%;
-    width: 29%;
-    height: 47%;
+    width: 30%;
+    height: 46%;
+  }
+  :root[data-compact-town="true"] .town-market {
+    left: 38%;
+    top: 56%;
+    width: 33%;
+    height: 42%;
+  }
+  :root[data-compact-town="true"] .town-garden {
+    left: 74%;
+    top: 49%;
+    width: 25%;
+    height: 49%;
   }
   :root[data-compact-town="true"] .town-goal {
     align-items: center;

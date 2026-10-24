@@ -21,7 +21,7 @@ try:
    page.set_default_timeout(5000)
    errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
    page.goto(os.environ.get('PREVIEW_URL',f'http://127.0.0.1:{server.server_port}/'))
-   page.wait_for_function("performance.getEntriesByType('resource').some(e=>e.name.endsWith('/assets/town/buildings.png') && e.responseEnd>0)")
+   page.wait_for_function("performance.getEntriesByType('resource').some(e=>e.name.endsWith('/assets/town/buildings.webp') && e.responseEnd>0)")
    def tap(name):page.get_by_role('button',name=name,exact=True).tap()
    def saved():return page.evaluate('JSON.stringify(state)')
    def fit():
@@ -81,7 +81,7 @@ try:
    tap('Community seed help');assert 'Community seed help' in page.locator('.dialog h2').inner_text();tap('Close ✕')
    assert saved()==before
    # Shared art is requested once; all six buttons reuse its cached image.
-   assert page.evaluate("performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/assets/town/buildings.png')).length")==1
+   assert page.evaluate("performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/assets/town/buildings.webp')).length")==1
    # Existing state: savings goal, seed stock, harvest, plots, paid rental and bags survive navigation/reload.
    page.evaluate('''()=>{state=Game.initial();state.cash=27.50;state.day=8;state.season=2;state.goal=3;state.bagCount=7;state.seeds.carrot=5;
     state.inventory.carrot=4;state.display.carrot=3;state.plots[0]={id:'carrot',age:3,left:0,quality:100,watered:false};

@@ -12,11 +12,26 @@
 - The old prototype images remain intact. New art details and limitations are in
   `assets/town/README.md`. Physical iPhone Safari playtesting remains manual.
 
-## Later phases — do not start Phase 2B before user review
+## Phase 2B delivered: living village exterior
+
+- Six destinations retain their functions in a staggered layout with depth and
+  a market gathering area; labels/targets fit the tested phone viewports.
+- Existing season numbers repeat Spring/Summer/Autumn/Winter without changing
+  the 20-day calendar. Scenery and independent tree sprites change; buildings
+  stay in the same layout. No new crop or market restrictions were introduced.
+- Gentle preset walkers, market activity, occasional birds, butterflies, swaying
+  trees/flowers and autumn leaves are decorative and cannot intercept input or
+  mutate gameplay. Reduced-motion settings are supported.
+- Normalized atlas components and empty per-building/world decoration slots
+  support later visual additions. No upgrades, unlocks, purchases or new save
+  fields were added. Original artwork and all interiors remain preserved.
+- Three cached WebP atlases total about 2 MB, including all seasonal scenery.
+
+## Phase 2C and later — interiors remain deferred
 
 Preserve prototype 0.9's colorful storybook appearance, characters and atmosphere.
-The following interior changes remain deferred. Phase 2A does not paint over,
-replace or rebuild these existing scenes.
+Phase 2B is exterior-only. Do not start Phase 2C before the user reviews the preview.
+The following interior changes are still pending:
 
 - Remove baked-in money bubbles, seasons, day labels, navigation, prices, and
   other controls from background art. Render only one live set of controls and
