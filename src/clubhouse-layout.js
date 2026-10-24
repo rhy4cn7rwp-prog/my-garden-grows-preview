@@ -202,7 +202,7 @@
   function metrics(id, p) {
     const s = getSurface(p.surface),
       base = {
-        ball: [32, 32],
+        ball: [44, 44],
         bike: [142, 112],
         guitar: [55, 100],
         camera: [35, 29],
@@ -283,6 +283,8 @@
       !p ||
       !Number.isFinite(p.angle) ||
       !Number.isFinite(p.y) ||
+      p.y < 0 ||
+      p.y > 1 ||
       Math.abs(p.angle) > 100
     )
       return null;
@@ -320,7 +322,7 @@
             version === 2
               ? valid(id, raw[id])
                 ? raw[id]
-                : null
+                : migrate(id, raw[id])
               : migrate(id, raw[id]);
           if (p) result[id] = { surface: p.surface, angle: p.angle, y: p.y };
         }
@@ -407,10 +409,12 @@
   }
   function geometry(width, height) {
     // Match the 3:1 painting's pixels at the central ray; cap the horizontal
-    // field of view at 60 degrees so ±80 never reveals a painting edge.
-    const focal = Math.max(
+    // field of view to 44–60 degrees. This fixed lens leaves enough side
+    // coverage to find edge treasures without changing zoom for each item.
+    const focal = clamp(
       (3 / (240 * radians)) * height,
       width / (2 * Math.tan(30 * radians)),
+      width / (2 * Math.tan(22 * radians)),
     );
     const paintedHeight = (focal * 240 * radians) / 3;
     return {

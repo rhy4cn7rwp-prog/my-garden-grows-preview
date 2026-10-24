@@ -10,6 +10,13 @@ html[data-clubhouse-canvas] {
   -webkit-touch-callout: none;
 }
 .clubhouse-panorama,
+.clubhouse-drop-surfaces {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 .clubhouse-panorama {
   opacity: 0;
 }
@@ -156,4 +163,14 @@ html[data-clubhouse-canvas] {
 }
 .clubhouse-drop-surfaces {
   z-index: 4;
+}
+
+/* Visible rewards are part of the one projected room texture. Their separate
+   DOM controls retain accessible names and generous touch targets only. */
+.clubhouse-world[data-composited="true"] .clubhouse-item .clubhouse-visual {
+  visibility: hidden;
+}
+
+.clubhouse-world[data-composited="true"] .clubhouse-occlusion {
+  visibility: hidden; /* Chest masking is already in the room-space texture. */
 }

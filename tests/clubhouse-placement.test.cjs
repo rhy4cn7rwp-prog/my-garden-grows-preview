@@ -174,3 +174,63 @@ test("corrupt placements and unowned records never create ownership or erase a v
   assert.deepEqual(r.dreamPurchases, {});
   assert.deepEqual(r.clubhousePositions, {});
 });
+
+test("soccer ball uses furniture-relative size rather than a touch-target size", () => {
+  const p = L.canonical("ball", "shelf-nook-middle", 1280);
+  assert.equal(L.metrics("ball", p).width, 44);
+  assert.equal(L.metrics("ball", p).height, 44);
+  const chest = L.canonical("ball", "chest", 1350);
+  assert.ok(L.metrics("ball", chest).width < (1386 - 1232) / 3);
+  assert.equal(L.canonical("ball", "shelf-nook-middle", 1225), null);
+});
+test("fixed room lens covers edge placements without treasure-specific zoom", () => {
+  for (const [w, h] of [
+    [320, 480],
+    [375, 548],
+    [428, 746],
+    [428, 892],
+    [844, 390],
+  ]) {
+    const g = L.geometry(w, h),
+      focal = g.focal;
+    const fov = (2 * Math.atan(w / (2 * focal)) * 180) / Math.PI;
+    assert.ok(fov >= 44 - 1e-9 && fov <= 60 + 1e-9);
+    for (const yaw of [-80, -40, 0, 40, 80]) {
+      const p = L.point("floor", L.pixelAt(yaw + 8), 620);
+      const q = L.project(p, yaw, g),
+        recovered = L.unproject(q.x, q.y, yaw, g);
+      assert.ok(Math.abs(recovered.angle - p.angle) < 1e-9);
+      assert.ok(Math.abs(recovered.y - p.y) < 1e-9);
+      assert.equal(g.focal, focal);
+    }
+  }
+});
+test("slightly tighter soccer-ball margins retain old owned surface placements and finances", () => {
+  const s = farm();
+  // This point fitted the previous 32-pixel ball. It needs a few pixels of
+  // clearance with the restored 44-pixel art, never a room/farm reset.
+  s.clubhousePositions.ball = L.point(
+    "shelf-left-middle",
+    350,
+    L.contactY("shelf-left-middle", 350),
+  );
+  const r = G.recover(JSON.stringify(s));
+  assert.equal(r.clubhousePositions.ball.surface, "shelf-left-middle");
+  assert.ok(L.valid("ball", r.clubhousePositions.ball));
+  assert.ok(Math.abs(L.pixelAt(r.clubhousePositions.ball.angle) - 350) <= 7);
+  for (const key of [
+    "cash",
+    "goal",
+    "seeds",
+    "garden",
+    "dreamPurchases",
+    "bagCount",
+    "day",
+    "season",
+  ])
+    assert.deepEqual(r[key], s[key]);
+  assert.deepEqual(
+    G.recover(JSON.stringify(r)).clubhousePositions,
+    r.clubhousePositions,
+  );
+});

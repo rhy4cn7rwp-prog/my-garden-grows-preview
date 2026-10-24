@@ -154,3 +154,20 @@ background still depicts fixed bags/equipment/produce regardless of saved stock.
 The new original play-money vectors can be reused in a later scene-integrated
 register. Larger changes to scenery, customers and baked-in dialogue remain
 outside Phase 1C.
+
+## Clubhouse spatial correction (after Phase 2E)
+
+- Preserved all original artwork and surface-aware drag/save rules.
+- Corrected missing absolute positioning that left the panorama below the
+  visible room and exposed the static page fallback. Screenshot pixel checks
+  now verify the displayed scene as well as offscreen rendering.
+- Owned treasures, shadows and chest front are now composed in room space and
+  projected once with the room. DOM targets remain accessible and touch-friendly.
+- Fixed viewpoint, ±80° yaw and a viewport-fixed lens; finding or centering a
+  treasure no longer changes zoom. Toolbar changes preserve viewing tilt.
+- Restored furniture-relative soccer-ball dimensions; tightly saved edge spots
+  retain their surface with a small clearance adjustment where needed.
+- Added full-frame pixel-reference checks across angles/surfaces and repeated
+  saved-layout recovery, alongside existing actual-touch mobile regression suites.
+- Native iPhone Safari still requires manual playtesting; Chromium tests are not
+  a claim of native Safari verification. No other gameplay or new phase began.

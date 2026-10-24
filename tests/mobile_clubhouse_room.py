@@ -48,7 +48,7 @@ try:
     find(id);fit();page.locator('[data-dream='+id+']').tap()
     assert page.locator('.dialog h2').inner_text()==page.evaluate('id=>Game.dreams.find(d=>d.id===id).name',id)
     tap('Close ✕')
-   look(0);ball=page.locator('[data-dream=ball]').bounding_box()
+   find('ball');look(0);ball=page.locator('[data-dream=ball]').bounding_box()
    swipe(ball['x']+ball['width']/2,ball['y']+ball['height']/2,20,ball['y']+ball['height']/2)
    assert page.evaluate('clubhouseRoom.yaw')>0
    assert page.evaluate('state.clubhousePositions')=={}
