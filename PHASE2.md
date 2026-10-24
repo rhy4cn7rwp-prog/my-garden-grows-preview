@@ -1,7 +1,22 @@
 # Phase 2: a state-driven storybook world
 
-Do not implement this redesign as part of Phase 1B. Preserve prototype 0.9's
-colorful illustrated storybook appearance, characters, scenery and atmosphere.
+## Phase 2A delivered: town and navigation only
+
+- The village is assembled from six independent visible building/location
+  buttons, a painted terrain layer and separate animated environmental objects.
+- Labels, savings progress, harvest readiness and market-open badges reflect
+  real state. There are no old town-image hotspots or baked money/day controls.
+- One functional header provides money, season/day, Home and appropriate Back.
+  Interior source images are preserved, with their old HUD regions display-cropped.
+- Existing gameplay/save logic is unchanged. The Job Board remains a placeholder.
+- The old prototype images remain intact. New art details and limitations are in
+  `assets/town/README.md`. Physical iPhone Safari playtesting remains manual.
+
+## Later phases — do not start Phase 2B before user review
+
+Preserve prototype 0.9's colorful storybook appearance, characters and atmosphere.
+The following interior changes remain deferred. Phase 2A does not paint over,
+replace or rebuild these existing scenes.
 
 - Remove baked-in money bubbles, seasons, day labels, navigation, prices, and
   other controls from background art. Render only one live set of controls and
@@ -26,7 +41,7 @@ colorful illustrated storybook appearance, characters, scenery and atmosphere.
   Retain educational conversations, calculation of totals, handling money and
   counting back change. Validate keyboard, touch and actual iPhone Safari.
 
-Phase 1B intentionally retains the existing art, including those limitations.
+Phase 2A retains the interior artwork, including those non-navigation limitations.
 
 ## Phase 1C follow-up notes
 

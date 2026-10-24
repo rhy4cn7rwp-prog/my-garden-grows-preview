@@ -19,7 +19,7 @@ try:
   page.evaluate('''()=>{let old=Game.initial();delete old.standMode;delete old.tableRented;old.cash=0;old.goal=4;old.day=9;old.owned.canopy=1;localStorage.setItem('mgg10',JSON.stringify(old));}''')
   page.reload()
   assert page.evaluate('state.cash')==0
-  page.get_by_role('button',name='📋 Job Board',exact=True).tap()
+  page.get_by_role('button',name='Job Board',exact=True).tap()
   assert 'Coming soon' in page.locator('.dialog').inner_text()
   assert page.locator('.dialog input').count()==0
   page.get_by_role('button',name='Visit community seed help',exact=True).tap()

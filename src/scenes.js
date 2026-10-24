@@ -26,11 +26,24 @@ const $ = (s) => document.querySelector(s),
     }
   };
 function go(v) {
-  if (view !== v) state.notice = "";
+  const changed = view !== v;
+  if (changed) state.notice = "";
   view = v;
   popup = "";
   dialogKey = null;
   render();
+  if (changed) {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.querySelector(".interior-crop, .town-world")?.animate(
+        [
+          { opacity: 0.6, transform: "translateY(4px)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration: 180, easing: "ease-out" },
+      );
+    }
+  }
 }
 function closeDialog() {
   popup = "";
@@ -46,21 +59,10 @@ function show(html, key = null) {
 function spot(x, y, w, h, action, title) {
   return `<button class="spot" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%" aria-label="${title}" ${view === "market" ? "" : `title="${title}"`} onclick="${action}">${view === "market" ? "" : `<span class="tip">${title}</span>`}</button>`;
 }
-function header() {
-  return `<div class="hud">${view === "town" ? "" : `<button class="nav" onclick="go('town')" aria-label="Back to village">←</button>`}<span class="pill">💵 ${money(state.cash)}</span><span class="pill">☀️ Season ${state.season} · Day ${state.day}/20</span><button class="nav" onclick="${view === "town" ? "settings()" : "go('town')"}" aria-label="${view === "town" ? "Settings" : "Home"}">${view === "town" ? "⚙" : "⌂"}</button></div>`;
-}
 function renderScene() {
   save();
   let stage = "",
     bottom = "";
-  if (view === "town") {
-    stage +=
-      spot(1, 17, 39, 40, "go('dream')", "Dream Shop") +
-      spot(55, 15, 43, 44, "go('seeds')", "Seed & Feed") +
-      spot(5, 57, 51, 37, "go('garden')", "My Garden") +
-      spot(58, 57, 40, 40, "go('market')", "Farmers Market");
-    bottom = `<h2>🌱 My Garden Grows</h2>${Game.debtTotal(state) ? `<p>Equipment charges still owed: ${money(Game.debtTotal(state))}</p>` : ""}<p>Tap a building to explore! Your dream: ${DREAMS[state.goal][2]} · ${money(DREAMS[state.goal][3])}</p><div class="row"><button class="btn alt" onclick="go('supplies')">🧺 Market Supplies</button><button class="btn alt" onclick="jobBoard()">📋 Job Board</button><button class="btn alt" onclick="seedHelp()">🌱 Community seed help</button><button class="btn alt" onclick="settings()">⚙ Settings</button></div>`;
-  }
   if (view === "dream") {
     for (let [id, x, y, w, h] of SHOP_HOTSPOTS.dream)
       stage += spot(
@@ -137,7 +139,15 @@ function renderScene() {
       (state.lastMarketReport
         ? '<button class="btn alt" onclick="showMarketReport(true)">Previous market report</button>'
         : "");
-  const gameHTML = `<div class="game"><div class="stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${header()}${stage}</div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 development · prototype 0.9 artwork</div></div>`;
+  // Only the baked header region is hidden. Source art and interaction coordinates stay intact.
+  const trim = ["garden", "supplies", "market"].includes(view) ? 128 : 64;
+  const content =
+    view === "town"
+      ? townScene()
+      : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
+  const gameHTML = `<div class="game ${view === "town" ? "town-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
+  document.body.dataset.view = view;
+
   const app = $("#app"),
     game = app.querySelector(".game");
   if (!game || game.outerHTML !== gameHTML) {

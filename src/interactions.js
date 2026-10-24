@@ -378,50 +378,6 @@ function render() {
   });
   renderedView = view;
   renderedDialogKey = dialogKey;
-  syncRegisterViewport();
+  syncGameViewport();
 }
 render();
-
-// Safari's visible viewport can be shorter than CSS viewport units while toolbars move.
-function syncRegisterViewport() {
-  const viewport = window.visualViewport;
-  const root = document.documentElement;
-  root.style.setProperty(
-    "--visible-height",
-    `${viewport ? viewport.height : innerHeight}px`,
-  );
-  root.style.setProperty(
-    "--visible-width",
-    `${viewport ? viewport.width : innerWidth}px`,
-  );
-  root.style.setProperty(
-    "--visible-top",
-    `${viewport ? viewport.offsetTop : 0}px`,
-  );
-  root.style.setProperty(
-    "--visible-left",
-    `${viewport ? viewport.offsetLeft : 0}px`,
-  );
-  const modal = document.querySelector(".register-modal");
-  const insets = getComputedStyle(modal || root);
-  const top =
-    parseFloat(
-      insets.getPropertyValue(
-        modal ? "--register-safe-top" : "--viewport-safe-top",
-      ),
-    ) || 0;
-  const bottom =
-    parseFloat(
-      insets.getPropertyValue(
-        modal ? "--register-safe-bottom" : "--viewport-safe-bottom",
-      ),
-    ) || 0;
-  root.dataset.shortRegister =
-    (viewport ? viewport.height : innerHeight) - top - bottom < 470
-      ? "true"
-      : "false";
-}
-window.visualViewport?.addEventListener("resize", syncRegisterViewport);
-window.visualViewport?.addEventListener("scroll", syncRegisterViewport);
-window.addEventListener("resize", syncRegisterViewport);
-syncRegisterViewport();

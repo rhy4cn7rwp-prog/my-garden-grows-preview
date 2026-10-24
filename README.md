@@ -1,9 +1,54 @@
-# My Garden Grows 1.0 preview — Phase 1E
+# My Garden Grows 1.0 preview — Phase 2A
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 2A: interactive village and shared navigation
+
+Six illustrated locations are real buttons with their own visible artwork:
+Dream Shop, Seed & Feed, Market Supplies, My Garden, Farmers Market and Job Board.
+The old single town image is preserved in `assets/scene-1.webp` but is no longer
+rendered. A painted terrain layer, six separate cutouts, signs, readiness/open
+badges, savings progress and animated environmental details compose the village.
+The Job Board still opens its existing placeholder; no earning minigames were added.
+Community seed help remains available through the leaf button and Job Board.
+
+One live navigation component shows money, season/day, Home and, in interiors,
+Back to village. Settings remains on the town header. All navigation and town
+buttons have at least 44px targets. Town layouts adapt to the visual viewport,
+safe-area insets and landscape orientation, fitting all six places without
+scrolling. Gentle butterflies, flower sway and birds use lightweight CSS/SVG;
+reduced-motion preferences disable motion and entry transitions.
+
+The old interior header strips are hidden by a display crop, without changing
+any prototype image file. Dream Shop/Seed & Feed hide the top 64 source pixels;
+garden/supplies/market hide the top 128, including stray strips from another
+prototype image. The original 512 × 512 coordinate system remains intact for
+interior interactions. All existing merchandise and plot targets are tested.
+The underlying rules, save keys/version, accounting, rentals, bags and customer
+logic are unchanged.
+
+| Source              | Responsibility                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `src/town.js`       | Six independent building sprites, landscape details and live village badges/progress |
+| `src/town.css`      | Village layout, animation, shared shell and safe-area presentation                   |
+| `src/navigation.js` | Single live HUD/icons and visual-viewport measurements for town/register             |
+| `src/scenes.js`     | Existing scene rendering, display-only interior crop and navigation transitions      |
+| `assets/town/`      | New original building atlas and scenery, with art notes                              |
+
+The new PNG sources total about 6 MB; they are preloaded and cached, with one
+atlas request reused by all six building components. A later asset pipeline can
+optimize formats. The miniature garden and produce in the location sprites are
+recognition art; detailed growing plants and dynamic market equipment remain
+future work. Interior baked prices/dialogue and decorative Water/End Day artwork
+are also deferred; Phase 2A only removes their old navigation/status strips.
+See `PHASE2.md`. Phase 2B has not begun.
+
+To playtest, open the preview in Safari and refresh if necessary. Keep website
+data to retain your farm. Tap each building (or its wooden sign), use Home/Back,
+and check that money/day values match your existing farm. No download is needed.
 
 ## Phase 1E customer service and order filling
 
@@ -63,11 +108,11 @@ Normal produce prices are unchanged. Buying supplies still works; an owned
 $8 table needs no daily fee. Tables are chosen before opening; scales and bags
 can be obtained during the market.
 
-| Daily equipment | Upfront | Deferred if unable to pay upfront | Extra cost |
-| --- | ---: | ---: | ---: |
-| Table | $1 | $3 | $2 |
-| Scale | $1 | $2 | $1 |
-| 10 daily-use bags | $0.50 | $1 | $0.50 |
+| Daily equipment   | Upfront | Deferred if unable to pay upfront | Extra cost |
+| ----------------- | ------: | --------------------------------: | ---------: |
+| Table             |      $1 |                                $3 |         $2 |
+| Scale             |      $1 |                                $2 |         $1 |
+| 10 daily-use bags |   $0.50 |                                $1 |      $0.50 |
 
 Both prices are explained before consent. Charges have a persistent itemized
 ledger, a $6 unpaid cap, no interest, and no new deferred rentals while an earlier
@@ -95,7 +140,6 @@ use an overflow fallback when necessary; content is not clipped to force a fit.
 These are Chromium touch emulation and explicit viewport simulations, not a claim
 of physical iPhone Safari verification. WebKit could not be installed in this
 workspace because its browser-download domains return HTTP 403.
-
 
 The register uses original simplified SVG bills ($1/$5/$10/$20) and coins
 (1¢/5¢/10¢/25¢), with large values, accessible labels and touch-sized targets.
@@ -146,6 +190,13 @@ day has complete accounting. Do not clear Safari data or restart to update.
 
 ## Tests and validation
 
+- `python3 tests/mobile_phase2a.py`: all six village locations and five interiors,
+  no-scroll town at 320 × 360, 320 × 440, 375 × 548, 390 × 664, 430 × 740 and
+  667 × 320 landscape; all targets >=44px; all 25 existing plots and all shop/market
+  targets after display cropping; one live HUD; no navigation-induced gameplay
+  changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
+  readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
+  and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
 - `npm test`: 61 rule tests covering prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,
@@ -178,7 +229,8 @@ manual playtesting; it has not been claimed as automated validation.
 
 Source responsibilities: `game.js` owns rules/accounting data, `accounting.js`
 renders reports without money mutations, `money.js` draws play-money controls,
-and `scenes.js` / `interactions.js` render scenes and connect UI actions.
+and `scenes.js` / `interactions.js` render interiors and connect UI actions.
+The separate town/navigation modules own the Phase 2A village shell.
 
 Community help also accounts for bags under the universal bag rule. Eligible
 cash-poor farms without bags receive three starter paper bags. Carrot seeds are
