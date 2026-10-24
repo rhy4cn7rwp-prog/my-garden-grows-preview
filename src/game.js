@@ -161,6 +161,12 @@
       marketSettled: false,
       marketChargesPaid: 0,
       rentalUpfrontPaid: 0,
+      bagCount: 0,
+      rentalBagsRemaining: 0,
+      customersServed: 0,
+      marketExpenses: [],
+      legacyAccounting: false,
+      lastMarketReport: null,
     };
   }
   function dictionary(value, ids) {
@@ -319,11 +325,57 @@
           : s.tableRented
             ? 1
             : 0;
+      // Migrate former bag packs/daily access once, without charging or resetting farms.
+      clean.bagCount =
+        s.bagCount === undefined ? s.owned.bags * 10 : s.bagCount;
+      clean.rentalBagsRemaining =
+        s.rentalBagsRemaining === undefined
+          ? clean.rentals.bags
+            ? 10
+            : 0
+          : s.rentalBagsRemaining;
+      requireRule(
+        quantity(clean.bagCount) &&
+          quantity(clean.rentalBagsRemaining) &&
+          clean.rentalBagsRemaining <= 10,
+        "bag inventory",
+      );
+      clean.customersServed = quantity(s.customersServed)
+        ? s.customersServed
+        : 0;
+      clean.legacyAccounting =
+        s.legacyAccounting === true || s.marketExpenses === undefined;
+      clean.marketExpenses =
+        s.marketExpenses === undefined
+          ? migrateExpenses(clean)
+          : s.marketExpenses;
+      requireRule(
+        Array.isArray(clean.marketExpenses) &&
+          clean.marketExpenses.every(
+            (e) =>
+              e &&
+              [
+                "table",
+                "scale",
+                "bags",
+                "bagPurchase",
+                "equipment",
+                "legacy",
+              ].includes(e.category) &&
+              ["upfront", "manual", "closing"].includes(e.timing) &&
+              quantity(e.cents),
+          ),
+        "market expenses",
+      );
+      clean.lastMarketReport = validReport(s.lastMarketReport)
+        ? s.lastMarketReport
+        : null;
       for (const id of ids)
         clean.display[id] = Math.min(
           clean.display[id] || 0,
           clean.inventory[id] || 0,
         );
+      restoreCustomer(clean, s, ids);
       return clean;
     } catch {
       return backup ? recover(backup) : initial();
@@ -365,13 +417,24 @@
     if (kind === "supplies")
       for (const [id, n] of Object.entries(obj))
         requireRule(
-          !n || (!s.owned[id] && n === 1),
+          !n || id === "bags" || (!s.owned[id] && n === 1),
           "You only need one of each supply.",
         );
     s.cash = (cents(s.cash) - cents(total)) / 100;
     for (const [id, n] of Object.entries(obj)) {
-      if (kind === "supplies") s.owned[id] = n || s.owned[id];
-      else if (id === "bundle")
+      if (kind === "supplies") {
+        if (id === "bags") {
+          s.bagCount += 10 * n;
+          s.owned.bags += n;
+        } else s.owned[id] = n || s.owned[id];
+        if (n)
+          recordExpense(
+            s,
+            id === "bags" ? "bagPurchase" : "equipment",
+            cents(supplies[id]) * n,
+            "upfront",
+          );
+      } else if (id === "bundle")
         for (const [crop, q] of Object.entries(bundle))
           s.seeds[crop] = (s.seeds[crop] || 0) + q * n;
       else s.seeds[id] = (s.seeds[id] || 0) + n;
@@ -473,6 +536,8 @@
   }
   function endDay(s) {
     settleMarket(s);
+    if (s.marketPlayed || s.marketExpenses.length)
+      s.lastMarketReport = accountingReport(s);
     s.day++;
     if (s.day > 20) {
       s.day = 1;
@@ -500,6 +565,10 @@
     s.marketSettled = false;
     s.marketChargesPaid = 0;
     s.rentalUpfrontPaid = 0;
+    s.rentalBagsRemaining = 0;
+    s.customersServed = 0;
+    s.marketExpenses = [];
+    s.legacyAccounting = false;
     s.standMode = s.owned.table ? "owned" : "blanket";
   }
   function harvest(s, i) {
@@ -598,6 +667,10 @@
         hasEquipment(s, "scale"),
       "You need a scale for produce sold by the pound.",
     );
+    requireRule(
+      !orderNeedsBag(s) || bagsRemaining(s) > 0,
+      "This loose-produce order needs 1 paper bag. Buy a 10-pack or review daily-use bags. Other produce can still be sold without bags.",
+    );
     const total = totalOrder(s);
     requireRule(
       Number.isFinite(answer) && cents(answer) === cents(total),
@@ -618,6 +691,15 @@
       cents(s.change) === cents(s.tendered - totalOrder(s)),
       "Count back the exact change.",
     );
+    requireRule(
+      Object.entries(s.customer.want).every(([id, n]) => s.basket[id] === n) &&
+        Object.keys(s.basket).every((id) => s.customer.want[id] !== undefined),
+      "Fill exactly the requested basket.",
+    );
+    requireRule(
+      !orderNeedsBag(s) || bagsRemaining(s) > 0,
+      "This order needs 1 paper bag before the sale can finish.",
+    );
     const total = totalOrder(s);
     for (const [id, n] of Object.entries(s.basket)) {
       requireRule(
@@ -629,10 +711,140 @@
       s.inventory[id] -= n;
       s.display[id] -= n;
     }
+    if (orderNeedsBag(s)) {
+      if (s.rentalBagsRemaining > 0) s.rentalBagsRemaining--;
+      else s.bagCount--;
+    }
+    s.customersServed++;
     s.cash = (cents(s.cash) + cents(total)) / 100;
     s.sales = (cents(s.sales) + cents(total)) / 100;
     s.step = "thanks";
     return total;
+  }
+  function bagsRemaining(s) {
+    return s.bagCount + s.rentalBagsRemaining;
+  }
+  function orderNeedsBag(s) {
+    return (
+      !!s.customer &&
+      Object.keys(s.customer.want).some((id) => get(id)?.unit === "lb")
+    );
+  }
+  function buyBagPacks(s, n = 1) {
+    requireRule(quantity(n) && n > 0 && n <= 100, "Choose 1 to 100 bag packs.");
+    const price = cents(supplies.bags) * n;
+    requireRule(
+      cents(s.cash) >= price,
+      "A 10-pack costs $3. You can review daily-use bags if cash is low.",
+    );
+    s.cash = (cents(s.cash) - price) / 100;
+    s.bagCount += 10 * n;
+    s.owned.bags += n;
+    recordExpense(s, "bagPurchase", price, "upfront");
+    return price / 100;
+  }
+  function recordExpense(s, category, amount, timing) {
+    if (amount > 0) s.marketExpenses.push({ category, cents: amount, timing });
+  }
+  function migrateExpenses(s) {
+    const rows = [];
+    let remaining = cents(s.rentalUpfrontPaid);
+    for (const [id, r] of Object.entries(s.rentals))
+      if (r.payment === "upfront" || r.payment === "legacy") {
+        const paid = Math.min(remaining, cents(rentalPrices[id].upfront));
+        if (paid > 0)
+          rows.push({ category: id, cents: paid, timing: "upfront" });
+        remaining -= paid;
+      }
+    if (remaining > 0)
+      rows.push({ category: "legacy", cents: remaining, timing: "upfront" });
+    if (s.marketChargesPaid > 0)
+      rows.push({
+        category: "legacy",
+        cents: cents(s.marketChargesPaid),
+        timing: "closing",
+      });
+    return rows;
+  }
+  function accountingReport(s) {
+    const expenses = s.marketExpenses.map((e) => ({ ...e }));
+    const paid = expenses.reduce((n, e) => n + e.cents, 0);
+    return {
+      day: s.day,
+      season: s.season,
+      sales: s.sales,
+      customers: s.customersServed,
+      expenses,
+      paid: paid / 100,
+      net: (cents(s.sales) - paid) / 100,
+      carry: debtTotal(s),
+      legacy: s.legacyAccounting,
+    };
+  }
+  function validReport(r) {
+    return (
+      r &&
+      quantity(r.day) &&
+      quantity(r.season) &&
+      Number.isFinite(r.sales) &&
+      quantity(r.customers) &&
+      Array.isArray(r.expenses) &&
+      r.expenses.every(
+        (e) =>
+          e &&
+          [
+            "table",
+            "scale",
+            "bags",
+            "bagPurchase",
+            "equipment",
+            "legacy",
+          ].includes(e.category) &&
+          ["upfront", "manual", "closing"].includes(e.timing) &&
+          quantity(e.cents),
+      ) &&
+      Number.isFinite(r.paid) &&
+      Number.isFinite(r.net) &&
+      Number.isFinite(r.carry)
+    );
+  }
+  function restoreCustomer(clean, s, ids) {
+    const c = s.customer;
+    if (
+      !s.marketOpen ||
+      !c ||
+      typeof c.name !== "string" ||
+      !/^[A-Za-z][A-Za-z '-]{0,59}$/.test(c.name) ||
+      !dictionary(c.want, ids) ||
+      !Object.keys(c.want).length ||
+      !Object.values(c.want).every((n) => n > 0 && n <= 100) ||
+      !["greet", "choose", "pay", "thanks"].includes(s.step) ||
+      !dictionary(s.basket, ids) ||
+      !Object.entries(s.basket).every(
+        ([id, n]) => c.want[id] !== undefined && n <= c.want[id],
+      )
+    )
+      return;
+    if (
+      s.step !== "thanks" &&
+      !Object.entries(c.want).every(
+        ([id, n]) => n <= (s.inventory[id] || 0) && n <= (s.display[id] || 0),
+      )
+    )
+      return;
+    if (
+      s.step === "pay" &&
+      (!Object.entries(c.want).every(([id, n]) => s.basket[id] === n) ||
+        !Number.isFinite(s.tendered) ||
+        s.tendered < totalOrder(s) ||
+        !Number.isFinite(s.change) ||
+        s.change < 0)
+    )
+      return;
+    clean.customer = { name: c.name, want: { ...c.want } };
+    clean.basket = { ...s.basket };
+    clean.step = s.step;
+    clean.change = Number.isFinite(s.change) && s.change >= 0 ? s.change : 0;
   }
   function savings(s) {
     return Math.max(0, (cents(s.cash) - cents(debtTotal(s))) / 100);
@@ -657,7 +869,9 @@
       "Choose a valid rental and payment option.",
     );
     requireRule(
-      !s.owned[id] && !s.rentals[id] && !(id === "table" && s.tableRented),
+      (id === "bags" ? bagsRemaining(s) === 0 : !s.owned[id]) &&
+        !s.rentals[id] &&
+        !(id === "table" && s.tableRented),
       "You already have this equipment today.",
     );
     requireRule(
@@ -676,6 +890,7 @@
       );
       s.cash = (cents(s.cash) - cents(price)) / 100;
       s.rentalUpfrontPaid = (cents(s.rentalUpfrontPaid) + cents(price)) / 100;
+      recordExpense(s, id, cents(price), "upfront");
     } else {
       requireRule(
         deferredAllowed(s, id),
@@ -684,17 +899,19 @@
       s.equipmentDebt.push({ id, cents: cents(price), day: farmingDay(s) });
     }
     s.rentals[id] = { payment };
+    if (id === "bags") s.rentalBagsRemaining = 10;
     if (id === "table") {
       s.tableRented = true;
       s.standMode = "rental";
     }
     return price;
   }
-  function applyDebtPayment(s, amountInCents) {
+  function applyDebtPayment(s, amountInCents, timing) {
     let left = Math.min(amountInCents, cents(debtTotal(s)));
     const paid = left;
     for (const charge of s.equipmentDebt) {
       const amount = Math.min(left, charge.cents);
+      if (amount) recordExpense(s, charge.id, amount, timing);
       charge.cents -= amount;
       left -= amount;
     }
@@ -703,16 +920,25 @@
     return paid / 100;
   }
   function payOutstanding(s) {
-    return applyDebtPayment(s, Math.min(cents(s.cash), cents(debtTotal(s))));
+    return applyDebtPayment(
+      s,
+      Math.min(cents(s.cash), cents(debtTotal(s))),
+      "manual",
+    );
   }
   function settleMarket(s) {
     if (s.marketSettled || !s.marketPlayed) return 0;
-    const paid = applyDebtPayment(s, Math.min(cents(s.cash), cents(s.sales)));
+    const paid = applyDebtPayment(
+      s,
+      Math.min(cents(s.cash), cents(s.sales)),
+      "closing",
+    );
     s.marketChargesPaid = (cents(s.marketChargesPaid) + cents(paid)) / 100;
     s.marketSettled = true;
     return paid;
   }
   function hasEquipment(s, id) {
+    if (id === "bags") return bagsRemaining(s) > 0;
     return (
       !!s.owned[id] || !!s.rentals?.[id] || (id === "table" && s.tableRented)
     );
@@ -770,6 +996,10 @@
     return "Your neighbors shared 3 carrot seeds. Plant, water and harvest them, then sell from a free blanket. No repayment is needed.";
   }
   const api = {
+    bagsRemaining,
+    orderNeedsBag,
+    buyBagPacks,
+    accountingReport,
     savings,
     rentalPrices,
     debtCap,

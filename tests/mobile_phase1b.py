@@ -82,7 +82,7 @@ try:
    page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment');tap('💵 Count change');tap('$1');tap('Give change');tap('👋 Thank you! Come again!')
    assert page.evaluate('state.cash')==4
    tap('Close market')
-   assert 'Equipment charges paid from earnings: $4.00' in page.locator('.dialog').inner_text()
+   assert '$4.00' in page.locator('.accounting-report tr').filter(has_text='Deferred equipment payments').inner_text()
    assert page.evaluate('[state.cash,Game.debtTotal(state)]')==[0,2]
    page.reload();assert page.evaluate('[state.cash,Game.debtTotal(state),state.goal]')==[0,2,4]
    tap('My Garden');tap('☀️ End day');tap('Home');tap('Farmers Market');tap('Arrange Produce / Open Market')

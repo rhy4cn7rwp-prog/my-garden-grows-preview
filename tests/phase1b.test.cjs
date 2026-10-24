@@ -100,6 +100,7 @@ test("temporary scale enables bulk display and normal educational checkout", () 
   const s = G.initial();
   s.cash = 0;
   s.inventory.beans = 3;
+  s.bagCount = 1;
   G.rentEquipment(s, "scale", "deferred");
   assert.deepEqual(G.addAllToDisplay(s).added, { beans: 3 });
   G.openMarket(s);

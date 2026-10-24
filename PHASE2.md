@@ -27,3 +27,18 @@ colorful illustrated storybook appearance, characters, scenery and atmosphere.
   counting back change. Validate keyboard, touch and actual iPhone Safari.
 
 Phase 1B intentionally retains the existing art, including those limitations.
+
+## Phase 1C follow-up notes
+
+Normal market touch/hover interaction no longer exposes crop tooltips or dotted
+hotspot rectangles. Keep that behavior when replacing fixed produce art with
+state-driven merchandise. Retain a keyboard-only focus cue for accessibility.
+
+Render actual bag stock and packing in the scene: one bag for a completed loose
+produce transaction, no packing animation for unbagged orders, and fewer visible
+bags as stock is consumed. The current bag inventory text is functional, but the
+background still depicts fixed bags/equipment/produce regardless of saved stock.
+
+The new original play-money vectors can be reused in a later scene-integrated
+register. Larger changes to scenery, customers and baked-in dialogue remain
+outside Phase 1C.

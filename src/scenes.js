@@ -10,7 +10,7 @@ function loadGame() {
 }
 const initial = () => Game.initial();
 let state = loadGame();
-let view = "town",
+let view = state.customer && state.marketOpen ? "market" : "town",
   popup = "",
   selected = "carrot",
   dialogKey = null;
@@ -43,7 +43,7 @@ function show(html, key = null) {
   render();
 }
 function spot(x, y, w, h, action, title) {
-  return `<button class="spot" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%" aria-label="${title}" title="${title}" onclick="${action}"><span class="tip">${title}</span></button>`;
+  return `<button class="spot" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%" aria-label="${title}" ${view === "market" ? "" : `title="${title}"`} onclick="${action}">${view === "market" ? "" : `<span class="tip">${title}</span>`}</button>`;
 }
 function header() {
   return `<div class="hud">${view === "town" ? "" : `<button class="nav" onclick="go('town')" aria-label="Back to village">←</button>`}<span class="pill">💵 ${money(state.cash)}</span><span class="pill">☀️ Season ${state.season} · Day ${state.day}/20</span><button class="nav" onclick="${view === "town" ? "settings()" : "go('town')"}" aria-label="${view === "town" ? "Settings" : "Home"}">${view === "town" ? "⚙" : "⌂"}</button></div>`;
@@ -112,7 +112,7 @@ function renderScene() {
       spot(66, 57, 33, 40, "marketItem('cucumber')", "Cucumbers");
     let c = state.customer;
     if (state.hour >= 13)
-      bottom = `<h2>🍎 Market closed · 1 PM</h2><p>Produce sales today: ${money(state.sales)}</p>${financeSummary()}<button class="btn" onclick="go('garden')">Return to garden · end day to reopen</button>`;
+      bottom = `<h2>🍎 Market closed · 1 PM</h2><button class="btn" onclick="showMarketReport()">View market-day report</button><button class="btn" onclick="go('garden')">Return to garden · end day to reopen</button>`;
     else {
       if (!c) {
         bottom = `<h2>🍎 Farmers Market</h2>${state.marketOpen ? `<button class="btn market-primary" onclick="newCustomer()">Welcome Next Customer</button><p>${state.visitors} / ${Game.customerLimit(state)} customers welcomed</p><button class="btn alt" onclick="marketStand()">Arrange Produce</button><button class="btn alt" onclick="closeMarket()">Close market</button>` : '<p>Arrange your harvest before opening.</p><button class="btn" onclick="marketStand()">Arrange Produce / Open Market</button>'}`;
@@ -132,7 +132,13 @@ function renderScene() {
         }</p><div class="row">${state.step === "greet" ? `<button class="btn" onclick="Game.greet(state);render()">😊 Welcome! What can I get you?</button><button class="btn alt" onclick="Game.greet(state);render()">Hello! How can I help?</button>` : state.step === "choose" ? `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="skip()">Sorry, sold out</button>` : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : `<button class="btn" onclick="advance()">👋 Thank you! Come again!</button><button class="btn alt" onclick="advance()">Hope to see you again!</button>`}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
     }
   }
-  const gameHTML = `<div class="game"><div class="stage" style="background-image:url('${ART[view]}')">${header()}${stage}</div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 development · prototype 0.9 artwork</div></div>`;
+  if (view === "market")
+    bottom +=
+      bagStatus() +
+      (state.lastMarketReport
+        ? '<button class="btn alt" onclick="showMarketReport(true)">Previous market report</button>'
+        : "");
+  const gameHTML = `<div class="game"><div class="stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${header()}${stage}</div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 development · prototype 0.9 artwork</div></div>`;
   const app = $("#app"),
     game = app.querySelector(".game");
   if (!game || game.outerHTML !== gameHTML) {
@@ -171,7 +177,7 @@ function seed(id) {
 function supply(id) {
   let s = SUPPLIES.find((x) => x[0] === id);
   show(
-    `<h2>${s[1]} ${s[2]}</h2><p class="tag">${money(s[3])}</p><p>${s[4]}</p><p>Already owned: ${state.owned[id] || 0}</p>${id === "table" ? '<p>You can also rent a basic table for $1 per day or use a free blanket.</p><button class="btn alt" onclick="go(\'market\');marketStand()">Choose a market stand</button>' : ""}<div class="qty"><button onclick="change('supcart','${id}',-1)">−</button><b>${state.supcart[id] || 0} in basket</b><button onclick="change('supcart','${id}',1)">+</button></div><button class="btn" onclick="cart('supplies')">🛒 View basket</button>`,
+    `<h2>${s[1]} ${s[2]}</h2><p class="tag">${money(s[3])}</p><p>${s[4]}</p><p>${id === "bags" ? "Purchased bags remaining: " + state.bagCount : "Already owned: " + (state.owned[id] || 0)}</p>${id === "table" ? '<p>You can also rent a basic table for $1 per day or use a free blanket.</p><button class="btn alt" onclick="go(\'market\');marketStand()">Choose a market stand</button>' : ""}<div class="qty"><button onclick="change('supcart','${id}',-1)">−</button><b>${state.supcart[id] || 0} in basket</b><button onclick="change('supcart','${id}',1)">+</button></div><button class="btn" onclick="cart('supplies')">🛒 View basket</button>`,
     "supply-" + id,
   );
 }
@@ -239,7 +245,9 @@ function marketItem(id) {
 function order() {
   let c = state.customer;
   show(
-    `<h2>🧺 ${c.name}'s order</h2><p>Customer requests: ${Object.entries(c.want)
+    `<h2>🧺 ${c.name}'s order</h2>${bagStatus()}<p>${Game.orderNeedsBag(state) ? "This loose-produce order uses 1 bag at completion." : "No bag is needed for this order."}</p><p>Customer requests: ${Object.entries(
+      c.want,
+    )
       .map(([id, n]) => n + " " + crop(id).name)
       .join(", ")}</p>${Object.entries(c.want)
       .map(
@@ -270,7 +278,7 @@ function paymentDialog() {
   let t = totalOrder(),
     due = state.tendered - t;
   show(
-    `<h2>💵 Cash Register</h2><p>Order total: <b>${money(t)}</b></p><p>${state.customer.name} gives you <b>${money(state.tendered)}</b>.</p><p>Count back the change: <b>${money(due)}</b></p><div class="row">${[0.01, 0.05, 0.1, 0.25, 1, 5, 10, 20].map((n) => `<button class="btn alt coin" onclick="addMoney(${n})">${n < 1 ? Math.round(n * 100) + "¢" : "$" + n}</button>`).join("")}</div><p class="note">Change counted: ${money(state.change)}</p><button class="btn alt" onclick="state.change=0;payment()">Start over</button><button class="btn" onclick="finish()">Give change</button>`,
+    `<h2>💵 Cash Register</h2>${bagStatus()}<p>Order total: <b>${money(t)}</b></p><p>${state.customer.name} gives you <b>${money(state.tendered)}</b>.</p><p>Count back the change: <b>${money(due)}</b></p><div class="money-tray">${[1, 5, 10, 20, 0.01, 0.05, 0.1, 0.25].map(moneyButton).join("")}</div><p class="note">Change counted: ${money(state.change)}</p><button class="btn alt" onclick="state.change=0;payment()">Start over</button><button class="btn" onclick="finish()">Give change</button>`,
     "payment",
   );
 }

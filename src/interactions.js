@@ -17,7 +17,7 @@ function checkout(kind) {
   });
 }
 function change(kind, id, d) {
-  const max = kind === "supcart" ? 1 : 100;
+  const max = kind === "supcart" && id !== "bags" ? 1 : 100;
   state[kind][id] = Math.max(0, Math.min(max, (state[kind][id] || 0) + d));
   if (id === "bundle") bundleInfo();
   else if (kind === "cart") seed(id);
@@ -87,7 +87,7 @@ function harvest(i) {
 }
 function marketStand() {
   show(
-    `<h2>Arrange your market stand</h2>${standOptions()}${financeSummary()}<button class="btn alt" onclick="rentalMenu()">Daily equipment rentals</button><button class="btn" onclick="addAllProduce()" ${state.customer ? "disabled" : ""}>Add All Produce to Stand</button>${state.notice ? `<p role="status">${state.notice}</p>` : ""}${
+    `<h2>Arrange your market stand</h2>${bagStatus()}<p>Loose produce sold by the pound uses one bag per completed order; other produce needs no bag.</p>${standOptions()}${financeSummary()}<button class="btn alt" onclick="rentalMenu()">Daily equipment rentals</button><button class="btn" onclick="addAllProduce()" ${state.customer ? "disabled" : ""}>Add All Produce to Stand</button>${state.notice ? `<p role="status">${state.notice}</p>` : ""}${
       CROPS.filter((c) => state.inventory[c.id])
         .map(
           (c) =>
@@ -120,10 +120,7 @@ function openMarket() {
 }
 function closeMarket() {
   Game.closeMarket(state);
-  show(
-    `<h2>Market day summary</h2><p>Produce sales: ${money(state.sales)}. Upfront rentals paid: ${money(state.rentalUpfrontPaid)}. Equipment charges paid from earnings: ${money(state.marketChargesPaid)}.</p>${financeSummary()}<p>Any unpaid balance carries forward without interest. You can still sell from a free blanket.</p>`,
-    "market-summary",
-  );
+  showMarketReport();
 }
 function newCustomer() {
   if (state.visitors >= Game.customerLimit(state)) {
@@ -227,6 +224,31 @@ function payment() {
     dialog.append(p);
   }
 }
+function bagStatus() {
+  return `<div class="bag-status"><p><strong>Paper bags remaining: ${Game.bagsRemaining(state)}</strong><span class="small"> (${state.bagCount} purchased; ${state.rentalBagsRemaining} daily-use)</span></p><button class="btn alt" onclick="bagShop()">Buy more bags</button></div>`;
+}
+function bagShop() {
+  show(
+    `<h2>Paper bag refill</h2>${bagStatusCount()}<p>A pack costs $3 and contains exactly 10 paper bags. Purchased bags carry over between days. Only loose-produce orders sold by the pound use a bag, once per completed transaction.</p><p>Your cash: ${money(state.cash)}</p><button class="btn" onclick="buyBagsNow()" ${state.cash >= 3 ? "" : "disabled"}>Buy 10 bags · $3</button>${!state.rentals.bags && Game.bagsRemaining(state) === 0 ? '<button class="btn alt" onclick="rentalOffer(\'bags\')">Review daily-use bags</button>' : ""}<button class="btn alt" onclick="returnFromBags()">${state.customer ? "Return to customer" : "Return to market preparation"}</button>`,
+    "bag-shop",
+  );
+}
+function bagStatusCount() {
+  return `<p role="status">Paper bags remaining: ${Game.bagsRemaining(state)}</p>`;
+}
+function buyBagsNow() {
+  act(() => {
+    Game.buyBagPacks(state);
+    state.notice = "Bought 10 paper bags for $3.";
+    returnFromBags();
+  });
+}
+function returnFromBags() {
+  if (state.customer && state.step === "choose") order();
+  else if (state.customer && state.step === "pay") payment();
+  else if (state.customer) closeDialog();
+  else marketStand();
+}
 function financeSummary() {
   const debt = Game.debtTotal(state);
   return `<p>Equipment ready: ${["table", "scale", "bags"].filter((id) => Game.hasEquipment(state, id)).join(", ") || "none — the blanket is free"}.</p>
@@ -235,11 +257,11 @@ function financeSummary() {
 }
 function rentalMenu() {
   show(
-    `<h2>Daily equipment rentals</h2><p>Use equipment until End Day. Buying equipment is still available in Market Supplies.</p>${financeSummary()}
+    `<h2>Daily equipment rentals</h2><p>Use equipment until End Day. Daily-use bags provide 10 consumable bags for today; unused daily-use bags expire. Purchased bags carry over.</p>${financeSummary()}
     ${Object.entries(Game.rentalPrices)
       .map(
         ([id, p]) =>
-          `<div class="basketline"><strong>${id === "table" ? "Market table" : id === "scale" ? "Produce scale" : "Produce bags"}</strong><p>${money(p.upfront)} upfront, or ${money(p.deferred)} after market if you cannot pay upfront. Extra cost: ${money(p.deferred - p.upfront)}.</p>${Game.hasEquipment(state, id) ? "<p>Ready to use today.</p>" : `<button class="btn" onclick="rentalOffer('${id}')" ${id === "table" && state.marketPlayed ? "disabled" : ""}>Review ${id} rental</button>`}</div>`,
+          `<div class="basketline"><strong>${id === "table" ? "Market table" : id === "scale" ? "Produce scale" : "Produce bags"}</strong><p>${money(p.upfront)} upfront, or ${money(p.deferred)} after market if you cannot pay upfront. Extra cost: ${money(p.deferred - p.upfront)}.</p>${Game.hasEquipment(state, id) || (id === "bags" && state.rentals.bags) ? `<p>${id === "bags" ? "Paper bags remaining: " + Game.bagsRemaining(state) + " (" + state.rentalBagsRemaining + " daily-use)" : "Ready to use today."}</p>` : `<button class="btn" onclick="rentalOffer('${id}')" ${id === "table" && state.marketPlayed ? "disabled" : ""}>Review ${id} rental</button>`}</div>`,
       )
       .join("")}`,
     "rentals",
@@ -252,9 +274,10 @@ function rentalOffer(id) {
   show(
     `<h2>Rent ${id === "bags" ? "produce bags" : id === "scale" ? "a produce scale" : "a market table"}</h2>
     <p>Pay now: <strong>${money(prices.upfront)}</strong>. Pay after market: <strong>${money(prices.deferred)}</strong>, an extra ${money(prices.deferred - prices.upfront)}.</p>
+    ${id === "bags" ? "<p>Provides 10 consumable daily-use bags. Unused daily-use bags expire at End Day. A purchased $3 pack of 10 carries over.</p>" : ""}
     <p>Your cash: ${money(state.cash)}. ${affordable ? "You can afford the lower upfront price." : "You cannot afford the upfront price."}</p>
     <p>Deferred charges are deducted from earnings when the market closes, including if you press End Day. If earnings are not enough, the remainder carries forward without interest. New deferred rentals are blocked while an earlier day is unpaid. Total unpaid charges cannot exceed $6. Rentals expire at End Day.</p>
-    ${Game.hasEquipment(state, id) ? "<p>You already have this equipment today.</p>" : affordable ? `<button class="btn" onclick="acceptRental('${id}','upfront')">Pay ${money(prices.upfront)} now</button>` : Game.deferredAllowed(state, id) ? `<button class="btn" onclick="acceptRental('${id}','deferred')">Agree to ${money(prices.deferred)} after market</button>` : "<p>Deferred rental unavailable until earlier charges are paid. The free blanket and community seed help remain available.</p>"}
+    ${Game.hasEquipment(state, id) || (id === "bags" && state.rentals.bags) ? "<p>You have already received this equipment today. If daily-use bags run out, buy another pack.</p>" : affordable ? `<button class="btn" onclick="acceptRental('${id}','upfront')">Pay ${money(prices.upfront)} now</button>` : Game.deferredAllowed(state, id) ? `<button class="btn" onclick="acceptRental('${id}','deferred')">Agree to ${money(prices.deferred)} after market</button>` : "<p>Deferred rental unavailable until earlier charges are paid. The free blanket and community seed help remain available.</p>"}
     <button class="btn alt" onclick="marketStand()">Back to market preparation</button>`,
     "rental-" + id,
   );

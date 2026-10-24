@@ -1,87 +1,116 @@
-# My Garden Grows 1.0 preview — Phase 1B
+# My Garden Grows 1.0 preview — Phase 1C
 
-Only `my-garden-grows-preview` is updated. The original game repository and its
-website are not modified.
+Changes and deployment are restricted to `my-garden-grows-preview`. The original
+`my-garden-grows` repository and website remain untouched. The illustrated
+storybook scenes and existing farming, shopping, customer and money gameplay
+are preserved.
 
-## Playtest improvements
+## Paper bags
 
-- Repetitive actions keep document/dialog scroll position. Same-purpose dialogs
-  retain their container rather than replacing the entire app; focus restoration
-  uses `preventScroll` for quantity buttons.
-- **Add All Produce to Stand** fills the display from actual inventory, reports
-  added/skipped quantities and leaves customer checkout intact. Individual
-  controls remain. By-pound produce needs an owned or currently rented scale;
-  bags remain optional, so basic blanket selling never requires equipment.
-- **Harvest All Ready Crops** uses normal yields, quality and finite regrowth
-  rules, reports quantities and ignores unready plots. Individual harvesting stays.
-- Seed counts show **available** seeds, excluding reservations. Pending plans
-  survive refresh and can be canceled one plot at a time or all at once. Seeds
-  are stored as total unplanted seeds with a separate reservation map; finalizing
-  a plan consumes each seed once and clears the reservation. Available quantity
-  stays consistent before/after finalization.
-- The idle open market puts **Welcome Next Customer** first, with **Arrange
-  Produce** below it. The blanket's three-customer limit gets friendly educational
-  feedback. Tables welcome up to six customers, using half-hour slots.
+- A purchased $3 pack adds exactly **10** bags. Packs can be purchased repeatedly.
+- Purchased leftovers persist across days, saves and refreshes.
+- A transaction containing **loose produce sold by the pound** needs one bag,
+  regardless of quantities or how many crop types are in that order. Other
+  produce needs no bag. Empty bag stock never blocks all market sales.
+- Bags are consumed only on a successful completed sale. Wrong totals, incorrect
+  change, skipped customers, restocking and canceled orders consume none.
+- The market preparation, customer order and register display bags remaining.
+  **Buy more bags** purchases a pack without changing the active customer,
+  basket, greeting/checkout stage, visits, clock or market progress.
+- Daily-use bags from Phase 1B provide 10 consumable bags for that farming day.
+  They are used before purchased stock; unused daily-use bags expire at End Day.
+  Purchased stock remains. Another daily-use pack cannot be borrowed repeatedly
+  on the same day; a purchased pack can refill an exhausted supply.
 
-## Equipment choices and rental costs
+## Market stands and rentals
 
-| Daily equipment | Upfront | Pay after market | Extra cost |
+Free blankets welcome up to 3 customers; owned or rented tables welcome up to 6.
+Normal produce prices are unchanged. Buying supplies still works; an owned
+$8 table needs no daily fee. Tables are chosen before opening; scales and bags
+can be obtained during the market.
+
+| Daily equipment | Upfront | Deferred if unable to pay upfront | Extra cost |
 | --- | ---: | ---: | ---: |
-| Table | $1.00 | $3.00 | $2.00 |
-| Scale | $1.00 | $2.00 | $1.00 |
-| Bags | $0.50 | $1.00 | $0.50 |
+| Table | $1 | $3 | $2 |
+| Scale | $1 | $2 | $1 |
+| 10 daily-use bags | $0.50 | $1 | $0.50 |
 
-Owned equipment remains available. Buying supplies still works; a table costs
-$8 permanently. Free blanket selling welcomes three customers instead of six.
-Normal produce prices are unchanged.
+Both prices are explained before consent. Charges have a persistent itemized
+ledger, a $6 unpaid cap, no interest, and no new deferred rentals while an earlier
+farming day's debt remains. Closing or End Day deducts available earnings once;
+remaining debt carries forward. Voluntary repayment remains available. The free
+blanket and community seed help remain available for financial recovery. Savings
+goals subtract outstanding charges rather than treating borrowed equipment as
+extra savings. The Job Board is still a placeholder, without math minigames.
 
-Both rental prices are shown before consent. Players who can afford the lower
-upfront fee pay it immediately (the table's existing select/open flow also
-continues to charge $1 only when opening). Players who cannot afford it can
-explicitly agree to the more expensive deferred price. Simply viewing/selecting
-an offer never adds debt. Scales and bags can be rented during an open market;
-tables must be chosen before opening. Rentals expire at End Day and never renew
-automatically. An item cannot be rented twice in one farming day or rented when
-already owned. There are no refunds for unused rentals.
+## Cash register and report
 
-Deferred charges have a persistent itemized ledger. Closing the market deducts
-up to available market earnings (and never takes more cash than the player has).
-Any unpaid remainder carries forward **without interest**, including when End
-Day is used instead of Close Market. Settlement runs only once; reloads do not
-re-charge it. Earlier debt is repaid from later market earnings. Players can
-also voluntarily pay from cash. Total unpaid charges cannot exceed **$6**, and
-no new deferred rentals are available while any earlier farming day's debt
-remains. Free blankets, upfront rentals, and community seed help remain available.
-Savings-goal progress subtracts outstanding charges so borrowing does not
-inflate savings or unlock a goal early.
+The register uses original simplified SVG bills ($1/$5/$10/$20) and coins
+(1¢/5¢/10¢/25¢), with large values, accessible labels and touch-sized targets.
+These are garden play-money illustrations, not copies of real currency. Change
+calculations and the explicit Give Change step remain unchanged.
 
-## Financial recovery and saves
+The market-day report shows produce sales and **completed customers**, upfront
+table and scale rentals, bag purchases/daily-use fees, other supply purchases,
+manual equipment payments, closing-time deferred payments, unpaid carryover and
+net market-day cash earnings. Each actual cash payment is recorded once. A
+closing payment's per-item details are included within that payment, not added
+again. Unpaid carryover is shown separately and not deducted twice. Buying bags
+records the full pack cost once; using individual bags adds no second charge.
 
-The town Job Board remains a placeholder: no jobs/math minigames are implemented.
-Community seed help offers three free carrot seeds to an eligible struggling
-farm so it can grow and sell from a blanket. No fee, loan or restart is required.
+This is a cash-basis **market-day** report, not total farm profit: seed costs are
+excluded. Owned supply purchases made during the day are market cash expenses;
+equipment bought on earlier days is not charged again. End Day saves the prior
+report for viewing while resetting only daily counters and expiring rentals.
 
-Save keys `mgg10` and `mgg10-backup`, and save version 1, are retained. Existing
-valid farms gain additive fields for equipment and charges. Money, crops, seeds,
-equipment, calendar and goals remain. Legacy paid table rentals migrate without
-an extra charge. Pending planting reservations now survive load. Existing
-interrupted customer recovery still cancels an unfinished order without taking
-inventory or payment. New debt, repayment status and rental access persist.
-Do not clear Safari website data or restart your farm to receive this update.
+## Other retained improvements
 
-## Tests
+Market crop hotspots no longer render floating hover labels/native tooltips or
+sticky dotted rectangles. Touch interactions and accessible names remain; only
+keyboard navigation gets a solid focus indication. Existing shop hotspots and
+artwork are unchanged. See [PHASE2.md](PHASE2.md) for the deferred art redesign.
 
-- `npm test`: 29 rule tests for previous features, migration, inventory, bulk
-  actions, rentals, consent, repayment, carryover, debt caps and recovery.
-- `python3 tests/mobile_finances.py`: touch-only legacy financial-recovery loop.
-- `python3 tests/mobile_phase1b.py`: touch-only 390 × 844 and 320 × 568 scrolling,
-  shopping, saved seed reservations/cancellation, bulk harvesting/display,
-  temporary scales, customer checkout, deferred charges, carryover and limits.
-- Browser tests need Python Playwright and Chromium at `/usr/bin/chromium`.
-  `PREVIEW_URL` optionally selects the deployed HTTPS preview; otherwise each
-  script starts/shuts down its own local server. Browser contexts are isolated
-  from real player saves. Tests simulate mobile Chromium; actual Safari on an
-  iPhone is a remaining manual validation, not an automated claim.
+Phase 1B scroll/focus retention, bulk display/harvest actions, individual controls,
+friendly customer limits and saved seed reservations remain. Planned seeds are
+excluded from available quantity immediately and consumed once at planting;
+canceling restores availability.
 
-Original artwork and hotspot coordinates are unchanged. See [PHASE2.md](PHASE2.md)
-for the deferred equipment-visual and customer-dialogue redesign requirements.
+## Saves and migration
+
+Save keys `mgg10` / `mgg10-backup` and save version 1 are retained. Existing money,
+crops, seeds, equipment, goals, calendar, plans and equipment debt are preserved.
+Old owned bag packs convert to 10 bags per pack **once**, without a new charge.
+Old daily-use bag access converts to the appropriate daily supply once.
+
+Valid active customers and baskets, including checkout/change and completed-sale
+stages, now resume after refresh. Invalid pending orders recover safely without
+taking cash, stock or bags. Successful sales cannot be charged or bagged again.
+
+Older saves lack a detailed purchase ledger and actual customers-served count.
+Known already-paid rental/closing totals are migrated into the report without
+recharging. Reports clearly flag earlier missing history and show recorded net
+rather than inventing customer counts or retroactive purchases. A new farming
+day has complete accounting. Do not clear Safari data or restart to update.
+
+## Tests and validation
+
+- `npm test`: 48 rule tests covering prior features plus bag packs/consumption,
+  active restocking, save migration/resumption, cash-matched accounting,
+  settlement idempotency and exact change.
+- `python3 tests/mobile_finances.py`: original touch-only financial recovery loop.
+- `python3 tests/mobile_phase1b.py`: scroll retention, bulk actions, plans,
+  deferred rentals, checkout/settlement and customer limits at two phone sizes.
+- `python3 tests/mobile_phase1c.py`: bag refill with an active customer, refresh,
+  illustrated denomination targets, exact coin/bill change, no-bag sales,
+  cash-matched reports, saved leftovers and absent market hover decorations at
+  390 × 844 and 320 × 568.
+
+Browser tests require Python Playwright and Chromium at `/usr/bin/chromium`.
+They use isolated browser contexts; real player saves are never touched.
+`PREVIEW_URL` optionally selects the HTTPS preview instead of each test's local
+server. Automated tests simulate mobile Chromium. Actual iPhone Safari remains
+manual playtesting; it has not been claimed as automated validation.
+
+Source responsibilities: `game.js` owns rules/accounting data, `accounting.js`
+renders reports without money mutations, `money.js` draws play-money controls,
+and `scenes.js` / `interactions.js` render scenes and connect UI actions.

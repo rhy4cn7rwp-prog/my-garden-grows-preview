@@ -333,3 +333,111 @@ input:focus-visible {
   min-height: 48px;
   margin: 8px auto;
 }
+
+/* Touch hover must not leave crop tooltips or debug-style rectangles on the market. */
+.market-scene .spot:hover {
+  outline: none;
+  background: transparent;
+}
+.market-scene .spot .tip {
+  display: none;
+}
+.market-scene .spot:focus-visible {
+  outline: 3px solid #f8df85;
+  outline-offset: -3px;
+  background: transparent;
+}
+.bag-status {
+  font-size: 14px;
+  margin: 8px 0;
+}
+.money-tray {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.money-piece {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 74px;
+  padding: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  touch-action: manipulation;
+}
+.money-piece svg {
+  display: block;
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+}
+.money-piece.metal-coin svg {
+  height: 80px;
+  width: 100px;
+  max-width: 100%;
+}
+.money-piece:active {
+  background: #e5d8b5;
+  transform: translateY(1px);
+}
+.money-piece:focus-visible {
+  outline: 3px solid #2377aa;
+  outline-offset: 1px;
+}
+.accounting-report {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.accounting-report table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.accounting-report caption {
+  text-align: left;
+  font-weight: 800;
+  padding: 6px 0;
+}
+.accounting-report th {
+  text-align: left;
+  font-weight: 600;
+}
+.accounting-report th,
+.accounting-report td {
+  padding: 9px 5px;
+  border-bottom: 1px solid #dbc79e;
+  vertical-align: top;
+}
+.accounting-report td:not([colspan]) {
+  text-align: right;
+  white-space: nowrap;
+}
+.accounting-report .report-section th {
+  padding-top: 18px;
+  color: #536746;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.accounting-report .net-row {
+  background: #deedcf;
+  font-weight: 800;
+  border-top: 3px solid #668954;
+}
+.accounting-report .net-row th,
+.accounting-report .net-row td {
+  font-weight: 800;
+  font-size: 16px;
+}
+.report-detail {
+  font-size: 12px;
+  color: #5d674d;
+}
+.report-carry {
+  padding: 10px;
+  background: #f8e4af;
+  border-radius: 8px;
+}
