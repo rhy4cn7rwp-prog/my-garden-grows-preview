@@ -71,9 +71,14 @@ try:
      actual=page.evaluate('id=>state.clubhousePositions[id]',id);assert actual['surface']==dest['surface'],actual
      assert abs(actual['angle']-dest['angle'])<.1 and abs(actual['y']-dest['y'])<.002,(actual,dest)
      anchored(id);assert farm()==before
+     saved=positions()
+     for delta in [-8,8]:
+      look(max(-80,min(80,actual['angle']+delta)));anchored(id);assert positions()==saved
+     page.reload();tap('Clubhouse');find(id);anchored(id);assert positions()==saved;assert farm()==before
     def dest(id,surface,x,y=None):return page.evaluate('([id,s,x,y])=>ClubhouseLayout.canonical(id,s,x,y)',[id,surface,x,y])
-    drag('ball',dest('ball','chest',1352));page.screenshot(path='/tmp/phase2e-chest-touch.png')
+    drag('ball',dest('ball','chest',1347));page.screenshot(path='/tmp/phase2e-chest-touch.png')
     drag('ball',dest('ball','window-seat',1010));page.screenshot(path='/tmp/phase2e-seat-touch.png')
+    drag('ball',dest('ball','shelf-nook-lower',1285))
     drag('ball',dest('ball','floor',1010,610));drag('ball',dest('ball','floor',1080,665));drag('ball',dest('ball','floor',800,585))
     for shelf in ['shelf-nook-lower','shelf-nook-upper','shelf-nook-middle']:drag('camera',dest('camera',shelf,1295))
     page.screenshot(path='/tmp/phase2e-shelf-touch.png')

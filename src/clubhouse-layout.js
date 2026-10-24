@@ -59,10 +59,10 @@
       id: "window-seat",
       kind: "seat",
       name: "Window seat",
-      pixels: [968, 1083],
+      pixels: [938, 1110],
       edge: [
-        [968, 423],
-        [1083, 425],
+        [938, 414],
+        [1110, 416],
       ],
       items: small,
     },
@@ -72,8 +72,8 @@
       name: "Reading bench cushion",
       pixels: [430, 501],
       edge: [
-        [430, 438],
-        [501, 440],
+        [430, 430],
+        [501, 433],
       ],
       items: small,
     },
@@ -83,8 +83,8 @@
       name: "Left bookshelf, upper shelf",
       pixels: [330, 469],
       edge: [
-        [330, 231],
-        [469, 235],
+        [330, 225],
+        [469, 230],
       ],
       items: small,
     },
@@ -94,8 +94,8 @@
       name: "Left bookshelf, middle shelf",
       pixels: [330, 469],
       edge: [
-        [330, 288],
-        [469, 289],
+        [330, 286],
+        [469, 287],
       ],
       items: small,
     },
@@ -105,8 +105,8 @@
       name: "Left bookshelf, lower shelf",
       pixels: [330, 469],
       edge: [
-        [330, 338],
-        [469, 339],
+        [330, 335],
+        [469, 336],
       ],
       items: small,
     },
@@ -127,8 +127,8 @@
       name: "Nook bookshelf, middle shelf",
       pixels: [1218, 1350],
       edge: [
-        [1218, 249],
-        [1350, 250],
+        [1218, 244],
+        [1350, 237],
       ],
       items: small,
     },
@@ -138,8 +138,8 @@
       name: "Nook bookshelf, lower shelf",
       pixels: [1218, 1350],
       edge: [
-        [1218, 325],
-        [1350, 330],
+        [1218, 316],
+        [1350, 320],
       ],
       items: small,
     },
@@ -160,8 +160,8 @@
       name: "Right bookshelf, middle shelf",
       pixels: [1583, 1717],
       edge: [
-        [1583, 298],
-        [1717, 302],
+        [1583, 295],
+        [1717, 297],
       ],
       items: small,
     },
@@ -172,7 +172,7 @@
       pixels: [1583, 1717],
       edge: [
         [1583, 351],
-        [1717, 354],
+        [1717, 350],
       ],
       items: small,
     },
@@ -182,8 +182,8 @@
       name: "Low display cabinet",
       pixels: [1583, 1717],
       edge: [
-        [1583, 421],
-        [1717, 410],
+        [1583, 414],
+        [1717, 405],
       ],
       items: small,
     },
@@ -202,7 +202,7 @@
   function metrics(id, p) {
     const s = getSurface(p.surface),
       base = {
-        ball: [44, 44],
+        ball: [64, 64],
         bike: [142, 112],
         guitar: [55, 100],
         camera: [35, 29],
@@ -223,7 +223,27 @@
     return {
       width: base[0] * scale,
       height: base[1] * scale,
-      tail: id === "camera" ? base[1] * scale * 0.18 : 0,
+      // The ball's actual body ends at atlas row 465, not at the end of
+      // its 380px crop. The remaining 17px are transparent edge/shadow.
+      tail:
+        id === "camera"
+          ? base[1] * scale * 0.18
+          : id === "ball"
+            ? (base[1] * scale * 17) / 380
+            : 0,
+      shadow: {
+        rx: base[0] * scale * (s?.kind === "floor" ? 0.34 : 0.28),
+        ry: Math.max(
+          0.7,
+          base[1] * scale * (s?.kind === "floor" ? 0.025 : 0.015),
+        ),
+        color:
+          s?.kind === "chest"
+            ? "#5f371929"
+            : s?.kind === "seat"
+              ? "#5f371933"
+              : "#5f371938",
+      },
       occlusion: s?.kind === "chest" ? 12 : 0,
     };
   }
@@ -360,11 +380,18 @@
     const x = pixelAt(angle),
       choices = [];
     for (const s of surfaces) {
+      if (!s.items.includes(id)) continue;
+      const estimate = point(s.id, x, y * 724),
+        m = metrics(id, estimate),
+        margin = m.width / 2 + 3,
+        snappedX = clamp(x, s.pixels[0] + margin, s.pixels[1] - margin);
+      // A nearby edge is forgiving, but distant releases still return home.
+      if (Math.abs(snappedX - x) > Math.min(18, tolerance * 724)) continue;
       const wanted =
         s.kind === "floor"
-          ? clamp(y * 724, floorMinimum(id, x, y * 724) + 1, 704)
-          : contactY(s, x);
-      const p = canonical(id, s.id, x, wanted);
+          ? clamp(y * 724, floorMinimum(id, snappedX, y * 724) + 1, 704)
+          : contactY(s, snappedX);
+      const p = canonical(id, s.id, snappedX, wanted);
       if (p && Math.abs(p.y - y) <= tolerance) choices.push(p);
     }
     return (

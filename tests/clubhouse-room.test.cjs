@@ -87,7 +87,7 @@ test("floor, shelf and wall compatibility prevents impossible placement and out-
 test("repositioning changes only the optional room layout and survives normal and backup recovery", () => {
   const s = farm(),
     before = copy(s),
-    p = { surface: "floor", angle: 43, y: 0.87 };
+    p = { surface: "floor", angle: 43, y: 0.9 };
   G.moveClubhouseItem(s, "ball", p);
   for (const k of Object.keys(before).filter((k) => k !== "clubhousePositions"))
     assert.deepEqual(s[k], before[k], k);
@@ -120,7 +120,7 @@ test("restoring an item frees an occupied home spot safely without losing owners
 });
 test("restore-all resets positions only, never the farm or purchases", () => {
   const s = farm();
-  G.moveClubhouseItem(s, "ball", { surface: "floor", angle: 43, y: 0.87 });
+  G.moveClubhouseItem(s, "ball", { surface: "floor", angle: 43, y: 0.9 });
   const before = copy(s);
   G.resetClubhouseLayout(s);
   assert.deepEqual(s.clubhousePositions, {});
@@ -152,12 +152,12 @@ test("position recovery keeps valid owned records without inventing ownership", 
   s.cash = 100;
   G.purchaseDream(s, "ball");
   s.clubhousePositions = {
-    ball: { surface: "floor", angle: 43, y: 0.87, other: "ignored" },
+    ball: { surface: "floor", angle: 43, y: 0.9, other: "ignored" },
     bike: { surface: "floor", angle: -50, y: 0.83 },
   };
   const r = G.recover(JSON.stringify(s));
   assert.deepEqual(r.clubhousePositions, {
-    ball: { surface: "floor", angle: 43, y: 0.87 },
+    ball: { surface: "floor", angle: 43, y: 0.9 },
   });
   assert.equal(G.ownsDream(r, "bike"), false);
 });
@@ -170,7 +170,7 @@ test("an unavailable optional room script cannot erase a recoverable farm", () =
     context,
   );
   const s = farm();
-  G.moveClubhouseItem(s, "ball", { surface: "floor", angle: 43, y: 0.87 });
+  G.moveClubhouseItem(s, "ball", { surface: "floor", angle: 43, y: 0.9 });
   const r = context.Game.recover(JSON.stringify(s));
   assert.equal(r.cash, s.cash);
   assert.equal(r.bagCount, s.bagCount);
@@ -187,7 +187,7 @@ test("new days and seasons retain custom positions and purchased ownership", () 
   const s = farm();
   s.day = 20;
   s.season = 2;
-  G.moveClubhouseItem(s, "ball", { surface: "floor", angle: 43, y: 0.87 });
+  G.moveClubhouseItem(s, "ball", { surface: "floor", angle: 43, y: 0.9 });
   const positions = copy(s.clubhousePositions),
     owned = copy(s.dreamPurchases);
   G.endDay(s);

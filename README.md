@@ -26,12 +26,24 @@ show a high shelf or low treasure. Safari toolbar changes retain the normalized
 view tilt rather than reframing a previously found treasure. Backing-pixel-aligned
 rendering strips and a fresh frame prevent old-view blending at strip boundaries.
 
-The soccer ball is 44 source-art pixels across on a shelf, scaled only for its
+The soccer ball is 64 source-art pixels across on a shelf, scaled only for its
 chosen surface/depth and the shared room projection. It is not enlarged to make
 a touch target. Chest, bookshelf, window-seat and free-floor hold-and-drag rules,
 invalid-drop recovery, and saved room coordinates are retained. A previously
 saved ball right against a shelf edge may move a few pixels along that same
 surface to accommodate the corrected size. Ownership and farm values do not change.
+
+The final contact refinement retains that camera unchanged. The ball is sized
+against the initial mobile design (approximately 64–68 displayed pixels), and
+its visible body—not the atlas's transparent/shadow padding—is anchored at each
+surface. Shelf contacts follow measured board edges; the window-seat contact
+follows the cushion top, with more usable horizontal room. The unchanged chest
+front masks the lower part of stored items. Subtle contact shadows differ for
+floor, cushion, shelf and chest. Nearby releases can snap inward up to 18 source
+pixels from a usable edge; distant or crowded releases return to the previous
+saved location. Larger ball margins can move an old edge placement slightly along
+its existing surface; older cushion contacts migrate to the cushion top.
+
 
 `tests/mobile_clubhouse_spatial.py` independently rebuilds the expected source
 composition and compares every rendered pixel across viewing angles and four
@@ -39,7 +51,7 @@ surface types at five phone/landscape sizes. It also compares the visible browse
 screenshot against the canvas throughout the unobstructed play area. It also checks a constant lens,
 refresh recovery, camera limits and unchanged farm/ownership/money. The existing
 actual-touch placement, customer/purchase and room-gesture suites remain in use.
-`npm test` passes **99 rule tests**. All mobile automation is isolated Chromium;
+`npm test` passes **102 rule tests**. All mobile automation is isolated Chromium;
 **native iPhone Safari remains unverified** because this environment has no
 physical iPhone and its WebKit browser download is blocked by the proxy.
 
@@ -176,7 +188,7 @@ congratulations/selection and existing market/farming rules are unchanged.
 
 ### Phase 2D validation and remaining manual checks
 
-`npm test` passes all **99 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
+`npm test` passes all **102 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
 painted-edge bounds, valid defaults, owned-only moves, compatible surfaces,
 collision rejection, exact save recovery, old/malformed layouts, per-item/cascade
 and whole-room resets, and recovery when optional room code is unavailable.
@@ -578,7 +590,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
   changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
   readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
   and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
-- `npm test`: 99 rule tests covering clubhouse ownership/checkout, goal congratulations
+- `npm test`: 102 rule tests covering clubhouse ownership/checkout, goal congratulations
   without auto-purchase, explicit next-goal selection, prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,

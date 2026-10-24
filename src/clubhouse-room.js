@@ -295,17 +295,9 @@ function compositeClubhouseRoom() {
       y = p.y * 724,
       [sx, sy, sw, sh] = CLUBHOUSE_DISPLAYS[d.id].bounds.split(" ").map(Number);
     ctx.save();
-    ctx.fillStyle = "#5f37194d";
+    ctx.fillStyle = m.shadow.color;
     ctx.beginPath();
-    ctx.ellipse(
-      x,
-      y,
-      m.width * 0.38,
-      Math.max(1, m.height * 0.025),
-      0,
-      0,
-      2 * Math.PI,
-    );
+    ctx.ellipse(x, y, m.shadow.rx, m.shadow.ry, 0, 0, 2 * Math.PI);
     ctx.fill();
     ctx.drawImage(
       r.rewardImage,
@@ -829,7 +821,7 @@ function updateRoomDrag() {
       r.usable.right - visualSize.visualWidth,
     ),
     top = ClubhouseLayout.clamp(
-      foot.y - visualSize.visualHeight,
+      foot.y - visualSize.visualHeight + visualSize.tail,
       r.usable.top,
       r.usable.bottom - visualSize.visualHeight,
     );

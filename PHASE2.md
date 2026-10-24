@@ -171,3 +171,16 @@ outside Phase 1C.
   saved-layout recovery, alongside existing actual-touch mobile regression suites.
 - Native iPhone Safari still requires manual playtesting; Chromium tests are not
   a claim of native Safari verification. No other gameplay or new phase began.
+
+## Final size and contact refinement
+
+- Camera geometry, yaw limits and artwork are unchanged.
+- Soccer ball restored to 64 source pixels (initial mobile design approximately
+  64–68 displayed pixels), with a body-contact anchor excluding shadow padding.
+- Expanded cushion placement along its top edge, surface-specific contact
+  shadows, original chest-front occlusion and forgiving nearby-edge snaps.
+- Owned positions migrate on the same surface if revised clearance/top edges
+  require adjustment. Finances, goals and purchases remain untouched.
+- Actual touch drops into all four surface types now include turning the view
+  and refreshing after each drop. Pixel-reference checks remain required.
+- Native Safari still needs an actual-device playtest.

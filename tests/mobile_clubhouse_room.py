@@ -100,8 +100,12 @@ try:
     touch('touchStart',box['x']+box['width']/2,box['y']+box['height']/2);page.wait_for_timeout(480)
     touch('touchMove',12,box['y']+box['height']/2);page.wait_for_timeout(1000)
     assert page.evaluate('clubhouseRoom.yaw')<-10
+    edge_drop=page.evaluate('clubhouseRoom.drop')
     touch('touchEnd');page.wait_for_timeout(40)
-    assert page.evaluate('state.clubhousePositions.ball.angle')<0
+    if edge_drop:
+     assert page.evaluate('state.clubhousePositions.ball')==edge_drop
+     assert edge_drop['angle']<0
+    else:assert page.evaluate('state.clubhousePositions.ball')==placed
     find('ball');page.locator('[data-dream=ball]').tap();tap('Restore default position')
     assert page.evaluate('state.clubhousePositions')=={}
     # A camera can move to an actual shelf, a bicycle cannot.

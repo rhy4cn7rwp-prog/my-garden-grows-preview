@@ -22,12 +22,12 @@ test("painted shelf rows use separate measured contact edges and accept small tr
   }
   const p = L.canonical("camera", "shelf-nook-middle", 1264);
   assert.ok(
-    p.y * 724 >= 248 && p.y * 724 <= 251,
+    p.y * 724 >= 237 && p.y * 724 <= 244,
     "contact follows the measured top edge, not the former floating center",
   );
 });
 test("chest placements sit below the front rim and the original front panel is an occlusion layer", () => {
-  const p = L.canonical("ball", "chest", 1352);
+  const p = L.canonical("ball", "chest", 1347);
   assert.ok(p && L.valid("ball", p));
   assert.ok(p.y * 724 >= 495 && p.y * 724 < 506);
   assert.equal(L.metrics("ball", p).occlusion, 12);
@@ -37,8 +37,8 @@ test("chest placements sit below the front rim and the original front panel is a
 });
 test("window seat and reading cushion provide actual resting surfaces", () => {
   for (const [id, x, min, max] of [
-    ["window-seat", 1000, 422, 426],
-    ["reading-bench", 465, 437, 441],
+    ["window-seat", 1000, 413, 417],
+    ["reading-bench", 465, 429, 434],
   ]) {
     const p = L.canonical("ball", id, x);
     assert.ok(p && L.valid("ball", p));
@@ -75,9 +75,9 @@ test("floor scale follows depth; chest size leaves an identifiable visible porti
 });
 test("multiple small treasures fit on a shelf, cushion and inside the chest without excessive overlap", () => {
   for (const [surface, xs] of [
-    ["shelf-nook-middle", [1241, 1283, 1324]],
+    ["shelf-nook-middle", [1240, 1271, 1315]],
     ["window-seat", [989, 1035, 1061]],
-    ["chest", [1258, 1300, 1352]],
+    ["chest", [1255, 1296, 1347]],
   ]) {
     const positions = {};
     const ids =
@@ -177,10 +177,10 @@ test("corrupt placements and unowned records never create ownership or erase a v
 
 test("soccer ball uses furniture-relative size rather than a touch-target size", () => {
   const p = L.canonical("ball", "shelf-nook-middle", 1280);
-  assert.equal(L.metrics("ball", p).width, 44);
-  assert.equal(L.metrics("ball", p).height, 44);
-  const chest = L.canonical("ball", "chest", 1350);
-  assert.ok(L.metrics("ball", chest).width < (1386 - 1232) / 3);
+  assert.equal(L.metrics("ball", p).width, 64);
+  assert.equal(L.metrics("ball", p).height, 64);
+  const chest = L.canonical("ball", "chest", 1347);
+  assert.ok(L.metrics("ball", chest).width < (1386 - 1232) / 2);
   assert.equal(L.canonical("ball", "shelf-nook-middle", 1225), null);
 });
 test("fixed room lens covers edge placements without treasure-specific zoom", () => {
@@ -208,7 +208,7 @@ test("fixed room lens covers edge placements without treasure-specific zoom", ()
 test("slightly tighter soccer-ball margins retain old owned surface placements and finances", () => {
   const s = farm();
   // This point fitted the previous 32-pixel ball. It needs a few pixels of
-  // clearance with the restored 44-pixel art, never a room/farm reset.
+  // clearance with the restored 64-pixel art, never a room/farm reset.
   s.clubhousePositions.ball = L.point(
     "shelf-left-middle",
     350,
@@ -217,7 +217,7 @@ test("slightly tighter soccer-ball margins retain old owned surface placements a
   const r = G.recover(JSON.stringify(s));
   assert.equal(r.clubhousePositions.ball.surface, "shelf-left-middle");
   assert.ok(L.valid("ball", r.clubhousePositions.ball));
-  assert.ok(Math.abs(L.pixelAt(r.clubhousePositions.ball.angle) - 350) <= 7);
+  assert.ok(Math.abs(L.pixelAt(r.clubhousePositions.ball.angle) - 350) <= 17);
   for (const key of [
     "cash",
     "goal",
@@ -229,6 +229,61 @@ test("slightly tighter soccer-ball margins retain old owned surface placements a
     "season",
   ])
     assert.deepEqual(r[key], s[key]);
+  assert.deepEqual(
+    G.recover(JSON.stringify(r)).clubhousePositions,
+    r.clubhousePositions,
+  );
+});
+
+test("soccer-ball body rather than transparent atlas padding meets every contact surface", () => {
+  for (const [surface, x, y] of [
+    ["floor", 1023, 606],
+    ["window-seat", 1000],
+    ["chest", 1347],
+    ["shelf-nook-lower", 1285],
+  ]) {
+    const p = L.canonical("ball", surface, x, y),
+      m = L.metrics("ball", p);
+    assert.ok(p && L.valid("ball", p));
+    const spriteTop = p.y * 724 - m.height + m.tail;
+    assert.ok(Math.abs(spriteTop + (m.height * 363) / 380 - p.y * 724) < 1e-9);
+    assert.ok(m.shadow.rx > 0 && m.shadow.ry > 0 && m.shadow.ry < 3);
+  }
+});
+test("near-edge drops snap gently but distant drops remain invalid", () => {
+  const s = L.getSurface("window-seat"),
+    m = L.metrics("ball", L.point(s.id, 1000, 415));
+  const edge = s.pixels[0] + m.width / 2 + 3;
+  const near = L.drop(
+    "ball",
+    L.angleAt(edge - 8),
+    L.contactY(s, edge) / 724 - 0.005,
+  );
+  assert.equal(near.surface, s.id);
+  assert.ok(Math.abs(L.pixelAt(near.angle) - edge) < 1e-8);
+  assert.equal(L.drop("ball", L.angleAt(edge - 60), 0.12), null);
+  const a = L.canonical("ball", s.id, 980),
+    b = L.canonical("ball", s.id, 1070);
+  assert.ok(a && b && a.angle !== b.angle);
+});
+
+test("old cushion placements move to cushion top once and preserve every farm value", () => {
+  const s = farm();
+  s.clubhousePositions.ball = L.point("window-seat", 1000, 424);
+  const r = G.recover(JSON.stringify(s));
+  assert.equal(r.clubhousePositions.ball.surface, "window-seat");
+  assert.equal(
+    r.clubhousePositions.ball.angle,
+    s.clubhousePositions.ball.angle,
+  );
+  assert.equal(
+    r.clubhousePositions.ball.y,
+    L.contactY("window-seat", 1000) / 724,
+  );
+  for (const key of Object.keys(s).filter(
+    (k) => !["clubhousePositions", "display"].includes(k),
+  ))
+    assert.deepEqual(r[key], s[key], key);
   assert.deepEqual(
     G.recover(JSON.stringify(r)).clubhousePositions,
     r.clubhousePositions,
