@@ -44,7 +44,7 @@ try:
    sign_fit()
    assert page.evaluate("({...state,display:Object.fromEntries(Object.entries(state.display).filter(([,n])=>n>0))})")==before
    if w==428 and h==746:page.screenshot(path='/tmp/counter-sign-final.png')
-   page.get_by_role('button',name='Carrots seeds',exact=True).tap();assert 'Carrots Seeds' in page.locator('.dialog').inner_text()
+   page.get_by_role('button',name='Carrot Seeds',exact=True).tap();assert 'Carrot Seeds' in page.locator('.dialog').inner_text()
    page.get_by_role('button',name='Close ✕',exact=True).tap()
    page.evaluate("document.querySelector('#app').scrollTop=0")
    sign_fit();assert page.evaluate("({...state,display:Object.fromEntries(Object.entries(state.display).filter(([,n])=>n>0))})")==before

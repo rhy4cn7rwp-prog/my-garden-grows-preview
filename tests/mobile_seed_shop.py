@@ -45,15 +45,15 @@ try:
     target=page.locator('[data-seed='+c['id']+'] .seed-produce-art').bounding_box()
     assert target and target['height']>5
     page.touchscreen.tap(target['x']+target['width']/2,target['y']+target['height']/2)
-    assert c['name']+' Seeds' in page.locator('.dialog h2').inner_text()
-    assert f"${c['seed']:.2f} per packet" in page.locator('.dialog').inner_text()
+    assert page.evaluate('id=>seedName(id)',c['id']) in page.locator('.dialog h2').inner_text()
+    assert f"${c['seed']:.2f} per "+("pack" if c['id']=='potato' else "packet") in page.locator('.dialog').inner_text()
     assert f"${c['price']:.2f}" in page.locator('.dialog').inner_text()
     tap('+');assert page.evaluate('id=>state.cart[id]',c['id'])==1;tap('Close ✕')
     if c['id']=='beans':
      pending=page.evaluate('state.cart');page.reload();tap('Seed & Feed');assert page.evaluate('state.cart')==pending
    assert page.evaluate('state.cash')==50 and page.evaluate('state.seeds')=={}
    tap('Variety bundle · $11.00 Fixed assortment · save $1.00')
-   assert '3 carrots, 2 onions, 2 green beans, 1 strawberry' in page.locator('.dialog').inner_text()
+   assert 'Carrot Seeds × 3, Onion Seeds × 2, Green Bean Seeds × 2, Strawberry Seeds × 1' in page.locator('.dialog').inner_text()
    assert 'cannot be customized' in page.locator('.dialog').inner_text()
    plus=page.get_by_role('button',name='+',exact=True);plus.scroll_into_view_if_needed()
    scroll=page.locator('.seed-detail-body').evaluate('(e)=>e.scrollTop');page.locator('.dialog').evaluate("e=>e.dataset.kept='yes'")
@@ -61,11 +61,11 @@ try:
    assert abs(page.locator('.seed-detail-body').evaluate('(e)=>e.scrollTop')-scroll)<2
    tap('View basket');assert 'Total: $29.00' in page.locator('.dialog').inner_text()
    # Basket edits retain the basket, and can be reversed without spending money.
-   page.get_by_role('button',name='Remove one Onions',exact=True).tap();assert page.evaluate('state.cart.onion')==0
+   page.get_by_role('button',name='Remove one pack of Onion Seeds',exact=True).tap();assert page.evaluate('state.cart.onion')==0
    page.evaluate("seedShopBasketChange('onion',1)");assert 'Total: $29.00' in page.locator('.dialog').inner_text()
    tap('Pay at checkout');assert 'You paid $29.00' in page.locator('.dialog').inner_text()
    assert 'Your balance is $21.00' in page.locator('.dialog').inner_text()
-   assert 'Carrots: 4 packets purchased' in page.locator('.dialog').inner_text()
+   assert 'Carrot Seeds: 4 packets purchased' in page.locator('.dialog').inner_text()
    expected={c['id']:1+page.evaluate('id=>Game.bundle[id]||0',c['id']) for c in crops}
    assert page.evaluate('state.seeds')==expected and page.evaluate('state.cash')==21
    assert page.evaluate('state.cart')=={}

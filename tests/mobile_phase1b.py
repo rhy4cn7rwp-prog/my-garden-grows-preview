@@ -40,7 +40,7 @@ try:
    tap('Add All Produce to Stand')
    assert 'No new produce added' in page.locator('.dialog').inner_text()
    assert page.evaluate('JSON.stringify(state.inventory)')==inventory
-   tap('Close ✕');tap('Back to village');tap('Seed & Feed');tap('Tomatoes seeds')
+   tap('Close ✕');tap('Back to village');tap('Seed & Feed');tap('Tomato Seeds')
    for _ in range(2):repeated(page.get_by_role('button',name='+',exact=True))
    tap('🛒 View basket');tap('Pay at checkout');tap('Close ✕')
    assert page.evaluate('state.seeds.tomato')==2
@@ -48,16 +48,16 @@ try:
    for i,remaining in [(0,2),(1,1)]:
     page.locator('.plot').nth(i).tap()
     before=page.evaluate('scrollY')
-    tap(f'🍅 Tomatoes ({remaining} available)')
+    tap(f'🍅 Tomato Seeds ({remaining} available)')
     page.wait_for_timeout(50)
     assert abs(page.evaluate('scrollY')-before)<=2
-   assert 'Tomatoes: 0' in page.locator('.bottom').inner_text()
+   assert 'Tomato Seeds: 0' in page.locator('.bottom').inner_text()
    page.reload();assert page.evaluate('Game.availableSeeds(state,"tomato")')==0
    tap('My Garden');page.locator('.plot').nth(2).tap()
-   assert page.get_by_role('button',name='🍅 Tomatoes (0 available)',exact=True).is_disabled()
+   assert page.get_by_role('button',name='🍅 Tomato Seeds (0 available)',exact=True).is_disabled()
    tap('Close ✕');tap('Cancel planting plan')
    assert page.evaluate('Game.availableSeeds(state,"tomato")')==2
-   page.locator('.plot').first.tap();tap('🍅 Tomatoes (2 available)');tap('🌱 Plant plan (1)')
+   page.locator('.plot').first.tap();tap('🍅 Tomato Seeds (2 available)');tap('🌱 Plant plan (1)')
    assert page.evaluate('state.seeds.tomato')==1
    page.evaluate("state.plots[0].age=4;state.plots[1]={id:'carrot',age:3,left:0,quality:40,watered:false};render()")
    button=page.get_by_role('button',name='Harvest All Ready Crops',exact=True);button.scroll_into_view_if_needed()

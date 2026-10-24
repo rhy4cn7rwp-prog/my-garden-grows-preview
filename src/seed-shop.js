@@ -1,16 +1,24 @@
 /* Seed & Feed presentation only. Game owns all prices, inventory and checkout rules. */
 const SEED_PACKET_NAMES = {
-  carrot: "Carrot",
-  corn: "Corn",
-  beans: "Beans",
-  strawberry: "Straw&shy;berry",
-  cucumber: "Cucumber",
-  potato: "Potato",
-  onion: "Onion",
-  tomato: "Tomato",
-  lettuce: "Lettuce",
-  radish: "Radish",
+  carrot: "Carrot Seeds",
+  corn: "Corn Seeds",
+  beans: "Green Bean Seeds",
+  strawberry: "Strawberry Seeds",
+  cucumber: "Cucumber Seeds",
+  potato: "Seed Potatoes",
+  onion: "Onion Seeds",
+  tomato: "Tomato Seeds",
+  lettuce: "Lettuce Seeds",
+  radish: "Radish Seeds",
 };
+function seedName(id) {
+  return SEED_PACKET_NAMES[id];
+}
+function seedBundleContents() {
+  return Object.entries(Game.bundle)
+    .map(([id, n]) => `${seedName(id)} × ${n}`)
+    .join(", ");
+}
 const SEED_SHOP_ART = [
   "carrot",
   "corn",
@@ -55,7 +63,7 @@ function seedShopScene() {
     `<div class="seed-shelf">${ids
       .map((id) => {
         const c = crop(id);
-        return `<button class="seed-packet" data-seed="${id}" onclick="seed('${id}')" aria-label="${c.name} seeds"><span class="seed-packet-name">${SEED_PACKET_NAMES[id]}</span>${seedProduceArt(id)}<span class="seed-packet-price">${money(c.seed)}</span><span class="seed-packet-count" aria-label="In basket" ${state.cart[id] ? "" : "hidden"}>${state.cart[id] || 0}</span></button>`;
+        return `<button class="seed-packet" data-seed="${id}" onclick="seed('${id}')" aria-label="${seedName(id)}"><span class="seed-packet-name">${seedName(id).replace("Strawberry", "Straw&shy;berry")}</span>${seedProduceArt(id)}<span class="seed-packet-price">${money(c.seed)}</span><span class="seed-packet-count" aria-label="In basket" ${state.cart[id] ? "" : "hidden"}>${state.cart[id] || 0}</span></button>`;
       })
       .join("")}</div>`;
   return `<div class="seed-shop-world"><img class="seed-shop-interior" src="assets/seed-shop/interior.webp" alt="A friendly shopkeeper in a straw hat welcomes you to a sunlit wooden garden store, with flowers, pots, tools and watering cans." fetchpriority="high"/>
@@ -68,17 +76,12 @@ function seedShopDetails(id) {
   const c = crop(id);
   if (!c) return;
   show(
-    `<header class="seed-detail-heading">${seedProduceArt(id)}<h2>${c.name} Seeds</h2></header><div class="seed-detail-body"><p><b>${money(c.seed)} per packet</b> · ${state.seeds[id] || 0} owned</p><p>${c.days} watered days to harvest. About ${c.yield} ${c.unit === "lb" ? "lb" : "items"} per harvest${c.repeat ? " · repeat harvests" : "."}</p><p>Estimated market price: <b>${money(c.price)}${c.unit === "lb" ? " per lb" : " each"}</b>. Sales depend on growing and selling your harvest.</p><div class="qty"><button aria-label="−" onclick="change('cart','${id}',-1)" ${(state.cart[id] || 0) === 0 ? "disabled" : ""}>−</button><b>${state.cart[id] || 0} in basket</b><button aria-label="+" onclick="change('cart','${id}',1)" ${(state.cart[id] || 0) >= 100 ? "disabled" : ""}>+</button></div></div><div class="seed-detail-actions"><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,
+    `<header class="seed-detail-heading">${seedProduceArt(id)}<h2>${seedName(id)}</h2></header><div class="seed-detail-body"><p><b>${money(c.seed)} per ${id === "potato" ? "pack" : "packet"}</b> · ${state.seeds[id] || 0} owned</p><p>${c.days} watered days to harvest. About ${c.yield} ${c.unit === "lb" ? "lb" : "items"} per harvest${c.repeat ? " · repeat harvests" : "."}</p><p>Estimated market price: <b>${money(c.price)}${c.unit === "lb" ? " per lb" : " each"}</b>. Sales depend on growing and selling your harvest.</p><div class="qty"><button aria-label="−" onclick="change('cart','${id}',-1)" ${(state.cart[id] || 0) === 0 ? "disabled" : ""}>−</button><b>${state.cart[id] || 0} in basket</b><button aria-label="+" onclick="change('cart','${id}',1)" ${(state.cart[id] || 0) >= 100 ? "disabled" : ""}>+</button></div></div><div class="seed-detail-actions"><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,
     "seed-" + id,
   );
 }
 function seedShopBundle() {
-  const list = Object.entries(Game.bundle)
-      .map(
-        ([id, n]) =>
-          `${n} ${id === "strawberry" && n === 1 ? "strawberry" : crop(id).name.toLowerCase()}`,
-      )
-      .join(", "),
+  const list = seedBundleContents(),
     individual = Object.entries(Game.bundle).reduce(
       (sum, [id, n]) => sum + n * crop(id).seed,
       0,
@@ -89,7 +92,7 @@ function seedShopBundle() {
     )
       .map((id) => {
         const c = crop(id);
-        return `<li>${c.name}: estimated ${money(c.price)} ${c.unit === "lb" ? "per lb" : "each"} at market.</li>`;
+        return `<li>${seedName(id)}: harvest estimated ${money(c.price)} ${c.unit === "lb" ? "per lb" : "each"} at market.</li>`;
       })
       .join(
         "",
@@ -104,11 +107,11 @@ function seedShopBasketChange(id, d) {
 function seedShopBasket() {
   const total = Game.cartTotal(state, "seeds"),
     items = [
-      ...CROPS.map((c) => [c.id, c.name, c.seed]),
+      ...CROPS.map((c) => [c.id, seedName(c.id), c.seed]),
       ["bundle", "Variety bundle", 11],
     ].filter(([id]) => state.cart[id]);
   show(
-    `<header class="seed-detail-heading"><h2>Shopping basket</h2></header><div class="seed-detail-body">${items.map(([id, name, price]) => `<div class="seed-basket-row"><span>${name} × ${state.cart[id]}<small>${money(price)} each · ${money(price * state.cart[id])}</small></span><button class="seed-adjust" aria-label="Remove one ${name}" onclick="seedShopBasketChange('${id}',-1)">−</button><button class="seed-adjust" aria-label="Add one ${name}" onclick="seedShopBasketChange('${id}',1)" ${state.cart[id] >= 100 ? "disabled" : ""}>+</button></div>`).join("") || "<p>Your basket is empty. Explore the packets on the shelves.</p>"}${state.cart.bundle ? "<p>Each bundle contains 3 carrots, 2 onions, 2 green beans and 1 strawberry packet.</p>" : ""}${total > state.cash ? `<p role="status">Your basket is ${money(total - state.cash)} over your balance. Remove a packet or bundle to make room in your budget.</p>` : ""}</div><div class="seed-detail-actions seed-checkout-actions"><p><b>Total: ${money(total)}</b> · You have ${money(state.cash)}</p><button class="btn" onclick="checkout('seeds')" ${total <= 0 || total > state.cash ? "disabled" : ""}>Pay at checkout</button><button class="btn alt" onclick="closeDialog()">Keep shopping</button></div>`,
+    `<header class="seed-detail-heading"><h2>Shopping basket</h2></header><div class="seed-detail-body">${items.map(([id, name, price]) => `<div class="seed-basket-row"><span>${name} × ${state.cart[id]}<small>${money(price)} each · ${money(price * state.cart[id])}</small></span><button class="seed-adjust" aria-label="Remove one ${id === "bundle" ? name : "pack of " + name}" onclick="seedShopBasketChange('${id}',-1)">−</button><button class="seed-adjust" aria-label="Add one ${id === "bundle" ? name : "pack of " + name}" onclick="seedShopBasketChange('${id}',1)" ${state.cart[id] >= 100 ? "disabled" : ""}>+</button></div>`).join("") || "<p>Your basket is empty. Explore the packets on the shelves.</p>"}${state.cart.bundle ? `<p>Each bundle contains: ${seedBundleContents()}.</p>` : ""}${total > state.cash ? `<p role="status">Your basket is ${money(total - state.cash)} over your balance. Remove a packet or bundle to make room in your budget.</p>` : ""}</div><div class="seed-detail-actions seed-checkout-actions"><p><b>Total: ${money(total)}</b> · You have ${money(state.cash)}</p><button class="btn" onclick="checkout('seeds')" ${total <= 0 || total > state.cash ? "disabled" : ""}>Pay at checkout</button><button class="btn alt" onclick="closeDialog()">Keep shopping</button></div>`,
     "seed-basket",
   );
 }
@@ -122,7 +125,7 @@ function seedShopCheckout() {
       )
         .map(
           (c) =>
-            `<li>${c.name}: ${bought[c.id]} ${bought[c.id] === 1 ? "packet" : "packets"} purchased · ${state.seeds[c.id]} owned</li>`,
+            `<li>${seedName(c.id)}: ${bought[c.id]} ${c.id === "potato" ? (bought[c.id] === 1 ? "pack" : "packs") : bought[c.id] === 1 ? "packet" : "packets"} purchased · ${state.seeds[c.id]} owned</li>`,
         )
         .join(
           "",

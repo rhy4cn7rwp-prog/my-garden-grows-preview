@@ -210,3 +210,13 @@ outside Phase 1C.
   internal shelf scrolling with navigation/basket controls kept accessible.
 - New sign-geometry/mobile save checks plus seed purchases and existing village
   regressions pass. Native iPhone Safari remains unverified.
+
+## Seed-label educational accuracy update
+
+- Shared display-only names use singular crop names before “Seeds,” with
+  “Seed Potatoes” for potato planting material.
+- Applied to packet faces/accessibility labels, product details, bundle contents,
+  basket/checkout/receipts, planting inventory and planting choices.
+- Crop/produce names, IDs, prices, mechanics, artwork and saved data unchanged.
+- 107 automated tests and mobile shopping, planting recovery and sign checks
+  pass; actual iPhone Safari remains unverified.

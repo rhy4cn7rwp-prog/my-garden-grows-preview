@@ -47,7 +47,7 @@ test("mixed individual and fixed bundle checkout displays actual expanded receip
   assert.equal(c.state.seeds.onion, 5);
   assert.ok(c.html.includes("$27.00"));
   assert.ok(c.html.includes("$23.00"));
-  assert.ok(c.html.includes("Carrots: 6 packets purchased"));
+  assert.ok(c.html.includes("Carrot Seeds: 6 packets purchased"));
   assert.deepEqual(c.state.cart, {});
   for (const key of Object.keys(before).filter(
     (k) => !["cash", "cart", "seeds"].includes(k),
@@ -59,10 +59,10 @@ test("bundle information preserves predetermined assortment, exact discount, and
   const c = shop();
   c.seedShopBundle();
   for (const text of [
-    "3 carrots",
-    "2 onions",
-    "2 green beans",
-    "1 strawberry",
+    "Carrot Seeds × 3",
+    "Onion Seeds × 2",
+    "Green Bean Seeds × 2",
+    "Strawberry Seeds × 1",
     "$12.00",
     "$1.00",
     "per lb",
@@ -84,4 +84,38 @@ test("over-budget and empty baskets cannot pay; calling checkout directly remain
   c.state.cart = {};
   c.seedShopBasket();
   assert.match(c.html, /onclick="checkout\('seeds'\)" disabled/);
+});
+
+test("planting-material names stay accurate across packets, details and receipts without changing crop data", () => {
+  const c = shop(),
+    before = JSON.stringify(G.crops),
+    names = {
+      carrot: "Carrot Seeds",
+      corn: "Corn Seeds",
+      beans: "Green Bean Seeds",
+      strawberry: "Strawberry Seeds",
+      cucumber: "Cucumber Seeds",
+      potato: "Seed Potatoes",
+      onion: "Onion Seeds",
+      tomato: "Tomato Seeds",
+      lettuce: "Lettuce Seeds",
+      radish: "Radish Seeds",
+    };
+  const shelf = c.seedShopScene();
+  for (const [id, name] of Object.entries(names)) {
+    assert.equal(c.seedName(id), name);
+    assert.ok(shelf.includes(`aria-label="${name}"`));
+    c.seedShopDetails(id);
+    assert.ok(c.html.includes(`<h2>${name}</h2>`));
+    c.state.cart[id] = 1;
+  }
+  c.seedShopBasket();
+  for (const name of Object.values(names)) assert.ok(c.html.includes(name));
+  c.seedShopCheckout();
+  for (const name of Object.values(names))
+    assert.ok(c.html.includes(name + ":"));
+  assert.equal(c.state.cash, 32);
+  for (const id of Object.keys(names)) assert.equal(c.state.seeds[id], 1);
+  assert.equal(JSON.stringify(G.crops), before);
+  assert.deepEqual(G.recover(JSON.stringify(c.state)).seeds, c.state.seeds);
 });

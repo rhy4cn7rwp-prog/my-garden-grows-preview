@@ -90,9 +90,9 @@ function renderScene() {
         return `<button class="plot ${ready ? "ready" : ""}" onclick="plot(${i})" title="${p ? c.name : state.plan[i] ? crop(state.plan[i]).name + " planned · tap to cancel" : "Empty plot"}">${!p ? (state.plan[i] ? crop(state.plan[i]).icon : "") : ready ? c.icon : p.age === 0 ? "🌰" : p.age / c.days < 0.5 ? "🌱" : "🌿"}</button>`;
       })
       .join("")}</div>`;
-    bottom = `<h2>🌿 My Garden · 5 × 5</h2>${state.notice ? `<p role="status">${state.notice}</p>` : ""}<p>Available seeds: ${
+    bottom = `<h2>🌿 My Garden · 5 × 5</h2>${state.notice ? `<p role="status">${state.notice}</p>` : ""}<p>Available planting supplies: ${
       CROPS.filter((c) => state.seeds[c.id])
-        .map((c) => `${c.name}: ${Game.availableSeeds(state, c.id)}`)
+        .map((c) => `${seedName(c.id)}: ${Game.availableSeeds(state, c.id)}`)
         .join(" · ") || "none"
     }</p><p>Tap a plot to plant, inspect or harvest. ${state.plots.filter(Boolean).every((p) => p.watered) ? "💧 Plants watered today!" : "Plants need water to grow."}</p><div class="row"><button class="btn" onclick="water()">💧 Water all</button><button class="btn" onclick="plantPlanned()">🌱 Plant plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="cancelPlanting()" ${Object.keys(state.plan).length ? "" : "disabled"}>Cancel planting plan</button><button class="btn" onclick="harvestReady()">Harvest All Ready Crops</button><button class="btn alt" onclick="endDay()">☀️ End day</button><button class="btn alt" onclick="inventory()">🧺 Harvest basket</button></div>`;
   }
@@ -187,7 +187,7 @@ function seed(id) {
   if (view === "seeds") return seedShopDetails(id);
   let c = crop(id);
   show(
-    `<h2>${c.icon} ${c.name} Seeds</h2><p class="tag">${money(c.seed)} per seed packet</p><p>🌞 Sun-loving · 🌱 ${c.days} watered days to harvest</p><p>Harvest about ${c.yield} ${c.unit} · Sell for ${money(c.price)}/${c.unit}</p><p>${c.repeat ? "🔁 Repeat harvests" : "🌾 One harvest per planting"}</p><div class="qty"><button onclick="change('cart','${id}',-1)">−</button><b>${state.cart[id] || 0} in basket</b><button onclick="change('cart','${id}',1)">+</button></div><div><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,
+    `<h2>${c.icon} ${seedName(id)}</h2><p class="tag">${money(c.seed)} per ${id === "potato" ? "pack" : "seed packet"}</p><p>🌞 Sun-loving · 🌱 ${c.days} watered days to harvest</p><p>Harvest about ${c.yield} ${c.unit} · Sell for ${money(c.price)}/${c.unit}</p><p>${c.repeat ? "🔁 Repeat harvests" : "🌾 One harvest per planting"}</p><div class="qty"><button onclick="change('cart','${id}',-1)">−</button><b>${state.cart[id] || 0} in basket</b><button onclick="change('cart','${id}',1)">+</button></div><div><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,
     "seed-" + id,
   );
 }
@@ -202,7 +202,7 @@ function supply(id) {
 function supplyCartDialog(kind) {
   let items =
       kind === "seeds"
-        ? CROPS.map((c) => [c.id, c.icon + " " + c.name, c.seed])
+        ? CROPS.map((c) => [c.id, c.icon + " " + seedName(c.id), c.seed])
         : SUPPLIES.map((s) => [s[0], s[1] + " " + s[2], s[3]]),
     obj = kind === "seeds" ? state.cart : state.supcart;
   let chosen = items.filter((x) => obj[x[0]]);
@@ -221,7 +221,7 @@ function plotDialog(i) {
         `<h2>🌱 Empty garden plot</h2><p>You need seeds first!</p><button class="btn" onclick="go('seeds')">Visit Seed & Feed</button>`,
       );
     show(
-      `<h2>🌱 Plant this plot</h2><p>Choose a seed packet from your bag:</p>${options.map((c) => `<button class="btn alt" ${Game.availableSeeds(state, c.id) ? "" : "disabled"} onclick="plant(${i},'${c.id}')">${c.icon} ${c.name} (${Game.availableSeeds(state, c.id)} available)</button>`).join("")}`,
+      `<h2>🌱 Plant this plot</h2><p>Choose planting supplies from your bag:</p>${options.map((c) => `<button class="btn alt" ${Game.availableSeeds(state, c.id) ? "" : "disabled"} onclick="plant(${i},'${c.id}')">${c.icon} ${seedName(c.id)} (${Game.availableSeeds(state, c.id)} available)</button>`).join("")}`,
       "plant-seed",
     );
     return;

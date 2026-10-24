@@ -27,7 +27,7 @@ function change(kind, id, d) {
 function bundleInfo() {
   if (view === "seeds") return seedShopBundle();
   show(
-    `<h2>📦 Variety bundle · $11</h2><p>3 carrots, 2 onions, 2 beans, 1 strawberry. Individually $12 · save $1.</p><div class="qty"><button onclick="change('cart','bundle',-1)">−</button><b>${state.cart.bundle || 0} bundles</b><button onclick="change('cart','bundle',1)">+</button></div><button class="btn" onclick="cart('seeds')">View basket</button>`,
+    `<h2>📦 Variety bundle · $11</h2><p>${seedBundleContents()}. Individually $12 · save $1.</p><div class="qty"><button onclick="change('cart','bundle',-1)">−</button><b>${state.cart.bundle || 0} bundles</b><button onclick="change('cart','bundle',1)">+</button></div><button class="btn" onclick="cart('seeds')">View basket</button>`,
     "bundle",
   );
 }
@@ -35,7 +35,7 @@ function cart(kind) {
   if (kind !== "seeds") return supplyCartDialog(kind);
   if (view === "seeds") return seedShopBasket();
   const items = [
-    ...CROPS.map((c) => [c.id, c.name, c.seed]),
+    ...CROPS.map((c) => [c.id, seedName(c.id), c.seed]),
     ["bundle", "Variety bundle", 11],
   ];
   show(
