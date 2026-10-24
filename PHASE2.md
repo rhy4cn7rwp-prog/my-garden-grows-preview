@@ -184,3 +184,19 @@ outside Phase 1C.
 - Actual touch drops into all four surface types now include turning the view
   and refreshing after each drop. Pixel-reference checks remain required.
 - Native Safari still needs an actual-device playtest.
+
+## Seed & Feed interior delivered (current Phase 2D request)
+
+- New original illustrated timber shop and transparent crop atlas; original art
+  preserved. Shopkeeper remains visible behind the counter.
+- Real packet buttons on reusable shelf components, with catalog names/prices
+  and live basket badges; no static-packet hotspots or baked-in controls.
+- Compact bottom detail/basket drawer, crop-growing and selling information,
+  individual quantities and the unchanged $11 fixed eight-packet variety bundle.
+- Editable basket, affordability safeguards, exact receipt quantities/spending/
+  remaining money, pending-cart refresh and saved/backup inventory recovery.
+- `Game.purchase`, crop/equipment prices, market, garden, clubhouse camera,
+  goals and progression unchanged. All original seed artwork retained.
+- 106 rule/presentation tests, seven seed-shop mobile layouts and existing
+  13 mobile suites pass. Native iPhone Safari still needs a real-device check.
+- No other shop interior redesign has begun. Await player review of Seed & Feed.

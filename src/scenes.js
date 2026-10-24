@@ -58,7 +58,7 @@ function closeDialog() {
 function show(html, key = null) {
   dialogKey = key;
   const register = key === "payment";
-  popup = `<div class="modal ${register ? "register-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : ""}">${html}${register ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
+  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${register ? "register-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : ""}">${html}${register ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
   render();
 }
 function spot(x, y, w, h, action, title) {
@@ -81,12 +81,6 @@ function renderScene() {
             DREAMS.find((d) => d[0] === id)[2],
           );
     bottom = `<h2>🎯 Dream Shop</h2><p>Tap an available item on the shelves to choose a goal or buy it with your savings.</p>${Game.dreams.every((d) => Game.ownsDream(state, d.id)) ? "<p>Your dream collection is complete!</p>" : Game.ownsDream(state, DREAMS[state.goal][0]) ? "<p>Your reward is in your clubhouse. Tap another item to choose your next savings goal.</p>" : `<div class="progress"><span style="width:${Math.min(100, (100 * Game.savings(state)) / DREAMS[state.goal][3])}%"></span></div><p>${money(Game.savings(state))} saved after equipment charges toward ${DREAMS[state.goal][2]} (${money(DREAMS[state.goal][3])})</p>`}<button class="btn" onclick="go('clubhouse')">My Clubhouse</button>`;
-  }
-  if (view === "seeds") {
-    SHOP_HOTSPOTS.seeds.forEach(([id, x, y, w, h]) => {
-      stage += spot(x, y, w, h, `seed('${id}')`, crop(id).name + " seeds");
-    });
-    bottom = `<h2>🌰 Seed & Feed</h2><p>Tap a seed packet on the display to learn about it and add it to your basket.</p><button class="btn alt" onclick="bundleInfo()">📦 Variety bundle · $11 (save $1)</button><button class="btn" onclick="cart('seeds')">🛒 Basket (${Object.values(state.cart).reduce((a, b) => a + b, 0)}) · ${money(CROPS.reduce((a, c) => a + (state.cart[c.id] || 0) * c.seed, 0))}</button>`;
   }
   if (view === "garden") {
     stage += `<div class="plantgrid">${state.plots
@@ -151,10 +145,12 @@ function renderScene() {
   const content =
     view === "town"
       ? townScene()
-      : view === "clubhouse"
-        ? clubhouseScene()
-        : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
-  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
+      : view === "seeds"
+        ? seedShopScene()
+        : view === "clubhouse"
+          ? clubhouseScene()
+          : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
+  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "seeds" ? "seed-shop-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
   document.body.dataset.view = view;
 
   const app = $("#app"),
@@ -188,6 +184,7 @@ function dream(id) {
   );
 }
 function seed(id) {
+  if (view === "seeds") return seedShopDetails(id);
   let c = crop(id);
   show(
     `<h2>${c.icon} ${c.name} Seeds</h2><p class="tag">${money(c.seed)} per seed packet</p><p>🌞 Sun-loving · 🌱 ${c.days} watered days to harvest</p><p>Harvest about ${c.yield} ${c.unit} · Sell for ${money(c.price)}/${c.unit}</p><p>${c.repeat ? "🔁 Repeat harvests" : "🌾 One harvest per planting"}</p><div class="qty"><button onclick="change('cart','${id}',-1)">−</button><b>${state.cart[id] || 0} in basket</b><button onclick="change('cart','${id}',1)">+</button></div><div><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,

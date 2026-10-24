@@ -1,9 +1,59 @@
-# My Garden Grows 1.0 preview — Clubhouse Spatial Fix
+# My Garden Grows 1.0 preview — Seed & Feed Interior
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Seed & Feed interior — current Phase 2D
+
+Enter **Seed & Feed** from the village. A new sunlit wooden garden store keeps the
+friendly illustrated shopkeeper, pots, tools, flowers and watering cans visible.
+Ten separate illustrated seed packets sit on reusable wooden display shelves.
+These are actual merchandise buttons, not transparent hotspots over painted
+packets. Names, prices and basket badges are live catalog values. The welcome
+sign stays on the window side, clear of the shopkeeper's face.
+
+Tap a packet for its cost, owned quantity, watered growing days, yield/repeat
+harvest information and estimated market selling price (each or per pound).
+Choose 0–100 packets using the existing quantity rules. The existing **$11 variety
+bundle** remains fixed: 3 carrots, 2 onions, 2 green beans, 1 strawberry; individual
+cost $12, discount $1. Bundle and individual choices have equal green functional
+buttons; no preferred crop or profitability recommendation is added.
+
+The basket allows quantities to be reduced or increased, shows the exact total
+and available money, and disables empty/over-budget payment. The underlying
+`Game.purchase` still independently validates and performs the transaction.
+Nothing is charged or added to seed inventory until payment succeeds. Receipts
+show the amount paid, remaining balance and actual per-crop quantities, including
+expanded bundle contents. The shelf basket count includes all eight bundle
+packets. Existing pending baskets and saved/backup inventory remain supported.
+
+`src/seed-shop.js` and `src/seed-shop.css` own the new presentation. Existing seed
+entry points delegate only while in the seed shop. `src/game.js`, farming,
+market/customer/accounting, clubhouse camera, savings and progression rules are
+unchanged. Original art remains intact; the two new generated PNGs are preserved
+under `assets/seed-shop/source/`, with WebP runtime art totaling about 875 KiB.
+Only this shop interior is redesigned.
+
+**Validation:** `npm test` passes 106 rule/presentation tests. Four new checks cover
+live catalog merchandise, mixed individual/bundle payments and receipt inventory,
+fixed assortment arithmetic/selling units, and empty/over-budget checkout.
+`tests/mobile_seed_shop.py` uses actual touch events at 320×360, 320×440, 375×548,
+390×664, 428×746, 428×892 and 667×320, including safe areas and shorter Safari-style
+visible heights. It verifies all ten packet interactions, prices, repeat quantity
+updates without jumping, editable baskets, exact $29 mixed checkout from $50,
+18 received packets, $21 remaining, pending basket refresh, paid inventory refresh,
+backup recovery and unchanged other farm values. Existing 13 mobile suites pass.
+
+The main store fits without page scrolling. Very short screens may need to scroll
+inside the compact detail/basket drawer; checkout and close controls remain
+accessible. All automation uses isolated Chromium saves. **Native iPhone Safari
+is not verified here:** no physical device is attached, and the environment's
+WebKit download is proxy-blocked. On the iPhone 12 Pro Max, check the shopkeeper's
+visibility, packet labels, repeated taps, drawer scrolling, toolbar changes and a
+normal refresh. Do not clear website data. Review this store before another
+interior redesign begins.
 
 ## Clubhouse camera and treasure spatial fix
 
@@ -51,7 +101,7 @@ surface types at five phone/landscape sizes. It also compares the visible browse
 screenshot against the canvas throughout the unobstructed play area. It also checks a constant lens,
 refresh recovery, camera limits and unchanged farm/ownership/money. The existing
 actual-touch placement, customer/purchase and room-gesture suites remain in use.
-`npm test` passes **102 rule tests**. All mobile automation is isolated Chromium;
+`npm test` passes **106 rule tests**. All mobile automation is isolated Chromium;
 **native iPhone Safari remains unverified** because this environment has no
 physical iPhone and its WebKit browser download is blocked by the proxy.
 
@@ -188,7 +238,7 @@ congratulations/selection and existing market/farming rules are unchanged.
 
 ### Phase 2D validation and remaining manual checks
 
-`npm test` passes all **102 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
+`npm test` passes all **106 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
 painted-edge bounds, valid defaults, owned-only moves, compatible surfaces,
 collision rejection, exact save recovery, old/malformed layouts, per-item/cascade
 and whole-room resets, and recovery when optional room code is unavailable.
@@ -590,7 +640,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
   changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
   readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
   and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
-- `npm test`: 102 rule tests covering clubhouse ownership/checkout, goal congratulations
+- `npm test`: 106 rule tests covering clubhouse ownership/checkout, goal congratulations
   without auto-purchase, explicit next-goal selection, prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,

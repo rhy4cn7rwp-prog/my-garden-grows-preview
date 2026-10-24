@@ -9,6 +9,7 @@ function act(fn) {
   }
 }
 function checkout(kind) {
+  if (kind === "seeds" && view === "seeds") return seedShopCheckout();
   act(() => {
     const total = Game.purchase(state, kind);
     show(
@@ -24,6 +25,7 @@ function change(kind, id, d) {
   else supply(id);
 }
 function bundleInfo() {
+  if (view === "seeds") return seedShopBundle();
   show(
     `<h2>📦 Variety bundle · $11</h2><p>3 carrots, 2 onions, 2 beans, 1 strawberry. Individually $12 · save $1.</p><div class="qty"><button onclick="change('cart','bundle',-1)">−</button><b>${state.cart.bundle || 0} bundles</b><button onclick="change('cart','bundle',1)">+</button></div><button class="btn" onclick="cart('seeds')">View basket</button>`,
     "bundle",
@@ -31,6 +33,7 @@ function bundleInfo() {
 }
 function cart(kind) {
   if (kind !== "seeds") return supplyCartDialog(kind);
+  if (view === "seeds") return seedShopBasket();
   const items = [
     ...CROPS.map((c) => [c.id, c.name, c.seed]),
     ["bundle", "Variety bundle", 11],
@@ -334,16 +337,13 @@ function render() {
     x: window.scrollX,
     y: window.scrollY,
     dialog: document.querySelector(".dialog")?.scrollTop || 0,
+    seedBody: document.querySelector(".seed-detail-body")?.scrollTop || 0,
   };
   const sameView = renderedView === view,
     sameDialog =
       sameView && dialogKey !== null && renderedDialogKey === dialogKey;
   const focused = document.activeElement?.getAttribute("onclick");
   renderScene();
-  if (view === "seeds") {
-    const basket = document.querySelector(".bottom button:last-child");
-    basket.textContent = `🛒 Basket (${Object.values(state.cart).reduce((a, b) => a + b, 0)}) · ${money(Game.cartTotal(state, "seeds"))}`;
-  }
   if (document.body.dataset.saveWarning) {
     const p = document.createElement("p");
     p.setAttribute("role", "alert");
@@ -363,6 +363,8 @@ function render() {
     if (sameDialog) {
       const dialog = document.querySelector(".dialog");
       if (dialog) dialog.scrollTop = position.dialog;
+      const seedBody = document.querySelector(".seed-detail-body");
+      if (seedBody) seedBody.scrollTop = position.seedBody;
       if (focused)
         Array.from(dialog?.querySelectorAll("[onclick]") || [])
           .find((el) => el.getAttribute("onclick") === focused)
