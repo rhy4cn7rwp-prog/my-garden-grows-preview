@@ -5,6 +5,28 @@ Changes and deployment are restricted to `my-garden-grows-preview`. The original
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
 
+## Storybook sign refinements
+
+The village title now rests on a small light parchment/wood plaque with dark
+brown lettering. It stays readable over all four seasonal skies without a large
+new panel. Existing seasonal scenery, destinations and navigation are retained.
+
+Seed & Feed now has one decorative wooden plaque on the counter front. Its SVG
+uses the unchanged room image's source coordinates, cover scale and object
+position, including Safari visible-height changes. The upper-left floating shop
+heading is removed; the welcome message remains. The plaque never receives input,
+so packets and controls retain their existing touch behavior. In landscape it
+fits the exposed counter panel beside the merchandise. No image files changed.
+
+Normal portrait layouts still fit the screen. Very short portrait viewports
+retain a proportional room with internal shelf scrolling, sticky navigation and
+basket controls; the plaque and packet rows have separate physical space.
+`tests/mobile_storybook_signs.py` checks all four seasonal title variants, plaque
+attachment/visibility, non-overlap with touch targets, toolbar resizing and exact
+saved state at seven phone layouts. Seed-shop purchases/receipts/recovery and the
+three existing village suites pass, alongside all 106 rule/presentation tests.
+Native physical iPhone Safari remains a manual check.
+
 ## Seed & Feed interior — current Phase 2D
 
 Enter **Seed & Feed** from the village. A new sunlit wooden garden store keeps the
@@ -12,7 +34,7 @@ friendly illustrated shopkeeper, pots, tools, flowers and watering cans visible.
 Ten separate illustrated seed packets sit on reusable wooden display shelves.
 These are actual merchandise buttons, not transparent hotspots over painted
 packets. Names, prices and basket badges are live catalog values. The welcome
-sign stays on the window side, clear of the shopkeeper's face.
+message stays on the window side, clear of the shopkeeper's face.
 
 Tap a packet for its cost, owned quantity, watered growing days, yield/repeat
 harvest information and estimated market selling price (each or per pound).

@@ -26,16 +26,22 @@ try:
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight+1')
     available=page.evaluate('visualViewport.height')
     data=page.evaluate("[...document.querySelectorAll('.seed-shop-game button')].map(e=>({name:e.getAttribute('aria-label')||e.textContent,...e.getBoundingClientRect().toJSON()}))")
+    compact=width<height and available<548
     for b in data:
      assert b['width']>=44 and b['height']>=44,(width,height,b)
-     assert b['left']>=-1 and b['right']<=width+1 and b['top']>=top-1 and b['bottom']<=available-bottom+1,(width,height,b)
+     assert b['left']>=-1 and b['right']<=width+1,(width,height,b)
+     if not compact or b['name'] in ['Back to village','Clubhouse','View seed basket']:
+      assert b['top']>=top-1 and b['bottom']<=available-bottom+1,(width,height,b)
     assert page.locator('.spot').count()==0 and page.locator('.seed-packet').count()==10
     assert page.locator('[aria-label="Money balance"]').count()==1
+    if compact:return
     for e in page.locator('.seed-packet-price').all():
      assert e.bounding_box()['y']+e.bounding_box()['height']<=page.locator('.seed-shop-bottom').bounding_box()['y']+1,(width,height,'price hidden')
    fit();before=page.evaluate("({...state,cart:null,seeds:null,cash:null,display:Object.fromEntries(Object.entries(state.display).filter(([,n])=>n>0))})")
    crops=page.evaluate('CROPS')
    for c in crops:
+    if width<height and height<=530:
+     page.locator('[data-seed='+c['id']+']').evaluate("e=>{const app=document.querySelector('#app'),top=document.querySelector('.hud').getBoundingClientRect().bottom;app.scrollTop+=e.getBoundingClientRect().top-top-12}")
     target=page.locator('[data-seed='+c['id']+'] .seed-produce-art').bounding_box()
     assert target and target['height']>5
     page.touchscreen.tap(target['x']+target['width']/2,target['y']+target['height']/2)

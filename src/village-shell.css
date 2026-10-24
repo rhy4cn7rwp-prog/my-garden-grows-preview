@@ -125,3 +125,22 @@ body[data-view="town"] #app {
     transform: translate(-50%, -60%);
   }
 }
+/* A small parchment-wood title plaque stays legible over every seasonal sky. */
+.town-game .town-intro h1 {
+  width: fit-content;
+  max-width: calc(100% - 16px);
+  margin: 0 auto;
+  padding: 4px 10px;
+  color: #51331f;
+  text-shadow: 0 1px #fff8e4;
+  background: repeating-linear-gradient(
+    2deg,
+    #fff0d2f5 0 8px,
+    #f8e8c8f5 9px 10px
+  );
+  border: 1px solid #b8946180;
+  border-radius: 9px 6px 10px 6px;
+  box-shadow:
+    0 2px 4px #53371e33,
+    inset 0 0 0 2px #fff9e488;
+}

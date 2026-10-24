@@ -58,8 +58,9 @@ function seedShopScene() {
         return `<button class="seed-packet" data-seed="${id}" onclick="seed('${id}')" aria-label="${c.name} seeds"><span class="seed-packet-name">${SEED_PACKET_NAMES[id]}</span>${seedProduceArt(id)}<span class="seed-packet-price">${money(c.seed)}</span><span class="seed-packet-count" aria-label="In basket" ${state.cart[id] ? "" : "hidden"}>${state.cart[id] || 0}</span></button>`;
       })
       .join("")}</div>`;
-  return `<div class="seed-shop-world"><img class="seed-shop-interior" src="assets/seed-shop/interior.webp" alt="A friendly shopkeeper in a straw hat welcomes you to a sunlit wooden garden store, with flowers, pots, tools and watering cans." fetchpriority="high"/></div>
-  <section class="seed-shop-heading"><h1>Seed &amp; Feed</h1><p>Welcome, gardener! Tap a packet to explore.</p></section>
+  return `<div class="seed-shop-world"><img class="seed-shop-interior" src="assets/seed-shop/interior.webp" alt="A friendly shopkeeper in a straw hat welcomes you to a sunlit wooden garden store, with flowers, pots, tools and watering cans." fetchpriority="high"/>
+  <h1 class="seed-counter-sign" aria-label="Seed &amp; Feed"><svg viewBox="0 0 1024 1536" aria-hidden="true" focusable="false"><defs><linearGradient id="seed-sign-wood" x2="0" y2="1"><stop stop-color="#efc27b"/><stop offset=".45" stop-color="#dba65c"/><stop offset="1" stop-color="#bf813e"/></linearGradient></defs><g class="seed-counter-plaque"><rect x="285" y="570" width="454" height="94" rx="9" fill="#6d3e1e" opacity=".35" transform="translate(1 5)"/><rect x="285" y="570" width="454" height="94" rx="9" fill="url(#seed-sign-wood)" stroke="#74451f" stroke-width="4"/><rect x="294" y="578" width="436" height="77" rx="5" fill="none" stroke="#f9dd9a" stroke-width="2" opacity=".7"/><path d="M303 586q75 6 132 0t134 1t149-2M303 647q100-5 180 0t235-2" fill="none" stroke="#9b632d" stroke-width="2" opacity=".3"/><circle cx="308" cy="616" r="5" fill="#785332"/><circle cx="716" cy="616" r="5" fill="#785332"/><text x="512" y="635" text-anchor="middle" font-family="Georgia,serif" font-size="52" font-weight="bold" fill="#54301a" stroke="#fff0bc" stroke-width=".6" paint-order="stroke">Seed &amp; Feed</text></g></svg></h1></div>
+  <section class="seed-shop-heading"><p>Welcome, gardener! Tap a packet to explore.</p></section>
   <section class="seed-display" aria-label="Seed packet shelves">${row(SEED_SHOP_ART.slice(0, 5))}${row(SEED_SHOP_ART.slice(5))}</section>
   <div class="seed-shop-bottom bottom"><button class="btn seed-bundle" onclick="bundleInfo()">Variety bundle · ${money(11)}<small>Fixed assortment · save ${money(1)}</small></button><button class="btn" onclick="cart('seeds')" aria-label="View seed basket">Basket (${count} ${count === 1 ? "packet" : "packets"})<small>${money(total)} · review &amp; checkout</small></button></div>`;
 }
@@ -128,5 +129,37 @@ function seedShopCheckout() {
         )}</ul></div><div class="seed-detail-actions"><button class="btn" onclick="closeDialog()">Back to the shelves</button></div>`,
       "seed-receipt",
     );
+  });
+}
+
+// The plaque shares the original photograph's cover scale and object position.
+// Resizing Safari moves the sign WITH the counter, never as an independent HUD.
+function syncSeedShopSign() {
+  const room = document.querySelector(".seed-shop-world"),
+    sign = document.querySelector(".seed-counter-sign");
+  if (!room || !sign) return;
+  const w = room.clientWidth,
+    h = room.clientHeight,
+    scale = Math.max(w / 1024, h / 1536),
+    landscape = matchMedia(
+      "(orientation: landscape) and (max-height: 500px)",
+    ).matches;
+  sign
+    .querySelector(".seed-counter-plaque")
+    .setAttribute(
+      "transform",
+      landscape ? "translate(71.5 308.5) scale(.5)" : "",
+    );
+  room.parentElement.style.setProperty(
+    "--seed-counter-bottom",
+    (landscape ? 640.5 : 664) * scale +
+      (landscape ? (h - 1536 * scale) * 0.29 : 0) +
+      "px",
+  );
+  Object.assign(sign.style, {
+    width: 1024 * scale + "px",
+    height: 1536 * scale + "px",
+    left: (landscape ? 0 : (w - 1024 * scale) / 2) + "px",
+    top: (landscape ? (h - 1536 * scale) * 0.29 : 0) + "px",
   });
 }

@@ -418,3 +418,43 @@ body[data-view="seeds"] #app {
   font-size: 12px;
   padding: 3px 6px;
 }
+
+/* A source-space plaque fixed to the counter; it never receives touches. */
+.seed-counter-sign {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+}
+.seed-counter-sign svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* A full, proportional room needs a little scroll space on very short phones. */
+@media (orientation: portrait) {
+  body[data-view="seeds"] #app {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .seed-shop-game {
+    min-height: 548px;
+    overflow: visible;
+  }
+  .seed-display {
+    top: max(45%, calc(var(--seed-counter-bottom, 0px) + 12px));
+  }
+  .seed-shop-game .hud {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .seed-shop-bottom.bottom {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    z-index: 4;
+  }
+}
+.seed-shop-world {
+  overflow: hidden;
+}

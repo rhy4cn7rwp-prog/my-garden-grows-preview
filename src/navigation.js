@@ -67,6 +67,7 @@ function syncGameViewport() {
     (viewport ? viewport.height : innerHeight) - top - bottom < 470
       ? "true"
       : "false";
+  if (typeof syncSeedShopSign === "function") syncSeedShopSign();
   if (typeof syncVillagePageCanvas === "function") syncVillagePageCanvas();
   if (typeof syncClubhouseCanvas === "function") syncClubhouseCanvas();
   if (typeof syncInteractiveClubhouse === "function")

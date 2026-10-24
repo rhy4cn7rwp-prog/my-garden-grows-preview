@@ -200,3 +200,13 @@ outside Phase 1C.
 - 106 rule/presentation tests, seven seed-shop mobile layouts and existing
   13 mobile suites pass. Native iPhone Safari still needs a real-device check.
 - No other shop interior redesign has begun. Await player review of Seed & Feed.
+
+## Small village and counter-sign refinement
+
+- Subtle light title plaque with dark lettering, verified across four seasons.
+- Wooden Seed & Feed plaque attached in the original counter's image coordinates;
+  floating upper-left heading removed. Artwork and purchasing rules unchanged.
+- Safe placement above merchandise, responsive counter attachment and small-screen
+  internal shelf scrolling with navigation/basket controls kept accessible.
+- New sign-geometry/mobile save checks plus seed purchases and existing village
+  regressions pass. Native iPhone Safari remains unverified.
