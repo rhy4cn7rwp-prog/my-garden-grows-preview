@@ -1,9 +1,80 @@
-# My Garden Grows 1.0 preview — Phase 2D: Interactive Clubhouse
+# My Garden Grows 1.0 preview — Phase 2E: Treasure Placement
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 2E: treasures rest on real surfaces
+
+The clubhouse artwork is **unchanged**. Placement now follows measured contact
+edges in the original panorama: individual bookshelf rows, the cushioned window
+seat and reading bench, the inside of the open chest, and a broad two-dimensional
+floor area that excludes furniture and the pet cushion.
+
+Hold a purchased treasure for about half a second, drag, and release near a
+suitable surface. It snaps to the nearest supported surface; the active drop area
+has a soft highlight. Invalid or excessively overlapping drops return to the
+previous saved spot. Large items stay on the floor; smaller items fit on shelves,
+seats and inside the chest. The floor allows both horizontal placement and depth,
+rather than the former narrow horizontal band. Turning, My treasures, restore
+controls, Dream Shop purchases, finances and all other game rules are retained.
+
+Swipe **up/down** to glance toward high shelves or the floor, as well as left/right
+for the same ±80° panorama. This changes only the view from the fixed standing
+position. Holding a moving treasure near a view edge briefly, then continuing to
+hold, can turn/tilt the room. A stationary hold or quick drop near an edge does
+not start a camera move. Reduced-motion settings still skip animated button turns.
+
+### Why items no longer float
+
+- Surface definitions in `src/clubhouse-layout.js` are measured on the unchanged
+  2172 × 724 painting. Shelf rows follow their own sloping top edges. Cushion
+  anchors sit on the actual cushion, and chest anchors sit behind the front rim.
+- The visible sprite's **bottom contact** is projected with the same rays and
+  camera framing as the artwork. Camera straps may hang below the contact point;
+  the camera body still rests on the shelf. Small contact shadows reinforce the
+  surface. Source-sized props scale with floor depth and viewing perspective.
+- The visible artwork is never independently clamped to the viewport. Only its
+  invisible touch target adjusts to remain comfortable (at least 44 px). Finding
+  an item adjusts the whole room's framing, and the display layers clip at the
+  fixed controls, so treasures cannot cover navigation.
+- A transparent foreground canvas redraws the original chest front panel above
+  chest contents. No new art or image downloads are used. Floor items stay in a
+  separate layer **in front of** the chest, while stored items remain partly
+  hidden **inside** it. The carried preview is above furniture until released.
+- Placement collisions compare the actual source-space silhouettes instead of a
+  large arbitrary angular gap, allowing multiple small items on a shelf or in the
+  chest. The floor contour accounts for the whole item's footprint.
+- Drop highlights and chest masks are clipped to the visible angular range before
+  projection, preventing polygons behind the viewer from crossing the scene.
+
+### Saved progress and checks
+
+The farm save remains version 1 with the same `mgg10` / `mgg10-backup` keys.
+`clubhouseLayoutVersion: 2` distinguishes bottom-contact layouts from Phase 2D's
+center-based positions. Identified older positions retain their horizontal place
+where it fits and snap to the corresponding real surface. Previously hanging
+music-wall items move to a supported floor position. A floor spot intersecting
+furniture moves just forward onto clear floor. Ownership, purchase dates, cash,
+crops, bags, rentals, accounting and the chosen savings goal are not changed.
+Version-2 placements survive repeated recovery exactly; missing/corrupt optional
+placements never reset an otherwise valid farm.
+
+`tests/clubhouse-placement.test.cjs` checks surface measurements, item-size limits,
+multiple-item space, floor exclusion/depth, chest occlusion data, layout migration
+and repeated save recovery. `tests/mobile_clubhouse_placement.py` uses real touch
+pointer sequences in isolated Chromium contexts to drop into the chest, three
+shelf rows, the window seat and multiple floor locations. It checks actual sprite
+contact coordinates against the artwork projection, samples foreground pixels to
+verify chest layering, and exercises rotation, vertical glances, dynamic browser
+height, orientation changes and refresh at seven phone sizes. Existing suites
+still test the complete purchase/goal and gameplay flows.
+
+Actual iPhone Safari is still **unverified**: no physical iPhone is attached and
+WebKit installation is proxy-blocked. Please playtest shelf snapping, partly
+visible chest contents, edge carrying, Safari toolbar changes, rotation and a
+refresh on the reported iPhone 12 Pro Max/iOS 27.0.1. Do not clear website data.
 
 ## Phase 2D: look around and make the Clubhouse yours
 
@@ -45,9 +116,10 @@ congratulations/selection and existing market/farming rules are unchanged.
   not a walkable 3D reconstruction. It never stretches the old portrait image
   into a wide strip. Changing yaw keeps the same eye position; screen resizing
   changes the field of view/crop rather than stored room coordinates.
-- The new panorama WebP is about **464 KB**. A single canvas caps its pixel ratio
+- The new panorama WebP is about **464 KB**. The background canvas caps its pixel ratio
   at 1.5 and draws only during input, viewport changes or a short button turn.
-  There is no idle paint loop, WebGL context, video or collection of room copies.
+  Phase 2E adds one clipped transparent chest-front layer at the same capped
+  resolution. There is no idle paint loop, WebGL context, video or collection of room copies.
   Reduced motion makes button-driven turns immediate; direct finger movement
   remains direct, without inertia.
 - The additive version-1 `clubhousePositions` field stores each owned item's
@@ -59,7 +131,7 @@ congratulations/selection and existing market/farming rules are unchanged.
 
 ### Phase 2D validation and remaining manual checks
 
-`npm test` passes all **87 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
+`npm test` passes all **96 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
 painted-edge bounds, valid defaults, owned-only moves, compatible surfaces,
 collision rejection, exact save recovery, old/malformed layouts, per-item/cascade
 and whole-room resets, and recovery when optional room code is unavailable.
@@ -461,7 +533,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
   changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
   readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
   and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
-- `npm test`: 87 rule tests covering clubhouse ownership/checkout, goal congratulations
+- `npm test`: 96 rule tests covering clubhouse ownership/checkout, goal congratulations
   without auto-purchase, explicit next-goal selection, prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,

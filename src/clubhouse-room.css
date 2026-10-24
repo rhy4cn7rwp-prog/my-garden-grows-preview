@@ -10,13 +10,6 @@ html[data-clubhouse-canvas] {
   -webkit-touch-callout: none;
 }
 .clubhouse-panorama,
-.clubhouse-drop-surfaces {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
 .clubhouse-panorama {
   opacity: 0;
 }
@@ -29,9 +22,6 @@ html[data-clubhouse-canvas] {
 .clubhouse-world[data-painted] .clubhouse-room-art {
   opacity: 0;
 }
-.clubhouse-displays {
-  inset: 0;
-}
 .clubhouse-world .clubhouse-item {
   touch-action: none;
   -webkit-user-select: none;
@@ -39,18 +29,6 @@ html[data-clubhouse-canvas] {
 }
 .clubhouse-world .clubhouse-item[hidden] {
   display: none;
-}
-.clubhouse-item[data-moving] {
-  z-index: 10;
-  filter: drop-shadow(0 4px 5px #fff2ae);
-}
-.clubhouse-item[data-moving][data-valid-drop="false"] {
-  filter: drop-shadow(0 4px 5px #edc08e);
-}
-.clubhouse-drop-surfaces polygon {
-  fill: #fff0a852;
-  stroke: #ffedb4b0;
-  stroke-width: 2;
 }
 .clubhouse-world .clubhouse-item:active .clubhouse-reward-art {
   transform: none;
@@ -108,4 +86,74 @@ html[data-clubhouse-canvas] {
     transition: none !important;
     animation: none !important;
   }
+}
+/* Phase 2E: art is bottom-anchored to the painting; only the invisible touch
+   target is kept large. Room framing moves the background and treasures together. */
+.clubhouse-visual {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+.clubhouse-contact-shadow {
+  position: absolute;
+  left: 12%;
+  bottom: var(--tail-offset, 0px);
+  width: 76%;
+  height: 5%;
+  min-height: 2px;
+  border-radius: 50%;
+  background: #5f37194d;
+  filter: blur(1px);
+}
+.clubhouse-occlusion {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+.clubhouse-drop-surfaces polygon {
+  fill: #fff3b12b;
+  stroke: #ffedb478;
+  stroke-width: 1;
+}
+.clubhouse-drop-surfaces polygon[data-active="true"] {
+  fill: #d9f39e66;
+  stroke: #f4ffd1;
+}
+.clubhouse-item[data-moving] .clubhouse-visual {
+  visibility: hidden;
+}
+.clubhouse-drag-ghost {
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 4px #fff1b0);
+}
+.clubhouse-drag-ghost .clubhouse-contact-shadow {
+  opacity: 0;
+}
+.clubhouse-drag-ghost[data-valid-drop="false"] {
+  filter: drop-shadow(0 3px 4px #d5b28b);
+}
+/* The chest front masks only contents. Floor treasures remain in front of it. */
+.clubhouse-chest-displays {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.clubhouse-displays,
+.clubhouse-chest-displays {
+  pointer-events: none;
+}
+.clubhouse-item {
+  pointer-events: auto;
+}
+
+.clubhouse-displays {
+  inset: 0;
+  z-index: 3;
+}
+.clubhouse-drop-surfaces {
+  z-index: 4;
 }

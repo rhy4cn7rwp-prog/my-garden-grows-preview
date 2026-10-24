@@ -14,19 +14,15 @@ function clubhouseRewardArt(id, className = "") {
     clip = `reward-${id}-${className || "room"}`;
   return `<svg class="clubhouse-reward-art ${className}" viewBox="${slot.bounds}" aria-hidden="true" focusable="false"><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${width}" height="${height}"/></clipPath></defs><image href="assets/clubhouse/rewards.webp" width="1535" height="1024" clip-path="url(#${clip})"/></svg>`;
 }
-function clubhouseDisplaySupport(id) {
-  if (!["camera", "tablet"].includes(id)) return "";
-  return '<svg class="clubhouse-display-support" viewBox="0 0 120 24" aria-hidden="true"><path d="M6 2h108l5 8-6 5H7l-6-5Z" fill="#e6ad62" stroke="#88582f" stroke-width="2"/><path d="M2 10h116M16 6h30m17 0h33M20 15v6h9l5-6m52 0 5 6h9v-6" fill="none" stroke="#b3783e" stroke-width="2"/></svg>';
-}
 function clubhouseScene() {
   const owned = Game.dreams.filter((d) => Game.ownsDream(state, d.id));
-  return `<section class="clubhouse-heading"><h1>My Clubhouse</h1><p>Swipe to look · Hold a treasure to move</p></section>
+  return `<section class="clubhouse-heading"><h1>My Clubhouse</h1><p>Swipe around or up/down · Hold a treasure to move</p></section>
     <section class="clubhouse-world" tabindex="0" aria-label="Clubhouse panorama. Swipe to turn or use the Look buttons."><div class="clubhouse-room">
       <img class="clubhouse-room-art" src="assets/clubhouse/panorama.webp" alt="A connected wooden hideaway: reading bench to the left, round window and seating nook in the middle, shelves and toy chest to the right, and a wooden floor with a braided rug." fetchpriority="high"/>
       <canvas class="clubhouse-panorama" aria-hidden="true"></canvas>
       <svg class="clubhouse-drop-surfaces" aria-hidden="true"></svg>
-      <div class="clubhouse-displays" aria-label="Purchased dream collection">${owned.map((d) => `<button class="clubhouse-item clubhouse-${d.id}" data-dream="${d.id}" onclick="clubhouseItem('${d.id}')" aria-label="${d.name} · ${CLUBHOUSE_DISPLAYS[d.id].area}">${clubhouseRewardArt(d.id)}${clubhouseDisplaySupport(d.id)}</button>`).join("")}</div>
-    </div></section>
+      <div class="clubhouse-displays" aria-label="Purchased dream collection">${owned.map((d) => `<button class="clubhouse-item clubhouse-${d.id}" data-dream="${d.id}" onclick="clubhouseItem('${d.id}')" aria-label="${d.name} · ${CLUBHOUSE_DISPLAYS[d.id].area}"><span class="clubhouse-visual"><span class="clubhouse-contact-shadow"></span>${clubhouseRewardArt(d.id)}</span></button>`).join("")}</div>
+    <div class="clubhouse-chest-displays"></div></div><canvas class="clubhouse-occlusion" aria-hidden="true"></canvas></section>
     <div class="clubhouse-bottom bottom"><div class="clubhouse-look-controls" aria-label="Look around the clubhouse"><button class="btn" onclick="turnClubhouse(-30)" aria-label="Look left">←</button><button class="btn alt" onclick="lookClubhouse(0)" aria-label="Look straight ahead">Center</button><button class="btn" onclick="turnClubhouse(30)" aria-label="Look right">→</button><button class="btn alt" onclick="clubhouseTreasures()">My treasures</button></div><output class="clubhouse-direction" aria-label="Viewing direction">Looking straight ahead</output><button class="btn" onclick="go('town')">Return to village</button><button class="btn alt" onclick="go('dream')">Dream Shop</button><span class="clubhouse-status" role="status" aria-live="polite"></span></div>`;
 }
 function clubhouseItem(id) {

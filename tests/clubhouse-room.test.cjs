@@ -76,12 +76,13 @@ test("floor, shelf and wall compatibility prevents impossible placement and out-
     assert.deepEqual(s, before);
   }
   assert.equal(L.drop("bike", 57, 0.38), null);
-  assert.equal(L.drop("ball", 94, 0.83), null);
-  assert.deepEqual(L.drop("tablet", 60, 0.41), {
-    surface: "right-shelf",
-    angle: 60,
-    y: 0.38,
-  });
+  assert.equal(L.drop("ball", 120, 0.83), null);
+  const shelf = L.point(
+    "shelf-right-middle",
+    1638,
+    L.contactY("shelf-right-middle", 1638),
+  );
+  assert.deepEqual(L.drop("tablet", shelf.angle, shelf.y + 0.01), shelf);
 });
 test("repositioning changes only the optional room layout and survives normal and backup recovery", () => {
   const s = farm(),
@@ -109,7 +110,7 @@ test("treasures cannot be dropped into another occupied spot", () => {
 });
 test("restoring an item frees an occupied home spot safely without losing ownership", () => {
   const s = farm();
-  G.moveClubhouseItem(s, "bike", { surface: "floor", angle: -40, y: 0.83 });
+  G.moveClubhouseItem(s, "bike", { surface: "floor", angle: -52, y: 0.83 });
   G.moveClubhouseItem(s, "ball", { surface: "floor", angle: -72, y: 0.83 });
   const before = copy(s);
   assert.deepEqual(G.resetClubhouseItem(s, "bike"), ["bike", "ball"]);

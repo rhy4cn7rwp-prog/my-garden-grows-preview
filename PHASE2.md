@@ -87,6 +87,26 @@ iPhone is attached and WebKit installation is blocked by the environment proxy.
   behavior and existing gameplay are tested. Physical iPhone Safari still needs
   manual checks of long press, edge turns, real toolbar transitions and speed.
 
+## Phase 2E delivered: surface-anchored treasure placement
+
+- Current panorama, reward art, navigation, 160° viewing and non-placement game
+  rules are unchanged. Sprites now use bottom-contact anchors measured directly
+  on the painting, including separate shelf rows, cushions, chest and clear floor.
+- Depth/angle scaling, contact shadows and a clipped copy of the original chest
+  front provide natural placement/layering. Floor objects remain in front of
+  furniture; chest contents are intentionally partly hidden inside it.
+- Compatible items snap to the nearest valid surface; invalid/occupied drops
+  revert. Smaller silhouettes allow multiple treasures per display. The floor
+  supports two-dimensional placement outside furniture footprints.
+- Vertical glances and coherent camera framing reach high shelves without moving
+  the standing position or detaching objects from the painting. Quick edge drops
+  and stationary holds do not trigger edge turning.
+- Layout schema 2 migrates old center-based positions onto supported surfaces,
+  preserving farm state and ownership. Save recovery is stable after migration.
+- Pure and mobile tests cover all surface types, pixel-level chest occlusion,
+  contact alignment during rotation, real touch drops, orientation/toolbar
+  changes and saved layouts. Physical iPhone Safari remains a manual check.
+
 ## Later phases — other interiors remain deferred
 
 Preserve prototype 0.9's colorful storybook appearance, characters and atmosphere.

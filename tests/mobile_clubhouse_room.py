@@ -106,10 +106,10 @@ try:
     assert page.evaluate('state.clubhousePositions')=={}
     # A camera can move to an actual shelf, a bicycle cannot.
     find('camera');box=page.locator('[data-dream=camera]').bounding_box();look(18)
-    dest=page.evaluate("roomItemPoint('camera',{angle:23,y:.31})")
+    dest=page.evaluate("roomItemPoint('camera',ClubhouseLayout.canonical('camera','shelf-nook-middle',1294))")
     box=page.locator('[data-dream=camera]').bounding_box();touch('touchStart',box['x']+box['width']/2,box['y']+box['height']/2);page.wait_for_timeout(480)
     touch('touchMove',dest['x'],dest['y']);page.wait_for_timeout(30);touch('touchEnd');page.wait_for_timeout(30)
-    assert page.evaluate('state.clubhousePositions.camera.surface')=='nook-shelf'
+    assert page.evaluate('state.clubhousePositions.camera.surface')=='shelf-nook-middle'
     tap('My treasures');tap('Restore all item positions');assert page.evaluate('state.clubhousePositions')=={}
     assert stable()==before
     # Button turns animate gently; reduced motion applies immediately.

@@ -99,60 +99,264 @@ function requestClubhousePaint() {
   if (!clubhouseRoom.frame && clubhouseRoom.world)
     clubhouseRoom.frame = requestAnimationFrame(paintClubhouse);
 }
-function roomItemSize(id, g, usable) {
-  const available = usable.bottom - usable.top;
-  let width = ClubhouseLayout.clamp(
-      Math.min(g.width * 0.18, available * 0.36),
-      50,
-      76,
-    ),
-    height = width * 0.85;
-  if (id === "ball") {
-    width = ClubhouseLayout.clamp(
-      Math.min(g.width * 0.17, available * 0.35),
-      48,
-      82,
-    );
-    height = width;
-  }
-  if (id === "bike") {
-    width = ClubhouseLayout.clamp(
-      Math.min(g.width * 0.4, available * 0.9),
-      86,
-      190,
-    );
-    height = width * 0.78;
-  }
-  if (id === "guitar") {
-    height = ClubhouseLayout.clamp(available * 0.5, 70, 150);
-    width = height * 0.56;
-  }
-  if (id === "puppy") height = width * 0.97;
-  const scale = Math.min(1, (available - 4) / height);
+function roomItemSize(
+  id,
+  g,
+  usable,
+  p = ClubhouseLayout.effective(state.clubhousePositions, id),
+) {
+  p = { surface: ClubhouseLayout.defaults[id].surface, ...p };
+  const m = ClubhouseLayout.metrics(id, p),
+    scale =
+      g.paintedHeight /
+      724 /
+      Math.max(0.4, Math.cos(((p.angle - clubhouseRoom.yaw) * Math.PI) / 180));
   return {
-    width: Math.max(44, width * scale),
-    height: Math.max(44, height * scale),
+    visualWidth: m.width * scale,
+    visualHeight: m.height * scale,
+    occlusion: m.occlusion * scale,
+    tail: m.tail * scale,
   };
 }
 function roomItemPoint(id, p) {
   const r = clubhouseRoom,
-    size = roomItemSize(id, r.geometry, r.usable),
+    size = roomItemSize(id, r.geometry, r.usable, p),
     projected = ClubhouseLayout.project(p, r.yaw, r.geometry);
+  const left = projected.x - size.visualWidth / 2,
+    top = projected.y - size.visualHeight + size.tail,
+    visibleBottom =
+      projected.y + (size.occlusion ? -size.occlusion : size.tail),
+    width = Math.min(
+      r.usable.right - r.usable.left,
+      Math.max(44, size.visualWidth),
+    ),
+    height = Math.min(
+      r.usable.bottom - r.usable.top,
+      Math.max(44, size.visualHeight - size.occlusion),
+    );
+  const x = ClubhouseLayout.clamp(
+      projected.x,
+      r.usable.left + width / 2,
+      r.usable.right - width / 2,
+    ),
+    y = ClubhouseLayout.clamp(
+      (top + visibleBottom) / 2,
+      r.usable.top + height / 2,
+      r.usable.bottom - height / 2,
+    );
+  const overlapX =
+      Math.min(left + size.visualWidth, r.usable.right) -
+      Math.max(left, r.usable.left),
+    overlapY =
+      Math.min(visibleBottom, r.usable.bottom) - Math.max(top, r.usable.top);
   return {
     ...size,
-    x: ClubhouseLayout.clamp(
-      projected.x,
-      r.usable.left + size.width / 2,
-      r.usable.right - size.width / 2,
-    ),
-    y: ClubhouseLayout.clamp(
-      projected.y,
-      r.usable.top + size.height / 2,
-      r.usable.bottom - size.height / 2,
-    ),
+    width,
+    height,
+    x,
+    y,
+    footX: projected.x,
+    footY: projected.y,
+    visualLeft: left,
+    visualTop: top,
+    offsetX: left - (x - width / 2),
+    offsetY: top - (y - height / 2),
     visible:
-      projected.visible && projected.x >= 0 && projected.x <= r.geometry.width,
+      projected.visible &&
+      overlapX >= Math.min(14, size.visualWidth * 0.4) &&
+      overlapY >= Math.min(14, (size.visualHeight - size.occlusion) * 0.4),
   };
+}
+function applyRoomItem(button, point) {
+  button.hidden = !point.visible;
+  Object.assign(button.style, {
+    left: point.x + "px",
+    top: point.y + "px",
+    width: point.width + "px",
+    height: point.height + "px",
+  });
+  const visual = button.querySelector(".clubhouse-visual");
+  Object.assign(visual.style, {
+    left: point.offsetX + "px",
+    top: point.offsetY + "px",
+    width: point.visualWidth + "px",
+    height: point.visualHeight + "px",
+  });
+  visual.style.setProperty("--tail-offset", point.tail + "px");
+}
+function frameClubhouseTreasure(id, yaw = clubhouseRoom.yaw) {
+  const r = clubhouseRoom;
+  if (!r.geometry) return;
+  r.focusId = id;
+  const p = id
+    ? ClubhouseLayout.effective(state.clubhousePositions, id)
+    : { surface: "floor", angle: yaw, y: 0.84 };
+  r.geometry.horizon = r.baseHorizon;
+  // Find can widen the SAME fixed-position view enough to show a treasure
+  // near a panorama limit; the painting and all items share the projection.
+  for (let i = 0; id && i < 16; i++) {
+    const q = ClubhouseLayout.project(p, yaw, r.geometry),
+      m = ClubhouseLayout.metrics(id, p),
+      half = (m.width * r.geometry.paintedHeight) / 724 / 2;
+    if (q.x - half >= r.usable.left && q.x + half <= r.usable.right) break;
+    const minimum = r.geometry.width / (2 * Math.tan(Math.PI / 6));
+    if (r.geometry.focal <= minimum + 0.01) break;
+    r.geometry.focal = Math.max(minimum, r.geometry.focal * 0.94);
+    r.geometry.paintedHeight = (r.geometry.focal * ((240 * Math.PI) / 180)) / 3;
+    r.baseHorizon =
+      (r.geometry.height - r.geometry.paintedHeight) * 0.85 +
+      r.geometry.paintedHeight * 0.5;
+    r.geometry.horizon = r.baseHorizon;
+  }
+  const projected = ClubhouseLayout.project(p, yaw, r.geometry),
+    m = ClubhouseLayout.metrics(id || "ball", p),
+    scale =
+      r.geometry.paintedHeight /
+      724 /
+      Math.cos(((p.angle - yaw) * Math.PI) / 180),
+    height = m.height * scale,
+    occlusion = m.occlusion * scale;
+  const min = r.usable.top + height + 8,
+    max = r.usable.bottom + occlusion - 8;
+  const wanted = min > max ? max : ClubhouseLayout.clamp(projected.y, min, max);
+  r.geometry.horizon += wanted - projected.y;
+  constrainRoomPitch();
+}
+function constrainRoomPitch() {
+  const r = clubhouseRoom;
+  r.geometry.horizon = ClubhouseLayout.clamp(
+    r.geometry.horizon,
+    r.usable.bottom - r.geometry.paintedHeight / 2,
+    r.usable.top + r.geometry.paintedHeight / 2,
+  );
+}
+function tiltClubhouse(amount) {
+  const r = clubhouseRoom;
+  if (!r.geometry) return;
+  r.geometry.horizon += amount;
+  constrainRoomPitch();
+  r.manualPitch =
+    (r.geometry.horizon - r.baseHorizon) / r.geometry.paintedHeight;
+  requestClubhousePaint();
+}
+function roomProjectedPolygon(points) {
+  const r = clubhouseRoom,
+    result = [],
+    half = (Math.atan(r.geometry.width / 2 / r.geometry.focal) * 180) / Math.PI;
+  // Clip in painting space BEFORE projection. Vertices behind the head must
+  // never create a giant highlight or occlusion across the opposite wall.
+  for (const [bound, keepLeft] of [
+    [ClubhouseLayout.pixelAt(r.yaw - half), false],
+    [ClubhouseLayout.pixelAt(r.yaw + half), true],
+  ]) {
+    const clipped = [];
+    for (let i = 0; i < points.length; i++) {
+      const a = points[(i + points.length - 1) % points.length],
+        b = points[i],
+        ai = keepLeft ? a[0] <= bound : a[0] >= bound,
+        bi = keepLeft ? b[0] <= bound : b[0] >= bound;
+      if (ai !== bi)
+        clipped.push([
+          bound,
+          a[1] + ((b[1] - a[1]) * (bound - a[0])) / (b[0] - a[0]),
+        ]);
+      if (bi) clipped.push(b);
+    }
+    points = clipped;
+  }
+
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i],
+      b = points[(i + 1) % points.length];
+    for (let j = 0; j < 8; j++)
+      result.push(
+        ClubhouseLayout.project(
+          {
+            angle: ClubhouseLayout.angleAt(a[0] + ((b[0] - a[0]) * j) / 8),
+            y: (a[1] + ((b[1] - a[1]) * j) / 8) / 724,
+          },
+          r.yaw,
+          r.geometry,
+        ),
+      );
+  }
+  return result;
+}
+function paintRoomTexture(ctx, img, g) {
+  const r = clubhouseRoom;
+  for (let x = 0; x < g.width; x += 4) {
+    const dw = Math.min(4, g.width - x),
+      a = Math.atan((x - g.width / 2) / g.focal),
+      b = Math.atan((x + dw - g.width / 2) / g.focal),
+      cos = Math.cos((a + b) / 2),
+      sx = ((r.yaw + (a * 180) / Math.PI + 120) / 240) * img.naturalWidth,
+      sw = ((b - a) / ((Math.PI * 240) / 180)) * img.naturalWidth,
+      sy = (0.5 - (g.horizon * cos) / g.paintedHeight) * img.naturalHeight,
+      sh = ((g.height * cos) / g.paintedHeight) * img.naturalHeight;
+    // Camera framing moves the entire room, never the treasures alone. Extend
+    // only the ceiling/floor edge behind fixed UI when the source is exceeded.
+    if (sy < 0)
+      ctx.drawImage(
+        img,
+        sx,
+        0,
+        sw + 0.3,
+        1,
+        x - 0.15,
+        0,
+        dw + 0.3,
+        Math.min(g.height, (-sy / sh) * g.height),
+      );
+    if (sy + sh > img.naturalHeight) {
+      const start = ((img.naturalHeight - sy) / sh) * g.height;
+      ctx.drawImage(
+        img,
+        sx,
+        img.naturalHeight - 1,
+        sw + 0.3,
+        1,
+        x - 0.15,
+        Math.max(0, start),
+        dw + 0.3,
+        g.height - Math.max(0, start),
+      );
+    }
+    const from = Math.max(0, sy),
+      to = Math.min(img.naturalHeight, sy + sh),
+      dy = ((from - sy) / sh) * g.height,
+      dh = ((to - from) / sh) * g.height;
+    if (to > from)
+      ctx.drawImage(
+        img,
+        sx,
+        from,
+        sw + 0.3,
+        to - from,
+        x - 0.15,
+        dy,
+        dw + 0.3,
+        dh,
+      );
+  }
+}
+function paintRoomOcclusion() {
+  const r = clubhouseRoom,
+    ctx = r.occCtx,
+    g = r.geometry;
+  ctx.clearRect(0, 0, g.width, g.height);
+  if (!r.image.complete || !r.image.naturalWidth) return;
+  for (const polygon of ClubhouseLayout.occluders) {
+    const points = roomProjectedPolygon(polygon);
+    if (points.every((p) => p.x < 0) || points.every((p) => p.x > g.width))
+      continue;
+    ctx.save();
+    ctx.beginPath();
+    points.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+    ctx.closePath();
+    ctx.clip();
+    paintRoomTexture(ctx, r.image, g);
+    ctx.restore();
+  }
 }
 function paintClubhouse(now) {
   const r = clubhouseRoom;
@@ -169,10 +373,34 @@ function paintClubhouse(now) {
   const gesture = r.gesture;
   if (gesture?.mode === "drag") {
     const rect = r.world.getBoundingClientRect(),
-      x = gesture.x - rect.left;
-    const edge = x < 34 ? -1 : x > rect.width - 34 ? 1 : 0;
-    if (edge) {
-      r.yaw = ClubhouseLayout.clamp(r.yaw + edge * dt * 0.025, -80, 80);
+      x = gesture.x - rect.left,
+      y = gesture.y - rect.top;
+    const edgeX = gesture.moved
+        ? x < 34
+          ? -1
+          : x > rect.width - 34
+            ? 1
+            : 0
+        : 0,
+      edgeY =
+        gesture.moved && y >= r.usable.top && y <= r.usable.bottom
+          ? y < r.usable.top + 20
+            ? 1
+            : y > r.usable.bottom - 20
+              ? -1
+              : 0
+          : 0;
+    const direction = edgeX || edgeY ? `${edgeX},${edgeY}` : null;
+    if (direction !== gesture.edgeDirection) {
+      gesture.edgeDirection = direction;
+      gesture.edgeStart = now;
+    }
+    // Holding still never starts a camera turn. A short edge dwell distinguishes
+    // carrying into another view from simply dropping near the phone edge.
+    if (direction && now - gesture.edgeStart >= 180) {
+      if (edgeY) tiltClubhouse(edgeY * dt * 0.12);
+      if (edgeX)
+        r.yaw = ClubhouseLayout.clamp(r.yaw + edgeX * dt * 0.025, -80, 80);
       updateRoomDrag();
     }
   }
@@ -180,31 +408,7 @@ function paintClubhouse(now) {
     ctx = r.ctx,
     img = r.image;
   if (img.complete && img.naturalWidth) {
-    // Inverse ray mapping: each column samples a different viewing angle.
-    // Vertical correction shares the same cylindrical projection as the items.
-    for (let x = 0; x < g.width; x += 4) {
-      const dw = Math.min(4, g.width - x),
-        a = Math.atan((x - g.width / 2) / g.focal),
-        b = Math.atan((x + dw - g.width / 2) / g.focal);
-      const middle = (a + b) / 2,
-        cos = Math.cos(middle),
-        sx = ((r.yaw + (a * 180) / Math.PI + 120) / 240) * img.naturalWidth;
-      const sw = ((b - a) / ((Math.PI * 240) / 180)) * img.naturalWidth;
-      const sy =
-        (0.5 - (g.horizon * cos) / g.paintedHeight) * img.naturalHeight;
-      const sh = ((g.height * cos) / g.paintedHeight) * img.naturalHeight;
-      ctx.drawImage(
-        img,
-        sx,
-        Math.max(0, sy),
-        sw + 0.3,
-        Math.min(img.naturalHeight - Math.max(0, sy), sh),
-        x - 0.15,
-        0,
-        dw + 0.3,
-        g.height,
-      );
-    }
+    paintRoomTexture(ctx, img, g);
     r.world.dataset.painted = "true";
   }
   for (const button of r.world.querySelectorAll("[data-dream]")) {
@@ -212,11 +416,14 @@ function paintClubhouse(now) {
       p = ClubhouseLayout.effective(state.clubhousePositions, id),
       point = roomItemPoint(id, p);
     if (gesture?.mode === "drag" && gesture.id === id) continue;
-    button.hidden = !point.visible;
-    button.style.left = point.x + "px";
-    button.style.top = point.y + "px";
-    button.style.width = point.width + "px";
-    button.style.height = point.height + "px";
+    const pane = r.world.querySelector(
+      p.surface === "chest"
+        ? ".clubhouse-chest-displays"
+        : ".clubhouse-displays",
+    );
+    if (button.parentElement !== pane) pane.append(button);
+    applyRoomItem(button, point);
+    button.style.zIndex = Math.round(p.y * 724);
     button.dataset.surface = p.surface;
   }
   r.world.dataset.yaw = r.yaw.toFixed(2);
@@ -230,13 +437,12 @@ function paintClubhouse(now) {
     right = document.querySelector('[aria-label="Look right"]');
   if (left) left.disabled = r.yaw <= -80;
   if (right) right.disabled = r.yaw >= 80;
+  paintRoomOcclusion();
   drawRoomSurfaces();
   r.world.dataset.layoutReady = "true";
   if (
     r.animation ||
-    (gesture?.mode === "drag" &&
-      (gesture.x - r.world.getBoundingClientRect().left < 34 ||
-        gesture.x - r.world.getBoundingClientRect().left > g.width - 34))
+    (gesture?.mode === "drag" && gesture.moved && gesture.edgeDirection)
   )
     requestClubhousePaint();
 }
@@ -244,6 +450,7 @@ function measureClubhouse() {
   const r = clubhouseRoom,
     rect = r.world.getBoundingClientRect();
   r.geometry = ClubhouseLayout.geometry(rect.width, rect.height);
+  r.baseHorizon = r.geometry.horizon;
   const header = document
       .querySelector(".clubhouse-heading")
       .getBoundingClientRect(),
@@ -268,6 +475,36 @@ function measureClubhouse() {
   }
   // Fractional CSS widths must fill the rounded backing store completely.
   r.ctx.setTransform(w / rect.width, 0, 0, h / rect.height, 0, 0);
+  if (r.occCanvas.width !== w || r.occCanvas.height !== h) {
+    r.occCanvas.width = w;
+    r.occCanvas.height = h;
+  }
+  r.occCtx.setTransform(w / rect.width, 0, 0, h / rect.height, 0, 0);
+  const focus =
+    r.focusId && Game.ownsDream(state, r.focusId)
+      ? r.focusId
+      : Game.ownsDream(state, "ball")
+        ? "ball"
+        : null;
+  frameClubhouseTreasure(
+    focus,
+    focus
+      ? ClubhouseLayout.clamp(
+          ClubhouseLayout.effective(state.clubhousePositions, focus).angle,
+          -80,
+          80,
+        )
+      : r.yaw,
+  );
+  if (r.manualPitch !== null && r.manualPitch !== undefined) {
+    r.geometry.horizon =
+      r.baseHorizon + r.manualPitch * r.geometry.paintedHeight;
+    constrainRoomPitch();
+  }
+  for (const pane of r.world.querySelectorAll(
+    ".clubhouse-displays,.clubhouse-chest-displays",
+  ))
+    pane.style.clipPath = `inset(${r.usable.top}px ${rect.width - r.usable.right}px ${rect.height - r.usable.bottom}px ${r.usable.left}px)`;
 }
 function stopClubhouseGesture() {
   const r = clubhouseRoom;
@@ -281,6 +518,8 @@ function stopClubhouseGesture() {
       : r.world;
   r.gesture = null;
   r.drop = null;
+  r.ghost?.remove();
+  r.ghost = null;
   if (pointer !== undefined && captured?.hasPointerCapture(pointer))
     captured.releasePointerCapture(pointer);
   requestClubhousePaint();
@@ -298,6 +537,12 @@ function destroyInteractiveClubhouse() {
     r.canvas.width = 0;
     r.canvas.height = 0;
   }
+  if (r.occCanvas) {
+    r.occCanvas.width = 0;
+    r.occCanvas.height = 0;
+  }
+  r.occCanvas = null;
+  r.occCtx = null;
   r.canvas = null;
   r.ctx = null;
   r.image = null;
@@ -318,7 +563,9 @@ function syncInteractiveClubhouse() {
     destroyInteractiveClubhouse();
     r.world = world;
     r.abort = new AbortController();
-    r.canvas = world.querySelector("canvas");
+    r.canvas = world.querySelector(".clubhouse-panorama");
+    r.occCanvas = world.querySelector(".clubhouse-occlusion");
+    r.occCtx = r.occCanvas.getContext("2d");
     r.ctx = r.canvas.getContext("2d", { alpha: false });
     r.image = world.querySelector("img");
     const options = { signal: r.abort.signal };
@@ -382,6 +629,10 @@ function lookClubhouse(angle) {
   if (!r.world) return;
   stopClubhouseGesture();
   const target = ClubhouseLayout.clamp(angle, -80, 80);
+  if (target === 0) {
+    r.manualPitch = null;
+    frameClubhouseTreasure(Game.ownsDream(state, "ball") ? "ball" : null, 0);
+  }
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
     r.yaw = target;
     r.animation = null;
@@ -410,6 +661,7 @@ function startRoomGesture(e) {
     x: e.clientX,
     y: e.clientY,
     yaw: r.yaw,
+    horizon: r.geometry.horizon,
     moved: false,
   };
   (item || r.world).setPointerCapture(e.pointerId);
@@ -418,6 +670,20 @@ function startRoomGesture(e) {
       if (!r.gesture || r.gesture.mode !== "pending") return;
       r.gesture.mode = "drag";
       item.dataset.moving = "true";
+      const point = roomItemPoint(
+          item.dataset.dream,
+          ClubhouseLayout.effective(
+            state.clubhousePositions,
+            item.dataset.dream,
+          ),
+        ),
+        rect = r.world.getBoundingClientRect();
+      r.gesture.grabDX = point.footX - (r.gesture.x - rect.left);
+      r.gesture.grabDY = point.footY - (r.gesture.y - rect.top);
+      r.ghost = item.querySelector(".clubhouse-visual").cloneNode(true);
+      r.ghost.classList.add("clubhouse-drag-ghost");
+      r.world.append(r.ghost);
+      updateRoomDrag();
       roomAnnounce(
         `Moving ${Game.dreams.find((d) => d.id === item.dataset.dream).name}. Drag to a glowing floor or display surface.`,
       );
@@ -444,6 +710,10 @@ function moveRoomGesture(e) {
       -80,
       80,
     );
+    r.geometry.horizon = g.horizon + (e.clientY - g.startY);
+    constrainRoomPitch();
+    r.manualPitch =
+      (r.geometry.horizon - r.baseHorizon) / r.geometry.paintedHeight;
     requestClubhousePaint();
   } else if (g.mode === "drag") {
     updateRoomDrag();
@@ -457,59 +727,41 @@ function updateRoomDrag() {
   const rect = r.world.getBoundingClientRect(),
     point = { x: g.x - rect.left, y: g.y - rect.top },
     button = r.world.querySelector(`[data-dream="${g.id}"]`),
-    size = roomItemSize(g.id, r.geometry, r.usable);
-  button.hidden = false;
-  button.style.left =
-    ClubhouseLayout.clamp(
-      point.x,
-      r.usable.left + size.width / 2,
-      r.usable.right - size.width / 2,
-    ) + "px";
-  button.style.top =
-    ClubhouseLayout.clamp(
-      point.y,
-      r.usable.top + size.height / 2,
-      r.usable.bottom - size.height / 2,
-    ) + "px";
-  const raw = ClubhouseLayout.unproject(point.x, point.y, r.yaw, r.geometry);
-  // Resolve against the same safe-area-adjusted surfaces that the child sees.
-  // In short Safari viewports the floor can sit above the fixed footer.
-  const candidates = ClubhouseLayout.surfaces
-    .filter(
-      (s) => s.items.includes(g.id) && raw.angle >= s.min && raw.angle <= s.max,
-    )
-    .map((s) => {
-      const anchor = roomItemPoint(g.id, { angle: raw.angle, y: s.y });
-      return {
-        surface: s,
-        distance: Math.abs(point.y - anchor.y),
-        offset: point.y - anchor.y,
-      };
-    })
-    .sort((a, b) => a.distance - b.distance);
-  const choice = candidates[0];
+    position = ClubhouseLayout.effective(state.clubhousePositions, g.id),
+    size = roomItemSize(g.id, r.geometry, r.usable, position);
+  const foot = { x: point.x + (g.grabDX || 0), y: point.y + (g.grabDY || 0) },
+    raw = ClubhouseLayout.unproject(foot.x, foot.y, r.yaw, r.geometry);
+  const tolerance = Math.min(
+    0.065,
+    30 /
+      (r.geometry.paintedHeight /
+        Math.cos(((raw.angle - r.yaw) * Math.PI) / 180)),
+  );
   r.drop =
     point.y >= r.usable.top &&
     point.y <= r.usable.bottom &&
     point.x >= r.usable.left &&
-    point.x <= r.usable.right &&
-    choice?.distance <
-      Math.max(28, Math.min(45, (r.usable.bottom - r.usable.top) * 0.12))
-      ? {
-          surface: choice.surface.id,
-          angle: Math.round(raw.angle * 100) / 100,
-          y:
-            choice.surface.id === "floor"
-              ? Math.round(
-                  ClubhouseLayout.clamp(
-                    0.83 + choice.offset / r.geometry.paintedHeight,
-                    0.77,
-                    0.9,
-                  ) * 1000,
-                ) / 1000
-              : choice.surface.y,
-        }
+    point.x <= r.usable.right
+      ? ClubhouseLayout.drop(g.id, raw.angle, raw.y, tolerance)
       : null;
+  const candidate = r.drop || position,
+    visualSize = roomItemSize(g.id, r.geometry, r.usable, candidate);
+  const left = ClubhouseLayout.clamp(
+      foot.x - visualSize.visualWidth / 2,
+      r.usable.left,
+      r.usable.right - visualSize.visualWidth,
+    ),
+    top = ClubhouseLayout.clamp(
+      foot.y - visualSize.visualHeight,
+      r.usable.top,
+      r.usable.bottom - visualSize.visualHeight,
+    );
+  Object.assign(r.ghost.style, {
+    left: left + "px",
+    top: top + "px",
+    width: visualSize.visualWidth + "px",
+    height: visualSize.visualHeight + "px",
+  });
   if (
     r.drop &&
     ClubhouseLayout.blockers(
@@ -521,6 +773,7 @@ function updateRoomDrag() {
   )
     r.drop = null;
   button.dataset.validDrop = r.drop ? "true" : "false";
+  r.ghost.dataset.validDrop = button.dataset.validDrop;
 }
 function finishRoomGesture(e) {
   const r = clubhouseRoom,
@@ -567,43 +820,17 @@ function drawRoomSurfaces() {
     return;
   }
   svg.setAttribute("viewBox", `0 0 ${r.geometry.width} ${r.geometry.height}`);
+  svg.style.clipPath = `inset(${r.usable.top}px ${r.geometry.width - r.usable.right}px ${r.geometry.height - r.usable.bottom}px ${r.usable.left}px)`;
   svg.innerHTML = ClubhouseLayout.surfaces
     .filter((s) => s.items.includes(id))
-    .map((s) => {
-      const half =
-          (Math.atan(r.geometry.width / 2 / r.geometry.focal) * 180) / Math.PI,
-        min = Math.max(s.min, r.yaw - half),
-        max = Math.min(s.max, r.yaw + half);
-      if (min > max) return "";
-      const corners = [
-        { angle: min, offset: -14 },
-        { angle: max, offset: -14 },
-        { angle: max, offset: 14 },
-        { angle: min, offset: 14 },
-      ].map((p) => {
-        const projected = ClubhouseLayout.project(
-          { angle: p.angle, y: s.y },
-          r.yaw,
-          r.geometry,
-        );
-        const anchor = roomItemPoint(id, {
-          angle: ClubhouseLayout.clamp(p.angle, r.yaw - 20, r.yaw + 20),
-          y: s.y,
-        });
-        return { ...projected, y: anchor.y + p.offset };
-      });
+    .map((surface) => {
+      const points = roomProjectedPolygon(ClubhouseLayout.outline(surface));
       if (
-        corners.some((p) => !Number.isFinite(p.x)) ||
-        corners.every((p) => !p.visible)
+        points.every((p) => p.x < 0) ||
+        points.every((p) => p.x > r.geometry.width)
       )
         return "";
-      const points = corners
-        .map(
-          (p) =>
-            `${ClubhouseLayout.clamp(p.x, 0, r.geometry.width)},${ClubhouseLayout.clamp(p.y, r.usable.top, r.usable.bottom)}`,
-        )
-        .join(" ");
-      return `<polygon points="${points}"/>`;
+      return `<polygon data-surface="${surface.id}" data-active="${r.drop?.surface === surface.id}" points="${points.map((p) => `${p.x},${p.y}`).join(" ")}"/>`;
     })
     .join("");
 }
@@ -616,6 +843,8 @@ function clubhouseTreasures() {
 function findClubhouseItem(id) {
   if (!Game.ownsDream(state, id)) return;
   const p = ClubhouseLayout.effective(state.clubhousePositions, id);
+  clubhouseRoom.manualPitch = null;
+  clubhouseRoom.focusId = id;
   closeDialog();
   lookClubhouse(p.angle);
 }
@@ -623,6 +852,8 @@ function restoreClubhouseItem(id) {
   act(() => {
     const reset = Game.resetClubhouseItem(state, id);
     save();
+    clubhouseRoom.manualPitch = null;
+    clubhouseRoom.focusId = id;
     closeDialog();
     lookClubhouse(ClubhouseLayout.defaults[id].angle);
     roomAnnounce(

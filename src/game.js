@@ -149,6 +149,7 @@
       goal: 1,
       dreamPurchases: {},
       clubhousePositions: {},
+      clubhouseLayoutVersion: 2,
       seeds: {},
       plots: Array(25).fill(null),
       inventory: {},
@@ -303,12 +304,16 @@
         ? roomLayout.recoverPositions(
             s.clubhousePositions,
             clean.dreamPurchases,
+            s.clubhouseLayoutVersion ?? 1,
           )
         : s.clubhousePositions &&
             typeof s.clubhousePositions === "object" &&
             !Array.isArray(s.clubhousePositions)
           ? s.clubhousePositions
           : {};
+      clean.clubhouseLayoutVersion = roomLayout
+        ? 2
+        : s.clubhouseLayoutVersion || 1;
       requireRule(
         typeof s.marketOpen === "boolean" &&
           typeof s.marketPlayed === "boolean" &&
