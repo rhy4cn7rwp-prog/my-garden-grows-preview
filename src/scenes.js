@@ -121,8 +121,8 @@ function renderScene() {
         const request = Object.entries(c.want)
           .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
           .join(" and ");
-        const greetings = `<button class="btn" onclick="greetCustomer('excellent')">Hi! Welcome to my stand! What can I help you find today?</button><button class="btn" onclick="greetCustomer('good')">Hi! What can I get for you?</button><button class="btn alt" onclick="greetCustomer('wait')">Wait quietly for the customer to ask for something.</button>`;
-        const farewells = `<button class="btn" onclick="advance('excellent')">Thank you so much! I hope to see you again!</button><button class="btn" onclick="advance('good')">Thanks for shopping with us!</button><button class="btn alt" onclick="advance('brief')">Bye!</button>`;
+        const greetings = `<button class="btn" onclick="greetCustomer('excellent')">Hi! Welcome to my stand! What can I help you find today?</button><button class="btn" onclick="greetCustomer('good')">Hi! What can I get for you?</button><button class="btn" onclick="greetCustomer('wait')">Wait quietly for the customer to ask for something.</button>`;
+        const farewells = `<button class="btn" onclick="advance('excellent')">Thank you so much! I hope to see you again!</button><button class="btn" onclick="advance('good')">Thanks for shopping with us!</button><button class="btn" onclick="advance('brief')">Bye!</button>`;
         const choosing = Game.missingProduce(state).length
           ? `<button class="btn" onclick="customerService()">Help with sold-out produce</button>`
           : `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="customerService()">Talk about the order</button>`;
@@ -331,14 +331,14 @@ function customerService() {
       .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
       .join(", ")}.</p>
     ${missing.length ? `<p>We don't have enough ${missing.map((id) => crop(id).name.toLowerCase()).join(" and ")} on the stand today. You can explain politely or suggest something we do have.</p>` : "<p>You can fill this order, or let the customer know if you cannot help today.</p>"}
-    <div class="customer-actions"><button class="btn alt" onclick="respondSoldOut('sorry')">I'm sorry, we're sold out of that today.</button>
+    <div class="customer-actions"><button class="btn" onclick="respondSoldOut('sorry')">I'm sorry, we're sold out of that today.</button>
     ${Game.alternativeChoices(state)
       .map(
         (item) =>
           `<button class="btn" onclick="offerAlternative('${item.id}')">We're sold out of ${crop(missing[0]).name.toLowerCase()}, but would you like to try some ${item.name.toLowerCase()}?</button>`,
       )
       .join("")}
-    <button class="btn alt" onclick="respondSoldOut('return')">We're sold out today, but I hope you'll visit us again!</button></div>`,
+    <button class="btn" onclick="respondSoldOut('return')">We're sold out today, but I hope you'll visit us again!</button></div>`,
     "service",
   );
 }
