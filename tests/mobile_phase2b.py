@@ -82,7 +82,7 @@ try:
     fit()
    # Follow the actual existing End Day path through winter -> spring; no alternate progression rules.
    page.evaluate("()=>{state=Game.initial();state.season=4;state.day=20;state.cash=23.75;state.goal=3;state.bagCount=7;state.seeds.carrot=5;go('garden')}")
-   tap('☀️ End day');tap('Clubhouse')
+   tap('☀️ End day');tap('Back to village')
    assert page.evaluate('[state.season,state.day,state.cash,state.goal,state.bagCount,state.seeds.carrot]')==[5,1,23.75,3,7,5]
    assert page.locator('.town-world').get_attribute('data-season')=='spring'
    page.reload();assert page.evaluate('[state.season,state.day,state.cash,state.goal,state.bagCount,state.seeds.carrot]')==[5,1,23.75,3,7,5]

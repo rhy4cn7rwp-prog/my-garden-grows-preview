@@ -1,9 +1,88 @@
-# My Garden Grows 1.0 preview — Phase 2B
+# My Garden Grows 1.0 preview — Phase 2C: The Clubhouse
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 2C: The Clubhouse
+
+The upper-right wooden-door **Clubhouse** control now opens a personal illustrated
+room. Back/Return to village returns to the same village; Dream Shop is directly
+accessible from the room. Money, season and day remain live. Existing interiors,
+seasonal village art, paths and animations are preserved.
+
+The new room has warm timber walls, an arched window seat, empty shelves, a toy
+chest, rug and keepsake areas. Six separate illustrated reward buttons appear only
+when owned: soccer ball and bicycle in the sports area, tablet on the toy display,
+guitar in the music nook, camera on the collectibles display, and a decorated
+**puppy-fund keepsake box** at the chest. The existing catalogue sells a _Puppy
+fund_, not a live pet; this phase does not add pet gameplay. Tap a reward for its
+name, purchase price and recorded season/day. No rearranging, decoration tools,
+new shop systems or achievement mechanics are introduced.
+
+### Purchases and existing saves
+
+Dream prices now come from the pure `Game.dreams` catalogue, shared by checkout
+and the shop. Choose a savings goal or explicitly buy an affordable unowned item.
+Purchases deduct $100/$250/$300/$350/$400/$500 respectively, once, while reserving
+cash owed for equipment. Owned items leave the shop's available touch targets;
+the preserved shop illustration shows a small “In your Clubhouse” marker instead.
+Reaching a savings goal triggers congratulations only: it does not buy or
+auto-award the item and does not deduct money. The player must explicitly press
+Buy in the Dream Shop. After purchasing the active goal, the game invites the
+player to choose their next savings goal; it does not silently choose one. A
+next-goal picker lists only unowned items. When all six are owned the village
+celebrates a complete collection instead of asking players to save toward an
+owned item. Purchases are personal rewards, not market operating
+expenses, and do not alter the market-day accounting ledger.
+
+Ownership is an additive version-1 field, `dreamPurchases`, keyed by catalogue ID:
+`{ owned: true, season: 2, day: 9, price: 100 }`. Existing `mgg10` and
+`mgg10-backup` storage keys are retained. Purchase records persist through refresh,
+backup recovery, new farming days and season changes. Identified records without
+a historical date remain owned with null dates and an honest “date was not
+recorded” message. Invalid optional reward records are ignored independently,
+without resetting an otherwise valid farm. No dates, cash movements or ownership
+are invented.
+
+**Earlier releases recorded a savings goal and a `won` celebration flag, but no
+Dream Shop purchase transaction or ownership history.** Those fields alone never
+auto-award a reward or retroactively charge the player. Older farms retain their
+money, goal, crops, supplies, bags, rentals and ongoing market transaction.
+
+### Source files, art and validation
+
+`src/clubhouse.js` renders the room, independently clipped reward sprites, item
+memories and purchase confirmation. `src/clubhouse.css` fits the room and safe-area
+controls to `visualViewport`, using compact portrait/landscape arrangements. The
+room artwork remains proportional; decorative edges may crop to fill the screen,
+while purchased controls stay independently positioned and accessible. The page
+canvas uses room artwork, not a solid green fallback. Safari owns any opaque
+native browser chrome.
+
+`assets/clubhouse/source/` preserves the original new PNG artwork; compressed WebP
+copies are used at runtime. Original prototype and village assets are unchanged.
+Original illustrated room and reward artwork was created for this phase. The
+shared atlas uses measured sprite bounds and explicit SVG clips so neighboring
+items never leak into a reward's control or preview. Small display ledges are
+separate original SVG components.
+
+Run `npm test` for the existing rules plus `tests/clubhouse.test.cjs`. Run
+`python3 tests/mobile_clubhouse.py` for isolated touch-browser purchase/reload/
+backup tests, all six items, missing historical records, an active market checkout,
+one-bag completion, earning a goal through produce selection/total/change,
+congratulations without automatic purchase, explicit reward checkout and
+player-selected next savings goals, eight phone layouts, safe areas and toolbar changes. The
+existing nine mobile regression suites remain applicable; historical tests now
+use **Back to village** for returning home because Clubhouse has its own room.
+
+Actual iPhone Safari is still **unverified**: this workspace has no attached
+iPhone and WebKit downloads were blocked by the network proxy. Before approving,
+playtest on the reported iPhone 12 Pro Max/iOS 27.0.1 with Safari's address bar
+both expanded and collapsed. Check the door, room, item taps, back button, a real
+purchase and a refresh/reopen. Do not clear website data; that removes saves.
+No development money or unlocked rewards are inserted into real player saves.
 
 ## Safari page-edge canvas follow-up
 
@@ -40,8 +119,8 @@ protect controls and location labels while the artwork reaches both screen edges
 Interior artwork and the existing interior shell remain unchanged.
 
 The former Home control is now a cozy wooden-door icon with the accessible label
-**Clubhouse**. Its action still returns to the town. Phase 2C may introduce the
-personal clubhouse and item/achievement displays; none of that exists yet.
+**Clubhouse**. In Phase 2B this returned to the town; Phase 2C now opens the
+personal room described above. Earned-achievement gameplay remains deferred.
 
 `src/village-walks.js` traces curved lanes and town-square arcs in the preserved
 terrain's coordinate system. At layout/season/safe-area changes it maps these
@@ -306,7 +385,8 @@ day has complete accounting. Do not clear Safari data or restart to update.
   changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
   readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
   and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
-- `npm test`: 61 rule tests covering prior features, order type/quantity validation,
+- `npm test`: 75 rule tests covering clubhouse ownership/checkout, goal congratulations
+  without auto-purchase, explicit next-goal selection, prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,
   cash-matched accounting, settlement idempotency and exact change.

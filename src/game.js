@@ -115,6 +115,15 @@
   ];
   const bundle = { carrot: 3, onion: 2, beans: 2, strawberry: 1 };
   const supplies = { table: 8, canopy: 10, bags: 3, scale: 5 };
+  // One catalogue for both checkout rules and the illustrated Dream Shop.
+  const dreams = [
+    { id: "ball", name: "Soccer ball", price: 100 },
+    { id: "bike", name: "Bicycle", price: 250 },
+    { id: "tablet", name: "Tablet", price: 300 },
+    { id: "guitar", name: "Guitar", price: 350 },
+    { id: "camera", name: "Camera", price: 400 },
+    { id: "puppy", name: "Puppy fund", price: 500 },
+  ];
   const rentalPrices = {
     table: { upfront: 1, deferred: 3 },
     scale: { upfront: 1, deferred: 2 },
@@ -134,6 +143,7 @@
       day: 1,
       season: 1,
       goal: 1,
+      dreamPurchases: {},
       seeds: {},
       plots: Array(25).fill(null),
       inventory: {},
@@ -251,6 +261,38 @@
         plan: {},
         notice: "",
       };
+      // Optional reward records migrate independently: an unknown/malformed
+      // record must never reset an otherwise valid farm. A goal or `won` flag
+      // is not evidence of a purchase. Never invent historical dates.
+      clean.dreamPurchases = {};
+      if (
+        s.dreamPurchases &&
+        typeof s.dreamPurchases === "object" &&
+        !Array.isArray(s.dreamPurchases)
+      ) {
+        for (const item of dreams) {
+          const record = s.dreamPurchases[item.id];
+          if (!record || typeof record !== "object" || Array.isArray(record))
+            continue;
+          const dated =
+            Number.isSafeInteger(record.season) &&
+            record.season >= 1 &&
+            Number.isSafeInteger(record.day) &&
+            record.day >= 1 &&
+            record.day <= 20;
+          if (!dated && record.price !== item.price && record.owned !== true)
+            continue;
+          clean.dreamPurchases[item.id] = {
+            owned: true,
+            season: dated ? record.season : null,
+            day: dated ? record.day : null,
+            price:
+              Number.isFinite(record.price) && record.price >= 0
+                ? record.price
+                : null,
+          };
+        }
+      }
       requireRule(
         typeof s.marketOpen === "boolean" &&
           typeof s.marketPlayed === "boolean" &&
@@ -383,8 +425,43 @@
   }
   function chooseGoal(s, index) {
     requireRule(quantity(index) && index < 6, "Choose a valid goal.");
+    requireRule(
+      !ownsDream(s, dreams[index].id),
+      "That dream is already in your clubhouse. Choose another one!",
+    );
     s.goal = index;
     s.won = false;
+  }
+  function ownsDream(s, id) {
+    return (
+      dreams.some((d) => d.id === id) &&
+      Object.prototype.hasOwnProperty.call(s.dreamPurchases || {}, id)
+    );
+  }
+  function acknowledgeGoal(s) {
+    const item = dreams[s.goal];
+    if (s.won || ownsDream(s, item.id) || cents(savings(s)) < cents(item.price))
+      return null;
+    // Reaching a goal only acknowledges the achievement. Checkout is separate.
+    s.won = true;
+    return item;
+  }
+  function purchaseDream(s, id) {
+    const item = dreams.find((d) => d.id === id);
+    requireRule(item, "Choose an item from the Dream Shop.");
+    requireRule(!ownsDream(s, id), "This dream is already in your clubhouse!");
+    requireRule(
+      cents(savings(s)) >= cents(item.price),
+      "Keep saving! You need enough money for this dream after outstanding equipment payments.",
+    );
+    // Validate everything before committing; repeat taps cannot double-charge.
+    s.cash = (cents(s.cash) - cents(item.price)) / 100;
+    s.dreamPurchases = {
+      ...(s.dreamPurchases || {}),
+      [id]: { owned: true, season: s.season, day: s.day, price: item.price },
+    };
+    if (dreams[s.goal].id === id) s.won = true;
+    return item.price;
   }
   function cartTotal(s, kind) {
     const obj = kind === "seeds" ? s.cart : s.supcart;
@@ -1183,6 +1260,10 @@
     return `Your neighbors shared ${[needsSeeds ? "3 carrot seeds" : "", donatedBags ? "3 paper bags" : ""].filter(Boolean).join(" and ")}. Grow and sell from a free blanket. No repayment is needed.`;
   }
   const api = {
+    dreams,
+    ownsDream,
+    acknowledgeGoal,
+    purchaseDream,
     marketStock,
     missingProduce,
     alternativeChoices,

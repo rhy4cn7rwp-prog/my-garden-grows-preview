@@ -64,7 +64,7 @@ try:
    assert page.locator('meta[name="theme-color"]').get_attribute('content')==expected_tint
    page.get_by_role('button',name='Seed & Feed',exact=True).tap()
    assert page.evaluate('document.documentElement.hasAttribute("data-village-canvas")') is False
-   page.get_by_role('button',name='Clubhouse',exact=True).tap()
+   page.get_by_role('button',name='Back to village',exact=True).tap()
    assert page.evaluate('document.documentElement.dataset.villageCanvas')=='winter'
    page.reload();assert page.evaluate('state.season')==4
    assert page.evaluate('document.documentElement.dataset.villageCanvas')=='winter'

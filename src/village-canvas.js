@@ -21,7 +21,9 @@ function syncVillagePageCanvas() {
   };
   if (!world) {
     delete root.dataset.villageCanvas;
-    tint("#f8e9c2");
+    // The Clubhouse paints its own room canvas/tint. Avoid two chrome repaints
+    // on every Safari toolbar event while that room is active.
+    if (document.body?.dataset.view !== "clubhouse") tint("#f8e9c2");
     return;
   }
   const season = VILLAGE_SEASONS.find((s) => s.key === world.dataset.season);

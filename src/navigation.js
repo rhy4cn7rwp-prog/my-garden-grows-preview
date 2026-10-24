@@ -16,7 +16,7 @@ function header() {
   return `<nav class="hud" aria-label="Farm navigation">
     <button class="nav" onclick="${view === "town" ? "settings()" : "go('town')"}" aria-label="${view === "town" ? "Settings" : "Back to village"}">${navigationIcon(view === "town" ? "settings" : "back")}</button>
     <div class="farm-status"><output class="balance" aria-label="Money balance">${navigationIcon("wallet")}${money(state.cash)}</output><span class="calendar" aria-label="Season and day">Season ${state.season} · Day ${state.day}/20</span></div>
-    <button class="nav clubhouse-nav" onclick="go('town')" aria-label="Clubhouse" ${view === "town" ? 'aria-current="page"' : ""}>${navigationIcon("clubhouse")}</button>
+    <button class="nav clubhouse-nav" onclick="go('clubhouse')" aria-label="Clubhouse" ${view === "clubhouse" ? 'aria-current="page"' : ""}>${navigationIcon("clubhouse")}</button>
   </nav>`;
 }
 
@@ -68,6 +68,7 @@ function syncGameViewport() {
       ? "true"
       : "false";
   if (typeof syncVillagePageCanvas === "function") syncVillagePageCanvas();
+  if (typeof syncClubhouseCanvas === "function") syncClubhouseCanvas();
   if (typeof syncVillageWalkers === "function") syncVillageWalkers();
 }
 window.visualViewport?.addEventListener("resize", syncGameViewport);

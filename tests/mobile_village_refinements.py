@@ -119,7 +119,7 @@ try:
    assert page.evaluate('JSON.stringify(state)')==before_dialog
    assert page.evaluate('villageWalking.plans.some(p=>!p.standing)')
    tap('Seed & Feed');assert page.evaluate('villageWalking.animations.length')==0
-   tap('Clubhouse');assert page.locator('.town-world').is_visible()
+   tap('Back to village');assert page.locator('.town-world').is_visible()
    page.emulate_media(reduced_motion='reduce')
    page.wait_for_function('document.getAnimations().filter(a=>a.playState==="running").length===0')
    assert page.evaluate('villageWalking.plans.length')>=1

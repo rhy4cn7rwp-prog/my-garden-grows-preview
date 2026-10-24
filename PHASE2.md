@@ -32,7 +32,7 @@
 - Edge-to-edge proportional scenery with no outer brown frame; light live HUD
   and savings overlays respect safe areas and visible Safari viewport dimensions.
 - The Home identity is now **Clubhouse**, using a wooden-door icon and accessible
-  label. It still returns to the village; no clubhouse room or new saved fields.
+  label. This initially returned to the village; Phase 2C now opens the room below.
 - Paved, curved walking routes are mapped to the actual terrain image and trimmed
   around visible obstacles. Residents turn and pause; reduced motion keeps them
   still. No animation frame loop, game-state changes or new artwork assets.
@@ -47,14 +47,35 @@ by the browser. No gameplay, artwork, destination layout or animation changes.
 Mobile simulations passed; actual iPhone Safari remains unverified because no
 iPhone is attached and WebKit installation is blocked by the environment proxy.
 
-## Phase 2C and later — interiors remain deferred
+## Phase 2C delivered: the personal Clubhouse
+
+- A new illustrated wooden hideaway with an arched window seat, shelves, toy chest,
+  rug and space to grow. The former door control opens this room; Return to village
+  and the shared HUD preserve money, season/day and existing navigation.
+- Six separate illustrated reward components appear only for recorded purchases.
+  Item taps show names and recorded season/day (or explain a missing date).
+- Explicit Dream Shop purchases deduct catalogue prices once, reserve equipment
+  debt and remove owned purchase options. Reaching a savings goal only triggers
+  congratulations; buying is an explicit action. After buying, the player chooses
+  a new goal. Saving and selecting goals never auto-purchase rewards.
+  The puppy-fund reward is a keepsake savings box, not a new pet simulation.
+- Additive v1 ownership records retain existing farms and backup saves. Earlier
+  goal/won flags never imply a purchase. Missing history is not invented.
+- Tests cover exact payments, insufficient funds, duplicates, all six rewards,
+  old/backup/refreshed saves, market checkout continuity and one-bag completion,
+  plus phone safe areas and toolbar changes. Native iPhone Safari remains a
+  manual check; no hardware is attached and WebKit download is proxy-blocked.
+- Source art is retained alongside lightweight WebP runtime assets. Existing
+  interiors and village artwork are preserved. No furniture editor, decorations
+  purchasing system, new minigames or achievement system is included.
+
+## Later phases — other interiors remain deferred
 
 Preserve prototype 0.9's colorful storybook appearance, characters and atmosphere.
-Phase 2B is exterior-only. Do not start Phase 2C before the user reviews the preview.
 The following interior changes are still pending:
 
-- Give the Clubhouse button its future personal-room destination, displaying
-  purchased Dream Shop items and earned achievements after that work is approved.
+- Earned achievements may eventually be displayed in the Clubhouse; no new
+  achievement mechanics are part of this phase.
 
 - Remove baked-in money bubbles, seasons, day labels, navigation, prices, and
   other controls from background art. Render only one live set of controls and

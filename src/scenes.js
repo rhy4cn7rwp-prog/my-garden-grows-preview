@@ -35,16 +35,18 @@ function go(v) {
   if (changed) {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.querySelector(".interior-crop, .town-world")?.animate(
-        [
-          {
-            opacity: 0.6,
-            transform: view === "town" ? "translateY(0)" : "translateY(4px)",
-          },
-          { opacity: 1, transform: "translateY(0)" },
-        ],
-        { duration: 180, easing: "ease-out" },
-      );
+      document
+        .querySelector(".interior-crop, .town-world, .clubhouse-world")
+        ?.animate(
+          [
+            {
+              opacity: 0.6,
+              transform: view === "town" ? "translateY(0)" : "translateY(4px)",
+            },
+            { opacity: 1, transform: "translateY(0)" },
+          ],
+          { duration: 180, easing: "ease-out" },
+        );
     }
   }
 }
@@ -68,15 +70,17 @@ function renderScene() {
     bottom = "";
   if (view === "dream") {
     for (let [id, x, y, w, h] of SHOP_HOTSPOTS.dream)
-      stage += spot(
-        x,
-        y,
-        w,
-        h,
-        `dream('${id}')`,
-        DREAMS.find((d) => d[0] === id)[2],
-      );
-    bottom = `<h2>🎯 Dream Shop</h2><p>Tap a real item on the shelves to choose what you're saving for.</p><div class="progress"><span style="width:${Math.min(100, (100 * Game.savings(state)) / DREAMS[state.goal][3])}%"></span></div><p>${money(Game.savings(state))} saved after equipment charges toward ${DREAMS[state.goal][2]} (${money(DREAMS[state.goal][3])})</p>`;
+      stage += Game.ownsDream(state, id)
+        ? `<span class="dream-owned-marker" style="left:${x}%;top:${y}%;width:${w}%">In your Clubhouse</span>`
+        : spot(
+            x,
+            y,
+            w,
+            h,
+            `dream('${id}')`,
+            DREAMS.find((d) => d[0] === id)[2],
+          );
+    bottom = `<h2>🎯 Dream Shop</h2><p>Tap an available item on the shelves to choose a goal or buy it with your savings.</p>${Game.dreams.every((d) => Game.ownsDream(state, d.id)) ? "<p>Your dream collection is complete!</p>" : Game.ownsDream(state, DREAMS[state.goal][0]) ? "<p>Your reward is in your clubhouse. Tap another item to choose your next savings goal.</p>" : `<div class="progress"><span style="width:${Math.min(100, (100 * Game.savings(state)) / DREAMS[state.goal][3])}%"></span></div><p>${money(Game.savings(state))} saved after equipment charges toward ${DREAMS[state.goal][2]} (${money(DREAMS[state.goal][3])})</p>`}<button class="btn" onclick="go('clubhouse')">My Clubhouse</button>`;
   }
   if (view === "seeds") {
     SHOP_HOTSPOTS.seeds.forEach(([id, x, y, w, h]) => {
@@ -147,8 +151,10 @@ function renderScene() {
   const content =
     view === "town"
       ? townScene()
-      : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
-  const gameHTML = `<div class="game ${view === "town" ? "town-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
+      : view === "clubhouse"
+        ? clubhouseScene()
+        : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
+  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
   document.body.dataset.view = view;
 
   const app = $("#app"),
@@ -175,8 +181,10 @@ function renderScene() {
 }
 function dream(id) {
   let d = DREAMS.find((x) => x[0] === id);
+  if (!d) return;
+  if (Game.ownsDream(state, id)) return clubhouseItem(id);
   show(
-    `<h2>${d[1]} ${d[2]}</h2><p class="tag">Price: ${money(d[3])}</p><p>${state.goal === DREAMS.indexOf(d) ? "This is your current savings goal." : "Would you like to save your market earnings for this?"}</p><button class="btn" onclick="Game.chooseGoal(state,${DREAMS.indexOf(d)});closeDialog()">🎯 ${state.goal === DREAMS.indexOf(d) ? "Keep this goal" : "Choose this dream"}</button>`,
+    `<h2>${d[2]}</h2>${clubhouseRewardArt(id, "dream-preview-art")}<p class="tag">Price: ${money(d[3])}</p><p>${state.goal === DREAMS.indexOf(d) ? "This is your current savings goal." : "Would you like to save your market earnings for this?"}</p>${id === "puppy" ? "<p>This puppy fund is shown as a keepsake savings box in your clubhouse, not a live pet.</p>" : ""}<p>You have ${money(Game.savings(state))} available after outstanding equipment payments.</p><button class="btn" onclick="chooseDreamGoal('${id}')">🎯 ${state.goal === DREAMS.indexOf(d) ? "Keep this goal" : "Choose this dream"}</button><button class="btn" onclick="buyDream('${id}')" ${Game.savings(state) < d[3] ? "disabled" : ""}>Buy for ${money(d[3])}</button>`,
   );
 }
 function seed(id) {

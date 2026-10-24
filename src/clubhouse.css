@@ -1,0 +1,275 @@
+/* Layered, proportionate room with real reward buttons; no baked-in UI. */
+html[data-clubhouse-canvas] {
+  min-height: 100lvh;
+  overflow: hidden;
+  background: #dca85e url("../assets/clubhouse/room.webp") center / cover
+    no-repeat;
+}
+body[data-view="clubhouse"] {
+  overflow: hidden;
+  background: transparent;
+}
+body[data-view="clubhouse"] #app {
+  position: fixed;
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  width: var(--visible-width, 100%);
+  height: var(--visible-height, 100svh);
+  min-height: 0;
+  padding: 0;
+}
+.clubhouse-game {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  background: transparent;
+  isolation: isolate;
+  position: relative;
+}
+.clubhouse-game .hud {
+  background: transparent;
+  border: 0;
+  padding: max(4px, var(--viewport-safe-top))
+    max(8px, var(--village-safe-right)) 2px max(8px, var(--village-safe-left));
+}
+.clubhouse-game .farm-status {
+  justify-self: center;
+  border-radius: 14px;
+  padding: 4px 12px;
+  background: #fff7e7f2;
+  box-shadow: 0 2px 8px #55331f30;
+}
+.clubhouse-heading {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 8px 5px;
+  pointer-events: none;
+}
+.clubhouse-heading h1 {
+  font:
+    800 24px/1.1 Georgia,
+    serif;
+  margin: 0;
+  color: #4d301c;
+  text-shadow:
+    0 1px 3px #fff5df,
+    0 0 9px #fff5df;
+}
+.clubhouse-heading p {
+  font-size: 13px;
+  margin: 2px 0 0;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #fff5dfed;
+}
+.clubhouse-world {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.clubhouse-room {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.clubhouse-room-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.clubhouse-displays {
+  position: absolute;
+  inset: 0 max(8px, var(--village-safe-right)) 0
+    max(8px, var(--village-safe-left));
+}
+.clubhouse-item {
+  position: absolute;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 12px;
+  -webkit-tap-highlight-color: #fff0a033;
+}
+.clubhouse-item:focus-visible {
+  outline: 3px solid #fff6c5;
+  outline-offset: 2px;
+}
+.clubhouse-item:active .clubhouse-reward-art {
+  transform: scale(0.96);
+}
+.clubhouse-reward-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  overflow: hidden;
+}
+.clubhouse-display-support {
+  position: absolute;
+  left: -5%;
+  top: 85%;
+  width: 110%;
+  height: 20%;
+  pointer-events: none;
+}
+.clubhouse-tablet .clubhouse-display-support {
+  top: 80%;
+}
+.clubhouse-ball {
+  left: 56%;
+  top: min(80%, calc(100% - var(--viewport-safe-bottom) - 82px));
+  width: 16%;
+  height: 12%;
+}
+.clubhouse-bike {
+  left: 24%;
+  top: 65%;
+  width: min(40%, 260px);
+  height: 22%;
+}
+.clubhouse-guitar {
+  left: 17%;
+  top: 38%;
+  width: 19%;
+  height: 24%;
+}
+.clubhouse-tablet {
+  left: 87%;
+  top: max(35%, calc(var(--viewport-safe-top) + 232px));
+  width: 17%;
+  height: 14%;
+}
+.clubhouse-camera {
+  left: 87%;
+  top: max(18%, calc(var(--viewport-safe-top) + 132px));
+  width: 18%;
+  height: 11%;
+}
+.clubhouse-puppy {
+  left: 84%;
+  top: max(60%, calc(var(--viewport-safe-top) + 332px));
+  width: 20%;
+  height: 14%;
+}
+.clubhouse-bottom.bottom {
+  grid-row: 4;
+  align-self: end;
+  z-index: 2;
+  min-height: 0;
+  border: 0;
+  background: #fff4dbe8;
+  padding: 3px max(6px, var(--village-safe-right))
+    max(4px, var(--viewport-safe-bottom)) max(6px, var(--village-safe-left));
+}
+.clubhouse-bottom p {
+  font-size: 13px;
+  margin: 0;
+}
+.clubhouse-bottom .btn {
+  min-height: 44px;
+  margin: 2px 3px 0;
+}
+.dream-preview-art {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+.next-dream-choice {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+}
+.town-next-goal {
+  min-height: 44px;
+  color: #452d16;
+  font: inherit;
+  text-align: left;
+}
+.dream-owned-marker {
+  position: absolute;
+  z-index: 4;
+  padding: 3px;
+  pointer-events: none;
+  font-size: 11px;
+  text-align: center;
+  background: #fff7dfed;
+  border-radius: 7px;
+  color: #346144;
+}
+:root[data-compact-town="true"] .clubhouse-heading h1 {
+  font-size: 20px;
+}
+:root[data-compact-town="true"] .clubhouse-heading p {
+  display: none;
+}
+:root[data-compact-town="true"] .clubhouse-bottom p {
+  display: none;
+}
+:root[data-compact-town="true"] .clubhouse-camera {
+  top: calc(var(--viewport-safe-top) + 102px);
+  width: 56px;
+  height: 44px;
+}
+:root[data-compact-town="true"] .clubhouse-tablet {
+  top: calc(var(--viewport-safe-top) + 154px);
+  width: 52px;
+  height: 44px;
+}
+:root[data-compact-town="true"] .clubhouse-puppy {
+  top: min(
+    calc(var(--viewport-safe-top) + 210px),
+    calc(100% - var(--viewport-safe-bottom) - 78px)
+  );
+  width: 54px;
+  height: 44px;
+}
+:root[data-compact-town="true"] .clubhouse-guitar {
+  top: calc(var(--viewport-safe-top) + 112px);
+  width: 44px;
+  height: 70px;
+}
+:root[data-compact-town="true"] .clubhouse-bike {
+  top: calc(100% - var(--viewport-safe-bottom) - 100px);
+  width: min(40%, 180px);
+  height: 64px;
+}
+:root[data-compact-town="true"] .clubhouse-ball {
+  top: calc(100% - var(--viewport-safe-bottom) - 78px);
+  width: 48px;
+  height: 44px;
+}
+@media (min-width: 540px) {
+  :root[data-compact-town="true"] .clubhouse-guitar {
+    left: 12%;
+  }
+  :root[data-compact-town="true"] .clubhouse-bike {
+    left: 35%;
+    width: min(30%, 180px);
+  }
+  :root[data-compact-town="true"] .clubhouse-camera {
+    left: 77%;
+  }
+  :root[data-compact-town="true"] .clubhouse-tablet {
+    left: 90%;
+  }
+  :root[data-compact-town="true"] .clubhouse-puppy {
+    left: 70%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clubhouse-item:active .clubhouse-reward-art {
+    transform: none;
+  }
+}

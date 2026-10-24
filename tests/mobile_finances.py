@@ -33,7 +33,7 @@ try:
    page.get_by_role('button',name='☀️ End day',exact=True).tap()
   page.locator('.plot').first.tap()
   page.get_by_role('button',name='🧺 Harvest',exact=True).tap()
-  page.get_by_role('button',name='Clubhouse',exact=True).tap()
+  page.get_by_role('button',name='Back to village',exact=True).tap()
   page.get_by_role('button',name='Farmers Market',exact=True).tap()
   page.get_by_role('button',name='Arrange Produce / Open Market',exact=True).tap()
   page.get_by_role('button',name='+',exact=True).tap()
@@ -65,7 +65,7 @@ try:
   assert page.evaluate('[state.cash,state.goal,state.owned.canopy,state.seeds.carrot]')==[2,4,1,2]
   page.get_by_role('button',name='My Garden',exact=True).tap()
   page.get_by_role('button',name='☀️ End day',exact=True).tap()
-  page.get_by_role('button',name='Clubhouse',exact=True).tap()
+  page.get_by_role('button',name='Back to village',exact=True).tap()
   page.get_by_role('button',name='Farmers Market',exact=True).tap()
   page.get_by_role('button',name='Arrange Produce / Open Market',exact=True).tap()
   page.get_by_role('button',name='+',exact=True).tap()

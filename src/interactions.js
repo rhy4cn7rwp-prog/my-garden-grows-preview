@@ -154,12 +154,7 @@ function finish() {
   act(() => {
     Game.finish(state);
     popup = "";
-    if (Game.savings(state) >= DREAMS[state.goal][3] && !state.won) {
-      state.won = true;
-      show(
-        `<h2>🎉 Dream achieved!</h2><p>You reached your savings goal. Keep growing or choose another dream!</p>`,
-      );
-    } else render();
+    if (!congratulateDreamGoal()) render();
   });
 }
 function advance(farewell = "good") {
@@ -353,7 +348,10 @@ function render() {
     const p = document.createElement("p");
     p.setAttribute("role", "alert");
     p.textContent = document.body.dataset.saveWarning;
-    document.querySelector(".bottom").append(p);
+    (
+      document.querySelector(".bottom, .clubhouse-bottom") ||
+      document.querySelector(".game")
+    ).append(p);
   }
   const restore = () => {
     if (sameView)

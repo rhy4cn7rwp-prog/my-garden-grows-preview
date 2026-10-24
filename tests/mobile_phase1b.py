@@ -40,11 +40,11 @@ try:
    tap('Add All Produce to Stand')
    assert 'No new produce added' in page.locator('.dialog').inner_text()
    assert page.evaluate('JSON.stringify(state.inventory)')==inventory
-   tap('Close ✕');tap('Clubhouse');tap('Seed & Feed');tap('Tomatoes seeds')
+   tap('Close ✕');tap('Back to village');tap('Seed & Feed');tap('Tomatoes seeds')
    for _ in range(2):repeated(page.get_by_role('button',name='+',exact=True))
    tap('🛒 View basket');tap('Pay at checkout');tap('Close ✕')
    assert page.evaluate('state.seeds.tomato')==2
-   tap('Clubhouse');tap('My Garden')
+   tap('Back to village');tap('My Garden')
    for i,remaining in [(0,2),(1,1)]:
     page.locator('.plot').nth(i).tap()
     before=page.evaluate('scrollY')
@@ -85,7 +85,7 @@ try:
    assert '$4.00' in page.locator('.accounting-report tr').filter(has_text='Deferred equipment payments').inner_text()
    assert page.evaluate('[state.cash,Game.debtTotal(state)]')==[0,2]
    page.reload();assert page.evaluate('[state.cash,Game.debtTotal(state),state.goal]')==[0,2,4]
-   tap('My Garden');tap('☀️ End day');tap('Clubhouse');tap('Farmers Market');tap('Arrange Produce / Open Market')
+   tap('My Garden');tap('☀️ End day');tap('Back to village');tap('Farmers Market');tap('Arrange Produce / Open Market')
    tap('Daily equipment rentals');tap('Review table rental')
    assert 'Deferred rental unavailable' in page.locator('.dialog').inner_text()
    # Limit feedback is friendly and the idle market action order remains sensible.
