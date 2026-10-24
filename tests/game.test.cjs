@@ -4,6 +4,7 @@ const G = require("../src/game.js");
 function stocked(cash = 50) {
   const s = G.initial();
   s.cash = cash;
+  s.bagCount = 100;
   s.inventory.corn = 100;
   s.display.corn = 100;
   return s;

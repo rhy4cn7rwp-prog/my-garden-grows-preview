@@ -39,7 +39,8 @@ function closeDialog() {
 }
 function show(html, key = null) {
   dialogKey = key;
-  popup = `<div class="modal" onclick="if(event.target===this)closeDialog()"><div class="dialog">${html}<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div></div></div>`;
+  const register = key === "payment";
+  popup = `<div class="modal ${register ? "register-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : ""}">${html}${register ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
   render();
 }
 function spot(x, y, w, h, action, title) {
@@ -245,7 +246,7 @@ function marketItem(id) {
 function order() {
   let c = state.customer;
   show(
-    `<h2>🧺 ${c.name}'s order</h2>${bagStatus()}<p>${Game.orderNeedsBag(state) ? "This loose-produce order uses 1 bag at completion." : "No bag is needed for this order."}</p><p>Customer requests: ${Object.entries(
+    `<h2>🧺 ${c.name}'s order</h2>${bagStatus()}<p>Every completed purchase uses 1 paper bag, regardless of items or quantities.</p><p>Customer requests: ${Object.entries(
       c.want,
     )
       .map(([id, n]) => n + " " + crop(id).name)
@@ -278,7 +279,12 @@ function paymentDialog() {
   let t = totalOrder(),
     due = state.tendered - t;
   show(
-    `<h2>💵 Cash Register</h2>${bagStatus()}<p>Order total: <b>${money(t)}</b></p><p>${state.customer.name} gives you <b>${money(state.tendered)}</b>.</p><p>Count back the change: <b>${money(due)}</b></p><div class="money-tray">${[1, 5, 10, 20, 0.01, 0.05, 0.1, 0.25].map(moneyButton).join("")}</div><p class="note">Change counted: ${money(state.change)}</p><button class="btn alt" onclick="state.change=0;payment()">Start over</button><button class="btn" onclick="finish()">Give change</button>`,
+    `<header class="register-header"><h2>💵 Cash Register</h2><button class="register-close" aria-label="Close ✕" onclick="closeDialog()">×</button></header>
+    <div class="register-receipt"><p><span>Order total</span><strong>${money(t)}</strong></p><p><span>${state.customer.name} pays</span><strong>${money(state.tendered)}</strong></p><p><span>Change due</span><strong>${money(due)}</strong></p></div>
+    <div class="money-tray">${[1, 5, 10, 20, 0.01, 0.05, 0.1, 0.25].map(moneyButton).join("")}</div>
+    <div class="register-count" role="status"><strong>Change counted: ${money(state.change)}</strong><small>Count up: ${money(t + state.change)} → ${money(state.tendered)}</small></div>
+    ${bagStatus(true)}
+    <div class="register-actions"><button class="btn alt" onclick="state.change=0;payment()">Start over</button><button class="btn" onclick="finish()">Give change</button></div>`,
     "payment",
   );
 }

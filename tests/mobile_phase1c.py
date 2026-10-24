@@ -32,17 +32,16 @@ try:
    assert 'Paper bags remaining: 0' in page.locator('.dialog').inner_text()
    tap('Open market');tap('Welcome Next Customer');tap('😊 Welcome! What can I get you?');tap('🧺 Fill customer basket')
    modalTap('+');page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment')
-   assert 'needs 1 paper bag' in page.locator('.dialog').inner_text()
-   assert page.evaluate('[state.sales,state.bagCount,state.customersServed]')==[0,0,0]
-   modalTap('Close ✕');tap('🧺 Fill customer basket')
+   assert page.evaluate('state.step')=='pay'
+   tap('💵 Count change')
    before=page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.hour,state.step])')
    modalTap('Buy more bags');tap('Buy 10 bags · $3')
    assert page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.hour,state.step])')==before
    assert page.evaluate('[state.cash,state.bagCount]')==[47,10]
    assert 'Paper bags remaining: 10' in page.locator('.dialog').inner_text()
    # Refresh returns to the same customer/order rather than discarding progress.
-   page.reload();assert page.evaluate('state.step')=='choose'
-   tap('🧺 Fill customer basket');page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment');tap('💵 Count change')
+   page.reload();assert page.evaluate('state.step')=='pay'
+   tap('💵 Count change')
    assert page.locator('.money-piece').count()==8
    for label in ['$1','$5','$10','$20','1¢','5¢','10¢','25¢']:
     piece=page.get_by_role('button',name=label,exact=True)
@@ -77,13 +76,15 @@ try:
    modalTap('Close ✕');tap('Return to garden · end day to reopen');tap('☀️ End day')
    assert page.evaluate('[state.bagCount,state.lastMarketReport.net,state.lastMarketReport.customers]')==[9,1,1]
    page.reload();assert page.evaluate('state.bagCount')==9
-   # Empty bag stock still permits a normal non-loose transaction with illustrated bills.
+   # Empty bag stock offers a refill at completion and keeps counted change.
    page.evaluate('''()=>{state=Game.initial();state.inventory.corn=3;state.display.corn=3;go('market');}''')
    tap('Arrange Produce / Open Market');tap('Open market');tap('Welcome Next Customer');tap('😊 Welcome! What can I get you?');tap('🧺 Fill customer basket');modalTap('+')
    page.locator('#total-answer').fill('3');tap('⚖️ Check total / collect payment');tap('💵 Count change');tap('$1');tap('$1');tap('Give change')
-   assert page.evaluate('[state.cash,state.bagCount,state.customersServed]')==[53,0,1]
+   assert page.evaluate('[state.sales,state.bagCount]')==[0,0]
+   tap('Buy 10 bags · $3');tap('Give change')
+   assert page.evaluate('[state.cash,state.bagCount,state.customersServed]')==[50,9,1]
    assert not errors,errors
    page.close()
   browser.close()
-  print('PASS: Phase 1C at 390×844 and 320×568 — legacy saves, no market hover labels, bag refill with live customer, refresh, illustrated/touch-sized money, exact coin/bill change, scroll retention, one-bag sale, cash-matched report, saved leftovers and no-bag sales')
+  print('PASS: Phase 1C at 390×844 and 320×568 — legacy saves, no market hover labels, bag refill with live customer, refresh, illustrated/touch-sized money, exact coin/bill change, scroll retention, one-bag sale, cash-matched report, saved leftovers and bag refill at checkout')
 finally:server.shutdown()

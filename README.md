@@ -1,4 +1,4 @@
-# My Garden Grows 1.0 preview — Phase 1C
+# My Garden Grows 1.0 preview — Phase 1D
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
@@ -9,9 +9,9 @@ are preserved.
 
 - A purchased $3 pack adds exactly **10** bags. Packs can be purchased repeatedly.
 - Purchased leftovers persist across days, saves and refreshes.
-- A transaction containing **loose produce sold by the pound** needs one bag,
-  regardless of quantities or how many crop types are in that order. Other
-  produce needs no bag. Empty bag stock never blocks all market sales.
+- **Every completed customer transaction consumes exactly one bag**, regardless
+  of crop type, quantities or the number of different items. Counted change and
+  the current order are retained while buying a refill if bags run out.
 - Bags are consumed only on a successful completed sale. Wrong totals, incorrect
   change, skipped customers, restocking and canceled orders consume none.
 - The market preparation, customer order and register display bags remaining.
@@ -44,6 +44,16 @@ goals subtract outstanding charges rather than treating borrowed equipment as
 extra savings. The Job Board is still a placeholder, without math minigames.
 
 ## Cash register and report
+
+Phase 1D compacts the register into the usable phone viewport: the four bills
+stay in two rows, the smaller coins share one row, and the receipt is concise.
+Paper bags remaining and Buy More Bags sit together below Change Counted and
+above Start Over/Give Change. Controls are at least 44px; no content is hidden
+to force a fit. The layout responds to viewport height, safe-area insets and
+landscape orientation. Normal-text register fit is tested down to 320 × 440,
+including a separate simulated safe-area case. Enlarged accessibility text
+retains an overflow fallback rather than clipping controls.
+
 
 The register uses original simplified SVG bills ($1/$5/$10/$20) and coins
 (1¢/5¢/10¢/25¢), with large values, accessible labels and touch-sized targets.
@@ -94,14 +104,19 @@ day has complete accounting. Do not clear Safari data or restart to update.
 
 ## Tests and validation
 
-- `npm test`: 49 rule tests covering prior features plus bag packs/consumption,
+- `npm test`: 53 rule tests covering prior features plus bag packs/consumption,
   active restocking, save migration/resumption, cash-matched accounting,
   settlement idempotency and exact change.
+- `python3 tests/mobile_phase1d.py`: verifies the entire register and all controls
+  fit without vertical/horizontal scrolling at 390 × 664, 375 × 548, 320 × 460,
+  320 × 440 and 667 × 320, plus toolbar resizing and safe-area simulation. Also
+  verifies all-product bag consumption, immediate counts, restock with counted
+  change retained and save persistence.
 - `python3 tests/mobile_finances.py`: original touch-only financial recovery loop.
 - `python3 tests/mobile_phase1b.py`: scroll retention, bulk actions, plans,
   deferred rentals, checkout/settlement and customer limits at two phone sizes.
 - `python3 tests/mobile_phase1c.py`: bag refill with an active customer, refresh,
-  illustrated denomination targets, exact coin/bill change, no-bag sales,
+  illustrated denomination targets, exact coin/bill change, checkout refills,
   cash-matched reports, saved leftovers and absent market hover decorations at
   390 × 844 and 320 × 568.
 
@@ -115,6 +130,9 @@ Source responsibilities: `game.js` owns rules/accounting data, `accounting.js`
 renders reports without money mutations, `money.js` draws play-money controls,
 and `scenes.js` / `interactions.js` render scenes and connect UI actions.
 
-Seed-help eligibility also accounts for missing bags: a cash-poor farm with
-only loose produce and no usable bags can receive carrot seeds and recover
-through unbagged blanket sales, even while old debt blocks new borrowing.
+Community help also accounts for bags under the universal bag rule. Eligible
+cash-poor farms without bags receive three starter paper bags. Carrot seeds are
+shared only if they also lack a viable crop resource. This avoids trapping a
+farm with no bags and old debt that blocks another deferred rental; it does not
+reset money, crops or equipment, or allow repeat collection while resources are
+available. Donated bags have no cash expense.

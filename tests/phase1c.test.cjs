@@ -85,18 +85,20 @@ test("one mixed multi-vegetable transaction consumes exactly one bag only on suc
   assert.throws(() => G.finish(s));
   assert.equal(s.bagCount, 1);
 });
-test("bag exhaustion restricts only loose orders, with no negative counts or blanket lockout", () => {
+test("bag exhaustion pauses completion until refill without losing a customer", () => {
   const s = stock();
+  s.bagCount = 1;
   sold(s, { corn: 1 });
   assert.equal(s.bagCount, 0);
   G.newCustomer(s, "Noah");
   s.customer.want = { beans: 1 };
   G.greet(s);
   s.basket = { beans: 1 };
-  assert.throws(() => G.ring(s, 4));
+  G.ring(s, 4);
+  s.change = 1;
+  assert.throws(() => G.finish(s));
   assert.equal(s.inventory.beans, 20);
   G.buyBagPacks(s);
-  G.ring(s, 4);
   s.change = 1;
   G.finish(s);
   assert.equal(s.bagCount, 9);
@@ -180,6 +182,7 @@ test("invalid pending orders recover safely without taking stock or money", () =
 });
 test("$18 sales less $1 table fee gives $17 net and matches actual cash movement", () => {
   const s = stock();
+  s.bagCount = 2;
   G.rentEquipment(s, "table", "upfront");
   sold(s, { corn: 6 });
   G.closeMarket(s);
@@ -218,6 +221,7 @@ test("deferred closing payments are recorded once, with partial debt carried sep
 });
 test("manual and closing repayments are separate payments, never double-counted", () => {
   const s = stock(0);
+  s.bagCount = 2;
   G.rentEquipment(s, "table", "deferred");
   s.cash = 1;
   G.payOutstanding(s);
@@ -250,6 +254,7 @@ test("bags, scale, other supply costs are included, seed costs explicitly remain
 });
 test("customers served excludes shoppers who leave without buying", () => {
   const s = stock();
+  s.bagCount = 2;
   G.openMarket(s);
   G.newCustomer(s, "Noah");
   s.step = "thanks";
@@ -314,36 +319,22 @@ test("cent denominations combine into exact change and leave one successful tran
   assert.equal(s.customersServed, 1);
 });
 
-test("no-bag debt-bound loose-produce farms can recover through free seeds and blanket sales", () => {
+test("no-bag debt-bound farms recover through donated bags and existing produce", () => {
   const s = stock(0);
   s.inventory = { beans: 10 };
   s.display = {};
-  s.owned.scale = 1;
   G.rentEquipment(s, "table", "deferred");
   G.rentEquipment(s, "bags", "deferred");
   G.endDay(s);
-  assert.equal(s.bagCount, 0);
   assert.throws(() => G.rentEquipment(s, "bags", "deferred"));
   assert.equal(G.canReceiveSeedHelp(s), true);
   G.receiveSeedHelp(s);
-  G.plan(s, 0, "carrot");
-  G.plantPlan(s);
-  for (let i = 0; i < 3; i++) {
-    G.water(s);
-    G.endDay(s);
-  }
-  G.harvest(s, 0);
-  s.display.carrot = s.inventory.carrot;
-  G.openMarket(s);
-  G.newCustomer(s, "Maya");
-  G.greet(s);
-  s.basket = { ...s.customer.want };
-  G.ring(s, G.totalOrder(s));
-  s.change = s.tendered - G.totalOrder(s);
-  G.finish(s);
+  assert.equal(s.bagCount, 3);
+  assert.equal(s.seeds.carrot, undefined);
+  s.display.beans = s.inventory.beans;
+  sold(s, { beans: 1 });
   G.closeMarket(s);
-  assert.equal(s.sales, 2);
-  assert.equal(G.debtTotal(s), 2);
-  assert.equal(s.bagCount, 0);
-  assert.equal(s.seeds.carrot, 2);
+  assert.equal(s.sales, 4);
+  assert.equal(G.debtTotal(s), 0);
+  assert.equal(s.bagCount, 2);
 });

@@ -23,7 +23,7 @@ try:
   assert 'Coming soon' in page.locator('.dialog').inner_text()
   assert page.locator('.dialog input').count()==0
   page.get_by_role('button',name='Visit community seed help',exact=True).tap()
-  page.get_by_role('button',name='Accept 3 free carrot seeds',exact=True).tap()
+  page.get_by_role('button',name='Accept community help',exact=True).tap()
   page.get_by_role('button',name='Go plant carrots',exact=True).tap()
   page.locator('.plot').first.tap()
   page.get_by_role('button',name='🥕 Carrots (3 available)',exact=True).tap()

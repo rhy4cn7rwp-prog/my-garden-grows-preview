@@ -87,7 +87,7 @@ function harvest(i) {
 }
 function marketStand() {
   show(
-    `<h2>Arrange your market stand</h2>${bagStatus()}<p>Loose produce sold by the pound uses one bag per completed order; other produce needs no bag.</p>${standOptions()}${financeSummary()}<button class="btn alt" onclick="rentalMenu()">Daily equipment rentals</button><button class="btn" onclick="addAllProduce()" ${state.customer ? "disabled" : ""}>Add All Produce to Stand</button>${state.notice ? `<p role="status">${state.notice}</p>` : ""}${
+    `<h2>Arrange your market stand</h2>${bagStatus()}<p>Every completed purchase uses exactly one bag, regardless of items or quantities.</p>${standOptions()}${financeSummary()}<button class="btn alt" onclick="rentalMenu()">Daily equipment rentals</button><button class="btn" onclick="addAllProduce()" ${state.customer ? "disabled" : ""}>Add All Produce to Stand</button>${state.notice ? `<p role="status">${state.notice}</p>` : ""}${
       CROPS.filter((c) => state.inventory[c.id])
         .map(
           (c) =>
@@ -145,6 +145,10 @@ function ring() {
   });
 }
 function finish() {
+  if (state.step === "pay" && Game.bagsRemaining(state) === 0) {
+    bagShop();
+    return;
+  }
   act(() => {
     Game.finish(state);
     popup = "";
@@ -203,33 +207,27 @@ function jobBoard() {
   );
 }
 function seedHelp() {
-  show(`<h2>🌱 Community seed help</h2><p>If you have less than $1 and no crops you can grow or sell with your equipment, your neighbors will share 3 carrot seeds. No fee, debt, or farm reset.</p>
-    ${Game.canReceiveSeedHelp(state) ? '<button class="btn" onclick="claimSeedHelp()">Accept 3 free carrot seeds</button>' : "<p>You have a way forward: buy a seed packet, plant your seeds, water your crops, or sell your harvest. Selling from a blanket is always free.</p>"}`);
+  show(`<h2>🌱 Community seed help</h2><p>If you have less than $1 and cannot keep selling, your neighbors can share starter seeds or bags. No fee, debt, or farm reset.</p>
+    ${Game.canReceiveSeedHelp(state) ? '<button class="btn" onclick="claimSeedHelp()">Accept community help</button>' : "<p>You have a way forward: buy a seed packet, plant your seeds, water your crops, or sell your harvest. Selling from a blanket is always free.</p>"}`);
 }
 function claimSeedHelp() {
   act(() => {
     const message = Game.receiveSeedHelp(state);
     show(
-      `<h2>A fresh start for your garden</h2><p>${message}</p><button class="btn" onclick="go('garden')">Go plant carrots</button>`,
+      `<h2>A fresh start for your garden</h2><p>${message}</p><button class="btn" onclick="go('garden')">${state.seeds.carrot > 0 ? "Go plant carrots" : "Visit garden"}</button>${Object.values(state.inventory).some((n) => n > 0) ? '<button class="btn" onclick="go(\'market\')">Visit market</button>' : ""}`,
     );
   });
 }
 // Show counting-up feedback while preserving explicit collection of payment/change.
 function payment() {
   paymentDialog();
-  const dialog = document.querySelector(".dialog");
-  if (dialog) {
-    const p = document.createElement("p");
-    p.textContent = `Count up: ${money(Game.totalOrder(state) + state.change)} → ${money(state.tendered)}`;
-    dialog.append(p);
-  }
 }
-function bagStatus() {
-  return `<div class="bag-status"><p><strong>Paper bags remaining: ${Game.bagsRemaining(state)}</strong><span class="small"> (${state.bagCount} purchased; ${state.rentalBagsRemaining} daily-use)</span></p><button class="btn alt" onclick="bagShop()">Buy more bags</button></div>`;
+function bagStatus(compact = false) {
+  return `<div class="bag-status ${compact ? "register-bags" : ""}"><p><strong>Paper bags remaining: ${Game.bagsRemaining(state)}</strong>${compact ? "" : `<span class="small"> (${state.bagCount} purchased; ${state.rentalBagsRemaining} daily-use)</span>`}</p><button class="btn alt" onclick="bagShop()">Buy more bags</button></div>`;
 }
 function bagShop() {
   show(
-    `<h2>Paper bag refill</h2>${bagStatusCount()}<p>A pack costs $3 and contains exactly 10 paper bags. Purchased bags carry over between days. Only loose-produce orders sold by the pound use a bag, once per completed transaction.</p><p>Your cash: ${money(state.cash)}</p><button class="btn" onclick="buyBagsNow()" ${state.cash >= 3 ? "" : "disabled"}>Buy 10 bags · $3</button>${!state.rentals.bags && Game.bagsRemaining(state) === 0 ? '<button class="btn alt" onclick="rentalOffer(\'bags\')">Review daily-use bags</button>' : ""}<button class="btn alt" onclick="returnFromBags()">${state.customer ? "Return to customer" : "Return to market preparation"}</button>`,
+    `<h2>Paper bag refill</h2>${bagStatusCount()}<p>A pack costs $3 and contains exactly 10 paper bags. Purchased bags carry over between days. Every completed customer purchase uses exactly one bag, regardless of items or quantities.</p><p>Your cash: ${money(state.cash)}</p><button class="btn" onclick="buyBagsNow()" ${state.cash >= 3 ? "" : "disabled"}>Buy 10 bags · $3</button>${!state.rentals.bags && Game.bagsRemaining(state) === 0 ? '<button class="btn alt" onclick="rentalOffer(\'bags\')">Review daily-use bags</button>' : ""}<button class="btn alt" onclick="returnFromBags()">${state.customer ? "Return to customer" : "Return to market preparation"}</button>`,
     "bag-shop",
   );
 }

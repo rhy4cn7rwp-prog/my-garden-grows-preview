@@ -441,3 +441,213 @@ input:focus-visible {
   background: #f8e4af;
   border-radius: 8px;
 }
+
+/* Phase 1D: a complete register in the usable phone viewport, with 44px targets. */
+.register-modal {
+  padding: max(6px, env(safe-area-inset-top))
+    max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom))
+    max(6px, env(safe-area-inset-left));
+}
+.register-dialog {
+  padding: 8px;
+  border-width: 4px;
+  width: min(100%, 420px);
+  max-height: calc(
+    100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.register-dialog p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.register-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 44px;
+}
+.register-header h2 {
+  font-size: 21px;
+  margin: 0;
+}
+.register-close {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 9px;
+  background: #f2dfb3;
+  color: #54351b;
+  font-size: 28px;
+}
+.register-receipt {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+.register-receipt p {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+.register-receipt span {
+  font-size: 12px;
+}
+.register-receipt strong {
+  font-size: 17px;
+}
+.register-dialog .money-tray {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: 64px 64px 52px;
+  gap: 5px;
+  margin: 2px 0;
+}
+.register-dialog .money-piece {
+  min-height: 44px;
+  padding: 2px;
+}
+.register-dialog .paper-bill {
+  grid-column: span 2;
+}
+.register-dialog .paper-bill svg {
+  height: 60px;
+  width: 100%;
+  max-width: 160px;
+}
+.register-dialog .metal-coin svg {
+  height: 52px;
+  width: 66px;
+  max-width: 100%;
+}
+.register-dialog .metal-coin svg text {
+  font-size: 28px;
+}
+.register-count {
+  padding: 4px;
+  background: #f9e6ab;
+  border-radius: 8px;
+  line-height: 1.15;
+}
+.register-count strong {
+  display: block;
+  font-size: 15px;
+}
+.register-count small {
+  display: block;
+  font-size: 12px;
+}
+.register-dialog .register-bags {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 0;
+  min-height: 44px;
+  text-align: left;
+}
+.register-bags p {
+  flex: 1;
+}
+.register-dialog .btn {
+  min-height: 44px;
+  margin: 0;
+  padding: 5px 8px;
+  font-size: 14px;
+  line-height: 1.1;
+}
+.register-bags .btn {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+.register-actions {
+  display: flex;
+  gap: 6px;
+}
+.register-actions .btn {
+  flex: 1;
+}
+@media (max-height: 520px) {
+  .register-dialog {
+    gap: 3px;
+  }
+  .register-dialog .money-tray {
+    grid-template-rows: 58px 58px 48px;
+    gap: 4px;
+  }
+  .register-dialog .paper-bill svg {
+    height: 54px;
+  }
+  .register-dialog .metal-coin svg {
+    height: 48px;
+  }
+}
+@media (max-height: 430px) and (min-width: 540px) {
+  .register-dialog {
+    width: min(100%, 700px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-areas: "header header" "receipt money" "count money" "bags money" "actions money";
+    gap: 4px 10px;
+  }
+  .register-header {
+    grid-area: header;
+  }
+  .register-receipt {
+    grid-area: receipt;
+  }
+  .register-dialog .money-tray {
+    grid-area: money;
+  }
+  .register-count {
+    grid-area: count;
+  }
+  .register-bags {
+    grid-area: bags;
+  }
+  .register-actions {
+    grid-area: actions;
+  }
+}
+/* Account for Safari's usable height and safe-area insets rather than device height. */
+.register-modal {
+  --register-safe-top: env(safe-area-inset-top, 0px);
+  --register-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --register-room: calc(
+    100dvh - 12px - var(--register-safe-top) - var(--register-safe-bottom)
+  );
+  padding-top: max(6px, var(--register-safe-top));
+  padding-bottom: max(6px, var(--register-safe-bottom));
+}
+.register-dialog {
+  max-height: var(--register-room);
+}
+.register-dialog .paper-bill svg {
+  height: 100%;
+  max-height: 60px;
+}
+@media (max-height: 600px) and (max-width: 539px) {
+  .register-dialog {
+    gap: 3px;
+  }
+  .register-dialog .money-tray {
+    grid-template-rows: repeat(
+        2,
+        clamp(48px, calc((var(--register-room) - 310px) / 2), 58px)
+      ) clamp(44px, calc(var(--register-room) - 370px), 48px);
+    gap: 4px;
+  }
+  .register-dialog .paper-bill svg {
+    height: 100%;
+    max-height: 54px;
+  }
+  .register-dialog .metal-coin svg {
+    height: 100%;
+    max-height: 48px;
+  }
+}

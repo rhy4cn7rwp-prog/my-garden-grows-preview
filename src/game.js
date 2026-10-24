@@ -667,10 +667,6 @@
         hasEquipment(s, "scale"),
       "You need a scale for produce sold by the pound.",
     );
-    requireRule(
-      !orderNeedsBag(s) || bagsRemaining(s) > 0,
-      "This loose-produce order needs 1 paper bag. Buy a 10-pack or review daily-use bags. Other produce can still be sold without bags.",
-    );
     const total = totalOrder(s);
     requireRule(
       Number.isFinite(answer) && cents(answer) === cents(total),
@@ -698,7 +694,7 @@
     );
     requireRule(
       !orderNeedsBag(s) || bagsRemaining(s) > 0,
-      "This order needs 1 paper bag before the sale can finish.",
+      "Every purchase needs 1 paper bag before the sale can finish.",
     );
     const total = totalOrder(s);
     for (const [id, n] of Object.entries(s.basket)) {
@@ -725,10 +721,7 @@
     return s.bagCount + s.rentalBagsRemaining;
   }
   function orderNeedsBag(s) {
-    return (
-      !!s.customer &&
-      Object.keys(s.customer.want).some((id) => get(id)?.unit === "lb")
-    );
+    return !!s.customer;
   }
   function buyBagPacks(s, n = 1) {
     requireRule(quantity(n) && n > 0 && n <= 100, "Choose 1 to 100 bag packs.");
@@ -978,8 +971,8 @@
   }
   function canReceiveSeedHelp(s) {
     if (cents(s.cash) >= 100) return false;
-    const sellable = (id) =>
-      get(id).unit === "each" || (s.owned.scale && s.bagCount > 0);
+    if (bagsRemaining(s) === 0) return true;
+    const sellable = (id) => get(id).unit === "each" || s.owned.scale;
     return (
       !crops.some(
         (c) =>
@@ -993,8 +986,17 @@
       canReceiveSeedHelp(s),
       "You already have a way to keep growing: use your seeds, water your plants, or sell your harvest.",
     );
-    s.seeds.carrot = (s.seeds.carrot || 0) + 3;
-    return "Your neighbors shared 3 carrot seeds. Plant, water and harvest them, then sell from a free blanket. No repayment is needed.";
+    const needsSeeds =
+      !crops.some(
+        (c) =>
+          (c.unit === "each" || s.owned.scale) &&
+          ((s.seeds[c.id] || 0) > 0 || (s.inventory[c.id] || 0) > 0),
+      ) &&
+      !s.plots.some((p) => p && (get(p.id).unit === "each" || s.owned.scale));
+    if (needsSeeds) s.seeds.carrot = (s.seeds.carrot || 0) + 3;
+    const donatedBags = bagsRemaining(s) === 0 ? 3 : 0;
+    s.bagCount += donatedBags;
+    return `Your neighbors shared ${[needsSeeds ? "3 carrot seeds" : "", donatedBags ? "3 paper bags" : ""].filter(Boolean).join(" and ")}. Grow and sell from a free blanket. No repayment is needed.`;
   }
   const api = {
     bagsRemaining,
