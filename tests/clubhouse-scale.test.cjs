@@ -53,3 +53,12 @@ test('large floor treasures still have multiple valid destinations and reject fu
  }
  assert.equal(L.drop('bike',L.angleAt(1300),.5),null);assert.equal(L.drop('bike',110,.9),null);
 });
+
+test('a newly crowded bench keeps the camera and finds a nearby same-wall surface for the larger tablet',()=>{
+ const s=farm();s.clubhousePositions={camera:L.canonical('camera','reading-bench',452),tablet:L.point('reading-bench',480,L.contactY('reading-bench',480))};
+ const camera=structuredClone(s.clubhousePositions.camera),before=structuredClone(otherState(s));
+ const r=G.recover(JSON.stringify(s));assert.deepEqual(r.clubhousePositions.camera,camera);
+ assert.equal(r.clubhousePositions.tablet.surface,'shelf-left-lower');
+ assert.ok(Math.abs(L.pixelAt(r.clubhousePositions.tablet.angle)-480)<100);assert.deepEqual(otherState(r),before);
+ assert.deepEqual(G.recover(JSON.stringify(r)).clubhousePositions,r.clubhousePositions);
+});

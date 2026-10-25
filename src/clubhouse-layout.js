@@ -371,10 +371,11 @@
   }
   function nearestFree(id, origin, accepted) {
     const ox=pixelAt(origin.angle),oy=origin.y*724;
+    const surfaceDistance=s=>{const x=clamp(ox,...s.pixels);return (x-ox)**2+((contactY(s,x)-oy)*1.4)**2;};
     const choices=surfaces.filter(s=>s.items.includes(id)).sort((a,b)=>
       Number(b.id===origin.surface)-Number(a.id===origin.surface) ||
       Number(a.kind==="floor")-Number(b.kind==="floor") ||
-      Math.abs(contactY(a,(a.pixels[0]+a.pixels[1])/2)-oy)-Math.abs(contactY(b,(b.pixels[0]+b.pixels[1])/2)-oy));
+      surfaceDistance(a)-surfaceDistance(b));
     for (const surface of choices) {
       let best=null,score=Infinity;
       const xs=[ox],ys=surface.kind==="floor"?[oy]:[undefined];
