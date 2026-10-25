@@ -26,3 +26,14 @@ seating nook, shelves and chest, and adds a left reading/bench wall and right
 shelf/cabinet wall. It contains no rewards or interface. The original room and
 reward assets above remain byte-for-byte unchanged. Canvas 2D samples this one
 continuous image; rewards remain separate touch controls.
+
+## Furniture-relative sizing
+
+The PNG and WebP artworks are unchanged. `ClubhouseLayout.itemSizes` supplies an
+approximate physical width/height and the correct atlas aspect ratio for each
+reward. The approved soccer-ball diameter defines the common room-pixel scale;
+the bench seat and floorboards provide a visual cross-check. Surface depth and
+the existing camera projection then apply uniformly to all items and furniture.
+Bicycle wheels, guitar base, tablet case, camera body/strap and keepsake base use
+individual contact insets, rather than treating transparent shadows as feet.
+These dimensions are storybook guides, not an architectural room model.

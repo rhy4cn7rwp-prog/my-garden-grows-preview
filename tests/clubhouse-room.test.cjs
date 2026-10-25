@@ -110,7 +110,7 @@ test("treasures cannot be dropped into another occupied spot", () => {
 });
 test("restoring an item frees an occupied home spot safely without losing ownership", () => {
   const s = farm();
-  G.moveClubhouseItem(s, "bike", { surface: "floor", angle: -52, y: 0.83 });
+  G.moveClubhouseItem(s, "bike", L.canonical("bike", "floor", 1760, 680));
   G.moveClubhouseItem(s, "ball", { surface: "floor", angle: -72, y: 0.83 });
   const before = copy(s);
   assert.deepEqual(G.resetClubhouseItem(s, "bike"), ["bike", "ball"]);

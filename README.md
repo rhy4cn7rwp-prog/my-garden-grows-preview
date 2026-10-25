@@ -1,3 +1,40 @@
+## Latest Clubhouse refinement: furniture-relative treasure sizes
+
+The room painting, reward artwork and fixed panoramic camera are unchanged.
+Purchased treasures now use maintainable, item-specific physical size guides in
+`ClubhouseLayout.itemSizes`, calibrated to the approved 64px / roughly 22cm soccer
+ball, the painted bench seat (~37cm high), window-seat width and floorboards.
+The bicycle is about 110cm long in this stylized room, rather than a miniature
+only twice the ball's width. The learner guitar and protected tablet are scaled
+separately; compact camera and keepsake-bank proportions stay close to before.
+The current collection has a puppy-fund keepsake bank, not a teddy bear. Future
+rewards can specify width or height in centimetres plus the atlas aspect ratio.
+
+One shared size function drives room-space compositing, shadows, floor depth,
+placement clearance, collision checks and touch geometry. Item aspect ratios
+and body-specific contact padding keep wheels/bases on their chosen surfaces.
+Looking around uses the existing camera rays and never changes an item's size
+independently of the room. Small touch targets still have at least 44px of reach;
+a partly off-screen large item only claims its visible touch area, so the bicycle
+cannot block a neighboring treasure with an invisible oversized button.
+
+Existing valid saved placements are kept exactly. Edge placements and newly
+crowded arrangements move only when clearance requires it, preferring the same
+surface and nearby space. Explicit saved placements take priority over defaults;
+smaller chosen treasures are protected when a larger bicycle needs more room.
+The same clearance pass runs after purchasing a new reward. Ownership, purchase
+records, money, garden, customer history and math/cash practice are unchanged.
+The existing coordinate format and save keys remain compatible; no room or farm
+reset is required. Recovered positions are stable on subsequent refreshes.
+
+QA includes all six item sizes across multiple viewing angles, actual bicycle
+press-and-hold dragging on small phones, all item details/Find controls, 44px hit
+targets, safe edge/collision migration, purchase/placement persistence, shelf/
+seat/chest/floor contacts, original room-space pixel projection, reduced motion,
+Safari toolbar/orientation simulations and unchanged financial progress. Rendered
+screenshots compare the bike/ball against furniture. Native iPhone Safari still
+needs device playtesting; automated browser checks use Chromium touch emulation.
+
 ## Phase 4: cents, varied payments and change-making support
 
 The original illustrated $1/$5/$10/$20 bill and penny/nickel/dime/quarter controls

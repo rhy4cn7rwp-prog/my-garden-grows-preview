@@ -538,6 +538,8 @@
       ...(s.dreamPurchases || {}),
       [id]: { owned: true, season: s.season, day: s.day, price: item.price },
     };
+    if (roomLayout) s.clubhousePositions = roomLayout.recoverPositions(
+      s.clubhousePositions, s.dreamPurchases, s.clubhouseLayoutVersion);
     if (dreams[s.goal].id === id) s.won = true;
     return item.price;
   }

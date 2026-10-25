@@ -126,29 +126,20 @@ function roomItemPoint(id, p) {
     top = projected.y - size.visualHeight + size.tail,
     visibleBottom =
       projected.y + (size.occlusion ? -size.occlusion : size.tail),
-    width = Math.min(
-      r.usable.right - r.usable.left,
-      Math.max(44, size.visualWidth),
-    ),
-    height = Math.min(
-      r.usable.bottom - r.usable.top,
-      Math.max(44, size.visualHeight - size.occlusion),
-    );
-  const x = ClubhouseLayout.clamp(
-      projected.x,
-      r.usable.left + width / 2,
-      r.usable.right - width / 2,
-    ),
-    y = ClubhouseLayout.clamp(
-      (top + visibleBottom) / 2,
-      r.usable.top + height / 2,
-      r.usable.bottom - height / 2,
-    );
-  const overlapX =
-      Math.min(left + size.visualWidth, r.usable.right) -
-      Math.max(left, r.usable.left),
-    overlapY =
-      Math.min(visibleBottom, r.usable.bottom) - Math.max(top, r.usable.top);
+    clippedLeft = Math.max(left, r.usable.left),
+    clippedRight = Math.min(left + size.visualWidth, r.usable.right),
+    clippedTop = Math.max(top, r.usable.top),
+    clippedBottom = Math.min(visibleBottom, r.usable.bottom),
+    overlapX = clippedRight - clippedLeft,
+    overlapY = clippedBottom - clippedTop,
+    width = Math.min(r.usable.right-r.usable.left, Math.max(44,overlapX)),
+    height = Math.min(r.usable.bottom-r.usable.top, Math.max(44,overlapY));
+  // Keep the target over the visible artwork. Moving a full oversized hit box
+  // inward would make an off-screen bicycle intercept neighboring treasures.
+  const x = ClubhouseLayout.clamp((clippedLeft+clippedRight)/2,
+      r.usable.left+width/2,r.usable.right-width/2),
+    y = ClubhouseLayout.clamp((clippedTop+clippedBottom)/2,
+      r.usable.top+height/2,r.usable.bottom-height/2);
   return {
     ...size,
     width,
@@ -162,7 +153,6 @@ function roomItemPoint(id, p) {
     offsetX: left - (x - width / 2),
     offsetY: top - (y - height / 2),
     visible:
-      projected.visible &&
       overlapX >= Math.min(14, size.visualWidth * 0.4) &&
       overlapY >= Math.min(14, (size.visualHeight - size.occlusion) * 0.4),
   };

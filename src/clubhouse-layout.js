@@ -199,16 +199,27 @@
       ? line(floorBack, x) + 6
       : line(s.edge, x) + (s.offset || 0);
   }
+  // A 22cm ball is the approved 64px reference. At the back of the painting
+  // the bench seat is about 108px high (~37cm), and its cushion is ~300px wide.
+  // These are approximate storybook proportions, not a change to the room lens.
+  const sizeReference = { pixelsPerCm:64/22, ballDiameterCm:22, benchSeatHeightPx:108, windowSeatWidthPx:300 };
+  const itemSizes = {
+    ball: { widthCm:22, aspect:1, contactInset:17/380, reference:"22cm soccer ball" },
+    bike: { widthCm:110, aspect:575/452, contactInset:18/452, reference:"110cm child bicycle, about 86cm tall" },
+    guitar: { heightCm:70, aspect:276/492, contactInset:28/492, reference:"70cm learner guitar" },
+    tablet: { widthCm:20, aspect:430/388, contactInset:12/388, reference:"20cm tablet in its protective case" },
+    camera: { widthCm:12, aspect:442/365, contactInset:.18, reference:"12cm compact camera; strap hangs below its body" },
+    puppy: { widthCm:14.5, aspect:455/442, contactInset:20/442, reference:"Small 14.5cm keepsake bank" },
+  };
+  function baseSize(id) {
+    const m=itemSizes[id];
+    if (!m) return {width:32,height:32,contactInset:0};
+    const width=(m.widthCm ?? m.heightCm*m.aspect)*sizeReference.pixelsPerCm;
+    return {width,height:width/m.aspect,contactInset:m.contactInset};
+  }
   function metrics(id, p) {
     const s = getSurface(p.surface),
-      base = {
-        ball: [64, 64],
-        bike: [142, 112],
-        guitar: [55, 100],
-        camera: [35, 29],
-        tablet: [38, 34],
-        puppy: [42, 41],
-      }[id] || [32, 32];
+      base = baseSize(id);
     let scale = s?.kind === "chest" ? 1.1 : s?.kind === "seat" ? 0.95 : 1;
     if (s?.kind === "floor")
       scale =
@@ -221,21 +232,16 @@
         ) *
           0.55;
     return {
-      width: base[0] * scale,
-      height: base[1] * scale,
-      // The ball's actual body ends at atlas row 465, not at the end of
-      // its 380px crop. The remaining 17px are transparent edge/shadow.
-      tail:
-        id === "camera"
-          ? base[1] * scale * 0.18
-          : id === "ball"
-            ? (base[1] * scale * 17) / 380
-            : 0,
+      width: base.width * scale,
+      height: base.height * scale,
+      // Align the visible body/tires, rather than transparent atlas padding,
+      // with the chosen surface. The camera strap may hang below that surface.
+      tail: base.height * scale * base.contactInset,
       shadow: {
-        rx: base[0] * scale * (s?.kind === "floor" ? 0.34 : 0.28),
+        rx: base.width * scale * (s?.kind === "floor" ? 0.34 : 0.28),
         ry: Math.max(
           0.7,
-          base[1] * scale * (s?.kind === "floor" ? 0.025 : 0.015),
+          base.height * scale * (s?.kind === "floor" ? 0.025 : 0.015),
         ),
         color:
           s?.kind === "chest"
@@ -346,7 +352,43 @@
               : migrate(id, raw[id]);
           if (p) result[id] = { surface: p.surface, angle: p.angle, y: p.y };
         }
+    const accepted = {};
+    const order = Object.keys(defaults).filter(id=>owned[id]).sort((a,b)=>
+      Number(!!result[b])-Number(!!result[a]) || baseSize(a).width-baseSize(b).width);
+    for (const id of order) {
+      const original=effective(result,id);
+      let p=original;
+      if (!valid(id,p) || Object.keys(accepted).some(other=>conflict(p,accepted[other],id,other)))
+        p=nearestFree(id,original,accepted);
+      // There is ample floor space for this six-item collection. Never discard
+      // an owned item or an otherwise valid farm if optional layout data is bad.
+      if (!p) p=defaults[id];
+      accepted[id]=p;
+      if (result[id] || p.angle!==defaults[id].angle || p.y!==defaults[id].y || p.surface!==defaults[id].surface)
+        result[id]={surface:p.surface,angle:p.angle,y:p.y};
+    }
     return result;
+  }
+  function nearestFree(id, origin, accepted) {
+    const ox=pixelAt(origin.angle),oy=origin.y*724;
+    const choices=surfaces.filter(s=>s.items.includes(id)).sort((a,b)=>
+      Number(b.id===origin.surface)-Number(a.id===origin.surface) ||
+      Number(a.kind==="floor")-Number(b.kind==="floor") ||
+      Math.abs(contactY(a,(a.pixels[0]+a.pixels[1])/2)-oy)-Math.abs(contactY(b,(b.pixels[0]+b.pixels[1])/2)-oy));
+    for (const surface of choices) {
+      let best=null,score=Infinity;
+      const xs=[ox],ys=surface.kind==="floor"?[oy]:[undefined];
+      for(let x=surface.pixels[0];x<=surface.pixels[1];x+=surface.kind==="floor"?12:2)xs.push(x);
+      if(surface.kind==="floor")for(let y=506;y<=704;y+=6)ys.push(y);
+      for(const x of xs)for(const y of ys){
+        const p=canonical(id,surface.id,x,y);
+        if(!p || Object.keys(accepted).some(other=>conflict(p,accepted[other],id,other)))continue;
+        const distance=(x-ox)**2+((p.y*724-oy)*1.4)**2;
+        if(distance<score){best=p;score=distance;}
+      }
+      if(best)return best;
+    }
+    return null;
   }
   function conflict(a, b, id, other) {
     const ma = metrics(id, a),
@@ -480,6 +522,9 @@
     point,
     contactY,
     getSurface,
+    sizeReference,
+    itemSizes,
+    baseSize,
     metrics,
     canonical,
     migrate,
