@@ -42,7 +42,7 @@ try:
    fit();assert page.locator('#total-answer').inner_text()=='—'
    if w==428:page.screenshot(path='/tmp/phase4b-keypad-iphone.png')
    assert '$7.00' not in page.locator('.total-keypad-dialog').inner_text()
-   assert 'at $2.00 each' in page.locator('.total-keypad-order').inner_text()
+   assert '2 × $2.00 = ?' in page.locator('.total-keypad-order').inner_text()
    assert page.get_by_role('button',name='Confirm total',exact=True).is_disabled()
    for k in ['Decimal point','2','5','9']:tap(k)
    assert page.locator('#total-answer').inner_text()=='$0.25'

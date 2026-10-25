@@ -12,15 +12,11 @@ function marketTotalKeypad(feedback = "") {
   ]);
   if (marketTotalDraft.key !== key) marketTotalDraft = { key, value: "" };
   show(
-    `<header class="total-keypad-header"><h2>Calculate the total</h2><button class="register-close" aria-label="Close ✕" onclick="closeDialog()">×</button></header><p class="total-keypad-order"><b>${state.customer.name}'s order:</b> ${marketRequestText()}.<br><b>Basket prices:</b> ${
-      Object.entries(state.basket)
-        .filter(([, n]) => n > 0)
-        .map(
-          ([id, n]) =>
-            `${marketQuantityText(id, n)} at ${money(crop(id).price)} ${crop(id).unit === "lb" ? "per lb" : "each"}`,
-        )
-        .join("; ") || "Your basket is empty."
-    }</p><div class="total-keypad-display"><span>Your total</span><output id="total-answer" aria-label="Your calculated total" aria-live="polite">${marketTotalDraft.value === "" ? "—" : "$" + marketTotalDraft.value}</output></div><p class="total-keypad-feedback" role="status">${feedback || "Use the prices on your stand. Take your time!"}</p><div class="total-keypad-keys">${["7", "8", "9", "Backspace", "4", "5", "6", "Clear", "1", "2", "3", ".", "0", "Confirm total"].map((key) => `<button class="${key === "0" ? "keypad-zero" : key === "Confirm total" ? "keypad-confirm" : ""}" aria-label="${key === "." ? "Decimal point" : key}" onclick="marketTotalPress('${key}')" ${key === "Confirm total" && marketTotalDraft.value === "" ? "disabled" : ""}>${key === "Backspace" ? "⌫" : key === "Confirm total" ? "Confirm total" : key}</button>`).join("")}</div>`,
+    `<header class="total-keypad-header"><h2>Calculate the total</h2><button class="register-close" aria-label="Close ✕" onclick="closeDialog()">×</button></header><div class="total-keypad-order"><b>${state.customer.name}'s order:</b>${
+      Object.entries(state.basket).filter(([,n])=>n>0).map(([id,n]) =>
+        `<div class="order-math-line"><span>${crop(id).name}${crop(id).unit === "lb" ? " (lb)" : ""}:</span><span>${n} × ${money(Game.marketPrice(state,id))} = ?</span></div>`
+      ).join("") || "Your basket is empty."
+    }<b>Total: $?</b></div><div class="total-keypad-display"><span>Your total</span><output id="total-answer" aria-label="Your calculated total" aria-live="polite">${marketTotalDraft.value === "" ? "—" : "$" + marketTotalDraft.value}</output></div><p class="total-keypad-feedback" role="status">${feedback || "Use the prices on your stand. Take your time!"}</p><div class="total-keypad-keys">${["7", "8", "9", "Backspace", "4", "5", "6", "Clear", "1", "2", "3", ".", "0", "Confirm total"].map((key) => `<button class="${key === "0" ? "keypad-zero" : key === "Confirm total" ? "keypad-confirm" : ""}" aria-label="${key === "." ? "Decimal point" : key}" onclick="marketTotalPress('${key}')" ${key === "Confirm total" && marketTotalDraft.value === "" ? "disabled" : ""}>${key === "Backspace" ? "⌫" : key === "Confirm total" ? "Confirm total" : key}</button>`).join("")}</div>`,
     "total-keypad",
   );
 }

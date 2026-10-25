@@ -257,7 +257,7 @@ test("reward purchases leave in-progress customer, garden, inventory and account
   const before = clone(s);
   G.purchaseDream(s, "ball");
   for (const field of Object.keys(before).filter(
-    (f) => !["cash", "dreamPurchases"].includes(f),
+    (f) => !["cash", "dreamPurchases", "dreamPurchaseCount"].includes(f),
   ))
     assert.deepEqual(s[field], before[field], field);
 });

@@ -53,7 +53,7 @@ function paintMarketClock() {
         Game.marketTime(state).expired
       ) {
         marketClockReportKey = key;
-        showMarketReport();
+        showMarketClosing();
       }
     });
   }
@@ -87,3 +87,10 @@ function pauseHiddenMarket() {
 window.addEventListener("pagehide", pauseHiddenMarket);
 // Supported by page-lifecycle browsers; visibilitychange handles Safari.
 document.addEventListener("freeze", pauseHiddenMarket);
+
+function showMarketClosing() {
+  if (state.customer || state.marketOpen) return;
+  if (!Game.marketTime(state).expired) return showMarketReport();
+  markMarketClockReport();
+  show(`<h2>The Market Has Closed!</h2><p>It's 1:00 PM! Another busy market day is over. Let's see how you did!</p><button class="btn" onclick="showMarketReport()">View Daily Market Report</button>`, "market-closing");
+}

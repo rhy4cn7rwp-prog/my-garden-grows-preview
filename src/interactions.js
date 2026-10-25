@@ -129,7 +129,7 @@ function closeMarket() {
 function newCustomer() {
   Game.syncMarketClock(state);
   if (!state.marketOpen && state.marketPlayed && !state.customer) {
-    showMarketReport();
+    showMarketClosing();
     return;
   }
   act(() => {

@@ -96,16 +96,24 @@ try:
    fixture('{onion:1}',decision=10);before=baseline();tap('Hi! What can I get for you?')
    page.reload();assert page.evaluate('state.customer.want')=={'onion':1}
    tap('Help with sold-out produce')
-   assert page.locator('.dialog [onclick^="offerAlternative"]').count()==5
-   page.locator('[onclick="offerAlternative(\'cucumber\')"]').tap()
+   assert page.locator('.dialog [onclick^="offerAlternative"]').count()==0
+   assert page.locator('[onclick="offerSomethingElse()"]').count()==1
+   page.locator('[onclick="offerSomethingElse()"]').tap()
    assert 'try that instead' in page.locator('.market-conversation').inner_text();assert baseline()==before
-   tap('🧺 Fill customer basket');tap('Add Cucumbers');tap('Check basket')
-   enter_total(page,'3');tap('Confirm total');tap('💵 Count change');fit();tap('$1');tap('$1');tap('Give change')
-   assert page.evaluate('[state.cash,state.bagCount,state.customersServed,state.inventory.cucumber]')==[53,2,1,2]
+   tap('🧺 Fill customer basket')
+   chosen=page.evaluate('Object.keys(state.customer.want)[0]')
+   label=page.evaluate('id=>crop(id).name',chosen)
+   tap('Add '+label);tap('Check basket')
+   amount=page.evaluate('id=>Game.marketPrice(state,id)',chosen)
+   enter_total(page,str(amount));tap('Confirm total');tap('💵 Count change');fit()
+   change=page.evaluate('state.tendered-Game.totalOrder(state)')
+   for _ in range(int(change)):tap('$1')
+   tap('Give change')
+   assert page.evaluate('[state.cash,state.bagCount,state.customersServed]')==[50+amount,2,1]
    tap('Thanks for shopping with us!')
    # Some customers decline: no forced sale, no money, produce, or bag consumed.
    fixture('{onion:1}',personality='thoughtful',decision=99);before=baseline();tap('Hi! What can I get for you?');tap('Help with sold-out produce')
-   page.locator('[onclick="offerAlternative(\'carrot\')"]').tap()
+   page.locator('[onclick="offerSomethingElse()"]').tap()
    assert 'on my list' in page.locator('.market-conversation').inner_text();assert page.evaluate('state.step')=='thanks'
    tap('Bye!');assert baseline()==before
    for personality,expected in [('curious','choose'),('hurried','thanks')]:

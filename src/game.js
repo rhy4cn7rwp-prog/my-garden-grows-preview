@@ -158,6 +158,7 @@
       day: 1,
       season: 1,
       goal: 1,
+      dreamPurchaseCount: 0,
       dreamPurchases: {},
       clubhousePositions: {},
       clubhouseLayoutVersion: 2,
@@ -313,6 +314,8 @@
           };
         }
       }
+      clean.dreamPurchaseCount = Math.max(Object.keys(clean.dreamPurchases).length,
+        quantity(s.dreamPurchaseCount) ? s.dreamPurchaseCount : 0);
       // A failed optional room-script download must never reset a valid farm.
       clean.clubhousePositions = roomLayout
         ? roomLayout.recoverPositions(
@@ -510,6 +513,7 @@
       "Keep saving! You need enough money for this dream after outstanding equipment payments.",
     );
     // Validate everything before committing; repeat taps cannot double-charge.
+    s.dreamPurchaseCount = dreamPurchaseCount(s) + 1;
     s.cash = (cents(s.cash) - cents(item.price)) / 100;
     s.dreamPurchases = {
       ...(s.dreamPurchases || {}),
@@ -867,6 +871,25 @@
     s.basket = {};
     s.step = "greet";
   }
+  function dreamPurchaseCount(s) {
+    return Math.max(quantity(s.dreamPurchaseCount) ? s.dreamPurchaseCount : 0,
+      dreams.filter(d => ownsDream(s, d.id)).length);
+  }
+  function mathLevel(s) { return Math.min(5, Math.floor(dreamPurchaseCount(s) / 2)); }
+  function orderDifficulty(s) {
+    const level = mathLevel(s);
+    // Every third shopper is an easier review; milestones never remove practice.
+    return s.visitors % 3 === 2 ? Math.max(0, level - 1) : level;
+  }
+  function priceForLevel(id, level, visit) {
+    const fraction = level === 0 ? 0 : level === 1
+      ? [25, 50][visit % 2] : [0, 25, 50, 75][visit % 4];
+    return (cents(get(id).price) + fraction) / 100;
+  }
+  function marketPrice(s, id) {
+    if (!get(id)) return 0;
+    return s.customer?.prices?.[id] ?? priceForLevel(id, orderDifficulty(s), s.visitors);
+  }
   function newCustomer(s, name, now = Date.now()) {
     syncMarketClock(s, now);
     requireRule(
@@ -876,10 +899,20 @@
     requireRule(!s.customer, "Finish serving this customer first.");
     const stock = crops.filter((c) => marketStock(s, c.id) > 0);
     requireRule(stock.length, "Your display is sold out.");
-    const a = stock[s.visitors % stock.length],
-      want = { [a.id]: Math.min(marketStock(s, a.id), (s.visitors % 2) + 1) };
-    if (stock.length > 1 && s.visitors % 2)
-      want[stock[(s.visitors + 1) % stock.length].id] = 1;
+    const level = orderDifficulty(s), prices = Object.fromEntries(
+      crops.map(c => [c.id, priceForLevel(c.id, level, s.visitors)]));
+    const a = stock[s.visitors % stock.length], want = {};
+    const products = Math.min(stock.length, level >= 3 ? 3 : level >= 2 ? 2 + s.visitors % 2 : 1 + s.visitors % 2);
+    const maxQuantity = [2, 2, 3, 4, 5, 8][level];
+    const budget = [20, 20, 20, 20, 50, 90][level];
+    let subtotal = 0;
+    for (let i = 0; i < products; i++) {
+      const item = stock[(s.visitors + i) % stock.length];
+      const n = Math.min(marketStock(s, item.id),
+        1 + (s.visitors + i) % maxQuantity,
+        Math.floor((cents(budget) - subtotal) / cents(prices[item.id])));
+      if (n > 0) { want[item.id] = n; subtotal += n * cents(prices[item.id]); }
+    }
     // Some shoppers come looking for a crop we do not stock today.
     const unavailable = crops.filter((c) => !marketStock(s, c.id));
     if ((s.day + s.visitors) % 4 === 0 && unavailable.length) {
@@ -890,6 +923,8 @@
     s.customer = {
       name,
       want,
+      prices,
+      mathLevel: level,
       personality: ["curious", "thoughtful", "hurried"][
         (s.day + s.visitors) % 3
       ],
@@ -917,13 +952,17 @@
   function alternativeChoices(s) {
     const missing = missingProduce(s)[0];
     if (!missing || s.customer.alternativeOffered) return [];
-    // Recommend other vegetables for vegetables, or berries for berries.
-    return crops.filter(
+    // Recommendations use sellable stock and fit this customer’s difficulty budget.
+    const available = crops.filter(
       (c) =>
         marketStock(s, c.id) > 0 &&
         !s.customer.want[c.id] &&
-        (c.id === "strawberry") === (missing === "strawberry"),
+        cents(marketPrice(s,c.id)) <= cents([20,20,20,20,50,90][s.customer.mathLevel ?? 0]) -
+          Object.entries(s.customer.want).filter(([id])=>!missingProduce(s).includes(id))
+            .reduce((n,[id,q])=>n+cents(marketPrice(s,id))*q,0),
     );
+    const preferred = available.filter(c => (c.id === "strawberry") === (missing === "strawberry"));
+    return preferred.length ? preferred : available;
   }
   function satisfaction(s, amount) {
     s.customer.satisfaction = Math.max(
@@ -965,7 +1004,10 @@
       (c.greeting === "excellent" ? 15 : c.greeting === "good" ? 5 : 0);
     const accepted = (c.decision ?? 50) < chance;
     if (accepted) {
-      const quantity = Math.min(c.want[missing], marketStock(s, id));
+      const otherCost = Object.entries(c.want).filter(([key])=>!missingProduce(s).includes(key))
+        .reduce((n,[key,q])=>n+cents(marketPrice(s,key))*q,0);
+      const quantity = Math.min(c.want[missing], marketStock(s, id),
+        Math.floor((cents([20,20,20,20,50,90][c.mathLevel ?? 0])-otherCost)/cents(marketPrice(s,id))));
       delete c.want[missing];
       c.want[id] = quantity;
       // Start a fresh basket for the customer's newly agreed order. No stock is consumed.
@@ -976,6 +1018,19 @@
       c.response = "alternative-declined";
       s.basket = {};
       s.step = "thanks";
+    }
+    return accepted;
+  }
+  function offerSomethingElse(s) {
+    requireRule(s.customer && s.step === "choose", "Listen to the customer's order first.");
+    const choices = alternativeChoices(s);
+    if (!choices.length) { declineOrder(s, "sorry"); return false; }
+    // The customer chooses from actual stock, using their established preference.
+    const choice = choices[(s.customer.decision ?? 50) % choices.length];
+    const accepted = suggestAlternative(s, choice.id);
+    if (accepted && missingProduce(s).length) {
+      // One conversation resolves all unavailable lines; never leave an impossible order.
+      for (const id of missingProduce(s)) delete s.customer.want[id];
     }
     return accepted;
   }
@@ -1020,7 +1075,7 @@
   function totalOrder(s) {
     return (
       Object.entries(s.basket).reduce(
-        (t, [id, n]) => t + cents(get(id).price) * n,
+        (t, [id, n]) => t + cents(marketPrice(s, id)) * n,
         0,
       ) / 100
     );
@@ -1054,7 +1109,9 @@
       "Try multiplying each quantity by its price, then add the amounts.",
     );
     s.tendered =
-      [5, 10, 20, 50, 100].find((n) => n >= total) ||
+      (s.customer.mathLevel === undefined ? [5, 10, 20, 50, 100] :
+        s.customer.mathLevel >= 5 ? [20, 50, 100] :
+        s.customer.mathLevel >= 4 ? [20, 50] : [5, 10, 20]).find((n) => n >= total) ||
       Math.ceil(total / 100) * 100;
     s.step = "pay";
     s.change = 0;
@@ -1211,12 +1268,17 @@
       )
     )
       return;
+    const savedPrices = Object.fromEntries(crops.map(item => [item.id,
+      Number.isFinite(c.prices?.[item.id]) && c.prices[item.id] >= item.price &&
+        c.prices[item.id] <= item.price + .75 && Number.isInteger(c.prices[item.id] * 100)
+        ? c.prices[item.id] : item.price]));
+    const savedTotal = Object.entries(s.basket).reduce((n,[id,q]) => n+cents(savedPrices[id])*q,0)/100;
     if (
       s.step === "pay" &&
       (!Object.entries(c.want).every(([id, n]) => s.basket[id] === n) ||
         !Object.keys(s.basket).every((id) => c.want[id] !== undefined) ||
         !Number.isFinite(s.tendered) ||
-        s.tendered < totalOrder(s) ||
+        s.tendered < savedTotal ||
         !Number.isFinite(s.change) ||
         s.change < 0)
     )
@@ -1224,6 +1286,8 @@
     clean.customer = {
       name: c.name,
       want: { ...c.want },
+      prices: savedPrices,
+      mathLevel: quantity(c.mathLevel) && c.mathLevel <= 5 ? c.mathLevel : undefined,
       personality: ["curious", "thoughtful", "hurried"].includes(c.personality)
         ? c.personality
         : "thoughtful",
@@ -1439,6 +1503,10 @@
     resetClubhouseItem,
     resetClubhouseLayout,
     dreams,
+    dreamPurchaseCount,
+    mathLevel,
+    marketPrice,
+    offerSomethingElse,
     ownsDream,
     acknowledgeGoal,
     purchaseDream,

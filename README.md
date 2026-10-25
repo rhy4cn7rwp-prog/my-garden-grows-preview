@@ -1,3 +1,40 @@
+## Latest Farmers Market: closing, conversations and progressive math
+
+At 1 PM the current customer can finish, then a friendly closing announcement
+links to the existing daily report. Early close still opens the report directly.
+Sold-out conversations offer one “Can I interest you in something else?” choice;
+the customer picks stocked produce or politely declines. No stock or bags are
+consumed until a completed sale.
+
+The total keypad shows unanswered quantity × price problems. Market prices and
+order sizes now progress with cumulative, verified Dream Shop purchases. Every
+third customer practices the previous tier. Customer prices and tier are saved
+with their order so buying a reward or refreshing never changes an agreed price.
+Seed prices and crop growth are unchanged; stand labels, basket prices, totals,
+payments, change and accounting share the same market prices.
+
+| Purchases | New challenges | Maximum payment |
+| --- | --- | --- |
+| 0–1 | Whole dollars, 1–2 items of each crop | $20 |
+| 2–3 | .25 and .50 prices | $20 |
+| 4–5 | .75 prices, up to 3 crop varieties | $20 |
+| 6–7 | Up to 4 of each crop; multiplication and mixed orders | $20 |
+| 8–9 | Up to 5 of each crop, larger orders | $50 |
+| 10+ | Up to 8 of each crop; occasional $30+ orders | $100 |
+
+Stock and order budgets further limit quantities. Existing known purchases seed
+the cumulative counter; reaching a goal does not increment it. There are currently
+only six Dream Shop objects, so the 8+ tiers are implemented and tested for future
+catalog additions, not reachable through today's six-item shop. No new rewards
+or repeat purchasing were added.
+
+QA includes all tiers through successful checkout, incorrect-total retry, decimal
+change, $100 payment, saved checkout recovery, milestone purchases, automatic
+closing announcement/report and active-play clock recovery. Mobile Chromium touch
+layouts are tested; actual iPhone Safari lock/reopen behavior still merits a device
+playtest. On exceptionally short screens the math receipt can scroll within its
+panel while keypad controls remain visible and at least 44px tall.
+
 ## Latest market gameplay refinements
 
 The 9 AM–1 PM clock now measures 20 minutes of **visible, active game time**.

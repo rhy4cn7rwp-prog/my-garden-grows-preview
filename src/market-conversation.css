@@ -105,7 +105,7 @@
   );
   width: min(100%, 440px);
   max-width: 680px;
-  height: min(440px, var(--keypad-room));
+  height: min(480px, var(--keypad-room));
   max-height: var(--keypad-room);
   display: flex;
   flex-direction: column;
@@ -137,7 +137,9 @@
 .total-keypad-dialog .total-keypad-order {
   margin: 0;
   flex-shrink: 0;
-  max-height: 72px;
+  max-height: 110px;
+  flex-shrink: 1;
+  min-height: 0;
   overflow-y: auto;
   font-size: 13px;
   line-height: 1.25;
@@ -401,3 +403,8 @@
     padding-top: 7px !important;
   }
 }
+
+.order-math-line { display:flex; justify-content:space-between; gap:6px; margin:2px 0; }
+.order-math-line span:last-child { white-space:nowrap; }
+.total-keypad-order { font-size:13px; line-height:1.2; }
+@media (max-height:500px) { .total-keypad-order { font-size:12px; margin:2px 0; } }

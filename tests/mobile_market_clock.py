@@ -77,7 +77,7 @@ try:
    assert page.locator('.register-dialog').evaluate('e=>e.scrollHeight<=e.clientHeight+1')
    for _ in range(3):tap('$1')
    tap('Give change');assert page.evaluate('[state.cash,state.bagCount,state.inventory.carrot]')==[52,4,99]
-   tap('Thanks for shopping with us!');page.get_by_role('heading',name='Market-day report',exact=True).wait_for()
+   tap('Thanks for shopping with us!');page.get_by_role('heading',name='The Market Has Closed!',exact=True).wait_for();tap('View Daily Market Report');page.get_by_role('heading',name='Market-day report',exact=True).wait_for()
    assert not page.evaluate('state.marketOpen') and page.evaluate('state.marketSettled')
    assert page.locator('.accounting-report').is_visible();tap('Close ✕')
    at(started+9999999);assert page.evaluate('state.cash')==52
@@ -86,12 +86,12 @@ try:
    # Idle market automatically closes, including while exploring another location.
    started=start();tap('Back to village');at(started+1200000)
    assert not page.evaluate('state.marketOpen')
-   tap('Farmers Market');page.get_by_role('heading',name='Market-day report',exact=True).wait_for();tap('Close ✕')
+   tap('Farmers Market');page.get_by_role('heading',name='The Market Has Closed!',exact=True).wait_for();tap('View Daily Market Report');page.get_by_role('heading',name='Market-day report',exact=True).wait_for();tap('Close ✕')
    # A last-millisecond admission click shows the report, without reopening it
    # a second time when dismissed.
    started=start()
    page.evaluate("n=>{window.__marketNow=n;newCustomer()}",started+1200000)
-   page.get_by_role('heading',name='Market-day report',exact=True).wait_for();tap('Close ✕')
+   page.get_by_role('heading',name='The Market Has Closed!',exact=True).wait_for();tap('View Daily Market Report');page.get_by_role('heading',name='Market-day report',exact=True).wait_for();tap('Close ✕')
    assert page.locator('.dialog').count()==0
    # Early closing remains possible and preserves its actual clock time.
    started=start();at(started+15000);tap('Close market');tap('Close ✕')

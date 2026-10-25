@@ -244,7 +244,7 @@ function marketItem(id) {
   if (view !== "market") return;
   let c = crop(id);
   show(
-    `<h2>${c.icon} ${c.name}</h2><p>On hand: ${state.inventory[id] || 0} ${c.unit}</p><p>Price: ${money(c.price)} per ${c.unit}</p><p>Tap “Fill customer basket” to serve the current shopper.</p>`,
+    `<h2>${c.icon} ${c.name}</h2><p>On hand: ${state.inventory[id] || 0} ${c.unit}</p><p>Price: ${money(Game.marketPrice(state,id))} per ${c.unit}</p><p>Tap “Fill customer basket” to serve the current shopper.</p>`,
   );
 }
 function order(feedback = "") {
@@ -265,7 +265,7 @@ function order(feedback = "") {
       .map((item) => {
         const stock = Game.marketStock(state, item.id);
         const count = state.basket[item.id] || 0;
-        return `<div class="basketline"><strong>${item.icon} ${item.name}</strong><p>${stock} ${item.unit} available · ${money(item.price)}/${item.unit}</p><div class="qty"><button aria-label="Remove ${item.name}" onclick="basketChange('${item.id}',-1)" ${count ? "" : "disabled"}>−</button><b>${count} in basket</b><button aria-label="Add ${item.name}" onclick="basketChange('${item.id}',1)" ${count < stock ? "" : "disabled"}>+</button></div></div>`;
+        return `<div class="basketline"><strong>${item.icon} ${item.name}</strong><p>${stock} ${item.unit} available · ${money(Game.marketPrice(state,item.id))}/${item.unit}</p><div class="qty"><button aria-label="Remove ${item.name}" onclick="basketChange('${item.id}',-1)" ${count ? "" : "disabled"}>−</button><b>${count} in basket</b><button aria-label="Add ${item.name}" onclick="basketChange('${item.id}',1)" ${count < stock ? "" : "disabled"}>+</button></div></div>`;
       })
       .join("")}</div>
     <p><strong>Your basket:</strong> ${
@@ -298,10 +298,7 @@ function checkBasket() {
   }
 }
 function totalOrder() {
-  return Object.entries(state.basket).reduce(
-    (a, [id, n]) => a + n * crop(id).price,
-    0,
-  );
+  return Game.totalOrder(state);
 }
 function paymentDialog() {
   let t = totalOrder(),
@@ -338,15 +335,13 @@ function customerService() {
       .join(", ")}.</p>
     ${missing.length ? `<p>We don't have enough ${missing.map((id) => crop(id).name.toLowerCase()).join(" and ")} on the stand today. You can explain politely or suggest something we do have.</p>` : "<p>You can fill this order, or let the customer know if you cannot help today.</p>"}
     <div class="customer-actions"><button class="btn" onclick="respondSoldOut('sorry')">I'm sorry, we're sold out of that today.</button>
-    ${Game.alternativeChoices(state)
-      .map(
-        (item) =>
-          `<button class="btn" onclick="offerAlternative('${item.id}')">We're sold out of ${crop(missing[0]).name.toLowerCase()}, but would you like to try some ${item.name.toLowerCase()}?</button>`,
-      )
-      .join("")}
+    ${missing.length && Game.alternativeChoices(state).length ? `<button class="btn" onclick="offerSomethingElse()">I'm sorry, we're sold out of ${crop(missing[0]).name.toLowerCase()} today. Can I interest you in something else?</button>` : ""}
     <button class="btn" onclick="respondSoldOut('return')">We're sold out today, but I hope you'll visit us again!</button></div>`,
     "service",
   );
+}
+function offerSomethingElse() {
+  act(() => { Game.offerSomethingElse(state); closeDialog(); });
 }
 function offerAlternative(id) {
   act(() => {

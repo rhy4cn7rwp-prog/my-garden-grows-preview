@@ -57,7 +57,7 @@ function marketProduceDisplay() {
   return `${available.length > 3 ? '<span class="market-tray-hint">Swipe harvest to see more →</span>' : ""}<section class="market-produce-tray" data-price-mode="regular" aria-label="Harvested produce and regular prices">${available
     .map((c) => {
       const stock = Game.marketStock(state, c.id);
-      return `<button class="market-produce" data-market-crop="${c.id}" onclick="marketItem('${c.id}')" aria-label="${c.name}, ${stock} ${c.unit} on stand, ${money(c.price)} per ${c.unit}"><span class="market-produce-basket ${["corn", "potato", "onion", "radish"].includes(c.id) ? "market-produce-crate" : ""}">${marketDisplayBin(c.id)}${seedProduceArt(c.id)}<span class="market-basket-rim">${marketDisplayBin(c.id)}</span></span><span class="market-produce-label"><strong>${c.name}</strong><span>${stock}${c.unit === "lb" ? " lb" : ""} on stand</span><span>${money(c.price)}${c.unit === "lb" ? "/lb" : " each"}</span></span></button>`;
+      return `<button class="market-produce" data-market-crop="${c.id}" onclick="marketItem('${c.id}')" aria-label="${c.name}, ${stock} ${c.unit} on stand, ${money(Game.marketPrice(state,c.id))} per ${c.unit}"><span class="market-produce-basket ${["corn", "potato", "onion", "radish"].includes(c.id) ? "market-produce-crate" : ""}">${marketDisplayBin(c.id)}${seedProduceArt(c.id)}<span class="market-basket-rim">${marketDisplayBin(c.id)}</span></span><span class="market-produce-label"><strong>${c.name}</strong><span>${stock}${c.unit === "lb" ? " lb" : ""} on stand</span><span>${money(Game.marketPrice(state,c.id))}${c.unit === "lb" ? "/lb" : " each"}</span></span></button>`;
     })
     .join("")}</section>`;
 }
