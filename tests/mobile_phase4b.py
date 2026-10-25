@@ -53,7 +53,7 @@ try:
     page.keyboard.type('8');page.keyboard.press('Enter')
    else:tap('8');tap('Confirm total')
    assert page.evaluate('state.step')=='choose'
-   assert 'multiplying' in page.locator('.total-keypad-feedback').inner_text();fit()
+   assert 'adding' in page.locator('.total-keypad-feedback').inner_text();fit()
    assert page.evaluate('[state.cash,state.bagCount,state.inventory,state.sales,state.day,state.season]')==initial
    tap('Close ✕');tap('🧺 Fill customer basket');tap('Calculate total')
    assert page.locator('#total-answer').inner_text()=='$8'

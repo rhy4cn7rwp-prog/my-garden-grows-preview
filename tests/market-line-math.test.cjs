@@ -19,7 +19,7 @@ test('wrong subtotals and final totals retry without revealing answers or moving
  assert.equal(JSON.stringify([s.cash,s.inventory,s.bagCount,s.marketElapsedMs]),before);
  G.answerMathLine(s,id,s.basket[id]*G.marketPrice(s,id));
  assert.throws(()=>G.answerMathLine(s,id,2),/highlighted/);
- solve(s);assert.throws(()=>G.ring(s,G.totalOrder(s)+1),/Try multiplying/);
+ solve(s);assert.throws(()=>G.ring(s,G.totalOrder(s)+1),/Try adding/);
  assert.equal(s.step,'choose');assert.equal(JSON.stringify([s.cash,s.inventory,s.bagCount,s.marketElapsedMs]),before);
 });
 test('solved item work survives refresh and stale or forged subtotal records cannot skip practice',()=>{

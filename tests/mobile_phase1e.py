@@ -65,7 +65,7 @@ try:
    assert page.evaluate('state.step')=='choose';assert baseline()==before
    tap('Remove Corn');tap('Check basket');assert 'matches the order' in page.locator('.order-feedback').inner_text()
    enter_total(page,'8');tap('Confirm total')
-   assert 'multiplying' in page.locator('.total-keypad-feedback').inner_text();assert baseline()==before
+   assert 'adding' in page.locator('.total-keypad-feedback').inner_text();assert baseline()==before
    enter_total(page,'7');tap('Confirm total');tap('💵 Count change');fit()
    if width==375:
     # Model Safari: layout viewport stays tall while visible toolbar space is smaller and offset.

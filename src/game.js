@@ -1152,7 +1152,7 @@
     recordMathAttempt(s, correct);
     requireRule(
       correct,
-      "Try multiplying each quantity by its price, then add the amounts.",
+      "Try adding the item amounts, one at a time. You can try again!",
     );
     s.tendered =
       (s.customer.mathLevel === undefined ? [5, 10, 20, 50, 100] :

@@ -291,7 +291,9 @@ function checkBasket() {
   try {
     Game.checkBasket(state);
     order(
-      "That matches the order! Multiply each quantity by its price, then add to find the total.",
+      Game.requiresLineMath(state)
+        ? "That matches the order! Multiply each quantity by its price, then add to find the total."
+        : "That matches the order! The keypad will show the item amounts for you to add.",
     );
   } catch (e) {
     order(e.message);
