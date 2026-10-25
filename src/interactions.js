@@ -133,10 +133,7 @@ function newCustomer() {
     return;
   }
   act(() => {
-    Game.newCustomer(
-      state,
-      PEOPLE[(state.day * 3 + state.visitors) % PEOPLE.length],
-    );
+    Game.newCustomer(state);
     render();
   });
 }

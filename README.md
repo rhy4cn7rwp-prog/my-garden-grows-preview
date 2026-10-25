@@ -1,3 +1,47 @@
+## Latest Farmers Market: neighbors and returning regulars
+
+The market now has **28 individually illustrated human customers**. All twenty
+existing names are retained; Maya, Noah, Ava and Oliver keep their exact original
+portraits. Names that previously shared those four portraits now have their own
+appearances, alongside eight new neighbors. The new 24-portrait transparent WebP
+atlas is approximately 628 KB and is cached as one image rather than 24 requests.
+The original artwork files remain unchanged.
+
+`src/market-customers.js` owns identity, short personality dialogue and optional
+visit memory. Actual orders, prices, greeting/alternative outcomes, satisfaction,
+math support, payment, bags and the active-play clock continue using existing
+Game rules. Named personality details affect conversation flavor, not finances
+or new reputation scores. Several short phrases are shared within seven dialogue
+styles, with individual opening/parting lines and three phrase variants.
+
+Selection favors fewer visits today and longer time since the last encounter.
+Every seventh arrival may be a familiar buyer, provided they are outside the last
+eight arrivals and have not already visited twice today. Ordinary fair rotation
+continues indefinitely; the second-visit preference is not a visitor cap. All 28
+are reached within the first 40 simulated visits. Memory survives day/season
+changes and refresh; it stores one small record per customer plus eight recent
+names. Reopening an active order does not count another visit.
+
+Regulars sometimes recognize previous visits. Produce compliments only reference
+a crop recorded in an actual completed purchase; apologies, failed checkout and
+canceled orders do not create purchases. Older saves start with empty history,
+while retaining their money, farm, math work, owned dreams and active orders.
+An old in-progress customer can still finish and have that actual sale recorded.
+No unrecorded past visits or purchases are guessed.
+
+Speech remains beside the speaking portrait inside the scene, with the existing
+cream bubble and tail. Arrivals stay silent until the player greets them. New
+portrait mouth anchors follow the same scene projection as the artwork. Trimmed
+sprite rows prevent neighboring figures from leaking above heads.
+
+QA covers full rotation, genuine regular memories, duplicate-sale prevention,
+day/season/backup recovery, old/malformed optional history, all 28 portraits across
+six phone layouts and four conversation stages, 40 welcome-button arrivals,
+math stages, adaptive progression, payments and market closing. Screenshots are
+visually inspected. Testing uses Chromium touch emulation and Safari-sized safe
+areas; native iPhone Safari still needs a physical-device playtest. The figures
+use the existing gentle motion rather than individual facial animation.
+
 ## Latest market refinement: adding first, multiplication next
 
 Before any Dream Shop purchase, the keypad provides calculated item subtotals;

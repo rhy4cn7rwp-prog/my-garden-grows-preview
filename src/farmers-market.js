@@ -6,41 +6,30 @@ const MARKET_CUSTOMER_BOUNDS = [
   [1100, 0, 520, 724],
   [1630, 0, 542, 724],
 ];
-// Cosmetic portrait assignment; it does not add age, preferences or scoring data.
-const MARKET_CUSTOMER_PORTRAITS = {
-  Maya: 2,
-  Noah: 1,
-  Ava: 0,
-  Oliver: 3,
-  Sophia: 2,
-  Liam: 1,
-  Ella: 0,
-  Leo: 3,
-  Emma: 2,
-  Lucas: 1,
-  Mia: 2,
-  Henry: 1,
-  Zoe: 0,
-  Amelia: 2,
-  Jack: 3,
-  Grace: 0,
-  Ethan: 3,
-  Aria: 2,
-  Ruby: 0,
-  Mateo: 1,
-};
+// Four original portraits stay unchanged; every other named neighbor has new art.
 function marketPortraitIndex() {
-  // Stable across refreshes without inventing or migrating saved character data.
-  const fallback =
-    Array.from(state.customer.name).reduce(
-      (n, ch) => n + ch.codePointAt(0),
-      0,
-    ) % MARKET_CUSTOMER_BOUNDS.length;
-  const assigned = MARKET_CUSTOMER_PORTRAITS[state.customer.name];
-  return Number.isInteger(assigned) ? assigned : fallback;
+  return MarketCustomers.profile(state.customer.name)?.legacyPortrait ??
+    Array.from(state.customer.name).reduce((n,ch)=>n+ch.codePointAt(0),0)%4;
+}
+function marketPortraitBounds(index) {
+  const row=Math.floor(index/6), tops=[0,330,642,951], heights=[329,310,309,303];
+  return [(index%6)*209,tops[row],209,heights[row]];
+}
+function marketCustomerMouth() {
+  const p=MarketCustomers.profile(state.customer.name);
+  const mouths=[139,112,143,174,137,128,142,135,142,136,143,151,
+    118,144,159,119,146,130,155,134,158,137,162,159];
+  const b=p?.portrait !== undefined ? marketPortraitBounds(p.portrait) : null;
+  return b ? 230+(Math.floor(p.portrait/6)*313.5+mouths[p.portrait]-b[1])*(515/b[3]) :
+    [451,433,462,445][marketPortraitIndex()];
 }
 function marketCustomerArt() {
   if (!state.customer) return "";
+  const profile=MarketCustomers.profile(state.customer.name);
+  if (profile?.portrait !== undefined) {
+    const [x,y,w,h]=marketPortraitBounds(profile.portrait);
+    return `<g class="market-active-customer" data-customer="${profile.name}" role="img" aria-label="${profile.name}, your customer, faces you across the counter" clip-path="url(#market-behind-counter)"><svg x="558" y="230" width="420" height="515" viewBox="${x} ${y} ${w} ${h}" preserveAspectRatio="xMidYMax meet"><svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}"><image href="assets/farmers-market/customers-expanded.webp" width="1254" height="1254"/></svg></svg></g>`;
+  }
   const index = marketPortraitIndex();
   const [x, y, w, h] = MARKET_CUSTOMER_BOUNDS[index];
   return `<g class="market-active-customer" role="img" aria-label="${state.customer.name}, your customer, faces you across the counter" clip-path="url(#market-behind-counter)"><svg x="558" y="230" width="420" height="515" viewBox="${x} ${y} ${w} ${h}" preserveAspectRatio="xMidYMax meet"><svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}"><image href="assets/farmers-market/customers.webp" width="2172" height="724"/></svg></svg></g>`;

@@ -9,6 +9,7 @@
     typeof module !== "undefined"
       ? require("./market-supplies-rules.js")
       : root.MarketSupplyRules;
+  const marketCustomers = typeof module !== "undefined" ? require("./market-customers.js") : root.MarketCustomers;
   const crops = [
     {
       id: "carrot",
@@ -195,6 +196,7 @@
       rentalUpfrontPaid: 0,
       bagCount: 0,
       rentalBagsRemaining: 0,
+      customerHistory: marketCustomers ? marketCustomers.emptyHistory() : {},
       customersServed: 0,
       marketExpenses: [],
       legacyAccounting: false,
@@ -464,6 +466,7 @@
           clean.display[id] || 0,
           clean.inventory[id] || 0,
         );
+      clean.customerHistory = marketCustomers ? marketCustomers.recover(s.customerHistory, ids) : s.customerHistory || {};
       restoreCustomer(clean, s, ids);
       if (supplyShop) Object.assign(clean, supplyShop.recover(s));
       clean.marketStartedAt = validMarketStamp(s.marketStartedAt)
@@ -928,6 +931,7 @@
       delete want[a.id];
       want[requested.id] = 1;
     }
+    name = name || (marketCustomers ? marketCustomers.pick(s) : "Maya");
     s.customer = {
       name,
       want,
@@ -941,7 +945,10 @@
       satisfaction: 50,
       decision: (s.day * 19 + s.visitors * 37 + s.season * 11) % 100,
       response: "arrival",
+      greeting: null,
+      alternativeOffered: false,
     };
+    if (marketCustomers) Object.assign(s.customer, marketCustomers.arrive(s, name));
     s.visitors++;
     s.notice = "";
     s.basket = {};
@@ -1195,6 +1202,7 @@
       if (s.rentalBagsRemaining > 0) s.rentalBagsRemaining--;
       else s.bagCount--;
     }
+    if (marketCustomers) marketCustomers.recordSale(s, s.customer);
     s.customer.response = "sale-complete";
     satisfaction(s, 5);
     s.customersServed++;
@@ -1331,6 +1339,11 @@
       return;
     clean.customer = {
       name: c.name,
+      historyRecorded: c.historyRecorded === true,
+      returning: c.returning === true,
+      rememberVisit: c.rememberVisit === true,
+      rememberedCrop: ids.includes(c.rememberedCrop) ? c.rememberedCrop : null,
+      dialogueVariant: quantity(c.dialogueVariant) ? c.dialogueVariant % 3 : 0,
       want: { ...c.want },
       prices: savedPrices,
       lineMath: typeof c.lineMath === "boolean" ? c.lineMath : dreamPurchaseCount(clean) > 0,

@@ -25,28 +25,7 @@ const SUPPLIES = [
     "Required for by-the-pound sales",
   ],
 ];
-const PEOPLE = [
-  "Maya",
-  "Noah",
-  "Ava",
-  "Oliver",
-  "Sophia",
-  "Liam",
-  "Ella",
-  "Leo",
-  "Emma",
-  "Lucas",
-  "Mia",
-  "Henry",
-  "Zoe",
-  "Amelia",
-  "Jack",
-  "Grace",
-  "Ethan",
-  "Aria",
-  "Ruby",
-  "Mateo",
-];
+const PEOPLE = MarketCustomers.profiles.map(person => person.name);
 
 // Bounds measured against the unchanged 512 × 512 prototype artwork.
 // Percentages share the stage coordinate system; crop order is explicitly mapped.

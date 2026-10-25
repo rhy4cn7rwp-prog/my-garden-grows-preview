@@ -22,3 +22,17 @@ basket are reused as layered components, with a front rim and contact shadow.
 Prices and quantities are live text. All figures face the player across the
 counter; there is no NPC shopkeeper. Adding portraits or extending price-card
 presentation does not require new transaction state or save migration.
+
+## Expanded neighbors
+
+`source/customers-expanded.png` is the original generated 1254×1254 transparent
+six-column/four-row study of 24 new human neighbors, in the same warm painted style
+as the original four-person atlas. `customers-expanded.webp` is its quality-90
+runtime encoding. All earlier source files and runtime artwork are preserved.
+The measured row bounds are 0–329, 330–640, 642–951 and 951–1254; nested SVG
+clipping isolates one person, omitting previous-row hands that would otherwise
+float above the next person's head. The far counter still occludes the waist.
+Four original named customers continue to use the original atlas.
+
+The old `register.webp` is preserved as artwork history and is no longer a market
+button; checkout uses the in-game keypad and existing payment controls.

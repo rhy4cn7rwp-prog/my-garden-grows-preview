@@ -77,6 +77,8 @@ function marketConversation() {
       `I'd like ${requests}`,
     ];
   }
+  const remembered = c.rememberedCrop && crop(c.rememberedCrop)?.name.toLowerCase();
+  lines = MarketCustomers.dialogue(c, state.step, order, money(state.tendered), remembered) || lines;
   return `<div class="market-conversation" aria-live="polite" aria-atomic="true"><strong>${c.name}</strong><div class="market-speech-copy">${lines.map((line, i) => `<p class="market-dialogue-line" style="--line-delay:${i * 650}ms">${line}</p>`).join("")}</div>${state.step === "pay" ? `<div class="market-payment-offer" aria-label="Customer presents ${money(state.tendered)}"><svg viewBox="0 0 160 60" aria-hidden="true"><rect x="2" y="2" width="156" height="56" rx="6" fill="#d7ead0" stroke="#375d43" stroke-width="3"/><rect x="9" y="8" width="142" height="44" rx="4" fill="none" stroke="#6e9272"/><text x="80" y="40" text-anchor="middle" font-family="Georgia,serif" font-size="32" font-weight="bold" fill="#254e37">${money(state.tendered)}</text></svg><span>Payment offered</span></div>` : ""}</div>`;
 }
 function syncMarketSpeech() {
@@ -92,7 +94,7 @@ function syncMarketSpeech() {
     oy = (h - 1024 * k) / 2;
   const left = ox + 930 * k,
     mouthX = ox + 768 * k,
-    mouthY = oy + [451, 433, 462, 445][marketPortraitIndex()] * k;
+    mouthY = oy + marketCustomerMouth() * k;
   const topLimit =
     document.querySelector(".farmers-market-game .hud").getBoundingClientRect()
       .bottom -
