@@ -39,6 +39,12 @@ try:
     assert page.locator('.guidebook-pages output').inner_text()==f'{i+1} of 6'
     assert page.get_by_role('button',name='← Back',exact=True).is_disabled()==(i==0)
     assert page.get_by_role('button',name='Next →',exact=True).is_disabled()==(i==5)
+    # Validate the actual illustration, not just an empty frame before download.
+    page.locator('.guidebook-illustration').evaluate("""async el=>{
+     await Promise.all([...el.querySelectorAll('img')].map(img=>img.decode()));
+     await Promise.all([...el.querySelectorAll('image')].map(el=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve();img.onerror=()=>reject(new Error('Missing guide artwork: '+el.href.baseVal));img.src=el.href.baseVal})));
+    }""")
+    page.wait_for_timeout(40)
     # No concealed controls, horizontal overflow, or dialog scrolling at phone sizes.
     boxes=page.locator('.guidebook-dialog').evaluate('''el=>({rect:el.getBoundingClientRect().toJSON(),client:el.clientHeight,scroll:el.scrollHeight,width:el.clientWidth,sw:el.scrollWidth})''')
     assert boxes['scroll']<=boxes['client']+1,(w,h,i,boxes)
