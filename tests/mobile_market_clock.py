@@ -1,4 +1,4 @@
-"""Timestamp clock tests using a controlled wall clock, never waiting 20 minutes.
+"""Active-play clock tests using a controlled wall clock, never waiting 20 minutes.
 Mobile Chromium simulates Safari viewports; not native iPhone Safari certification.
 """
 import os
@@ -56,14 +56,24 @@ try:
    tap('🧺 Fill customer basket');tap('Add Carrots')
    enter_total(page,'2');tap('Confirm total');tap('💵 Count change')
    pending=page.evaluate('[state.customer,state.basket,state.change,state.cash,state.bagCount]')
-   # Simulate many minutes of phone lock/background time while checkout is open.
+   # Safari lifecycle events: hidden time is never charged, including reload.
+   active_before=page.evaluate('Game.marketTime(state).elapsedMs')
+   page.evaluate("()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));window.dispatchEvent(new Event('pagehide'))}")
    at(started+1500000)
+   assert page.evaluate('Game.marketTime(state).elapsedMs')==active_before
    assert page.evaluate('[state.customer,state.basket,state.change,state.cash,state.bagCount]')==pending
+   page.reload();tap('💵 Count change')
+   assert page.evaluate('Game.marketTime(state).elapsedMs')==active_before
+   page.evaluate("()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'))}")
+   at(started+5500000)
+   assert page.evaluate('Game.marketTime(state).elapsedMs')==active_before
+   page.evaluate("()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>false});document.dispatchEvent(new Event('visibilitychange'))}")
+   at(started+5500010)
    assert page.locator('.register-dialog').is_visible()
    assert page.locator('.market-clock-time').inner_text()=='1:00 PM'
    assert page.evaluate('state.marketOpen')
    page.reload();assert page.evaluate('state.marketStartedAt')==started
-   at(started+1500000);tap('💵 Count change')
+   at(started+5500010);tap('💵 Count change')
    assert page.locator('.register-dialog').evaluate('e=>e.scrollHeight<=e.clientHeight+1')
    for _ in range(3):tap('$1')
    tap('Give change');assert page.evaluate('[state.cash,state.bagCount,state.inventory.carrot]')==[52,4,99]
@@ -90,6 +100,6 @@ try:
    assert page.locator('.market-clock-time').inner_text()=='9:03 AM'
    assert page.evaluate('state.cash')==50 and not page.evaluate('state.marketOpen')
    assert not errors,errors
-   page.close();print(f'PASS exact game clock, epoch/reload/background, active checkout, auto report and early close {w}x{h}',flush=True)
+   page.close();print(f'PASS exact game clock, active-time/reload/background, active checkout, auto report and early close {w}x{h}',flush=True)
   browser.close()
 finally:server.shutdown()

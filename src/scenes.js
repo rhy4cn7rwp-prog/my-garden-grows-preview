@@ -10,6 +10,7 @@ function loadGame() {
 }
 const initial = () => Game.initial();
 let state = loadGame();
+if (!document.hidden) Game.resumeMarketClock(state);
 let view = state.customer && state.marketOpen ? "market" : "town",
   popup = "",
   selected = "carrot",
@@ -18,6 +19,7 @@ const $ = (s) => document.querySelector(s),
   money = (n) => "$" + Number(n).toFixed(2),
   crop = (id) => CROPS.find((c) => c.id === id),
   save = () => {
+    Game.checkpointMarketClock(state);
     try {
       localStorage.setItem("mgg10-backup", JSON.stringify(state));
       localStorage.setItem("mgg10", JSON.stringify(state));

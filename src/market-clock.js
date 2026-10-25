@@ -1,4 +1,4 @@
-/* Wall-clock-derived game time: background throttling never adds extra time. */
+/* Persist active play; never charge a hidden or reopened page for time away. */
 function marketClockFace() {
   return `<div class="market-clock" aria-label="Market clock"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="#b77c40" stroke="#704723" stroke-width="2"/><circle cx="32" cy="32" r="24" fill="#fff4d5" stroke="#e7bd70" stroke-width="2"/>${Array.from({ length: 12 }, (_, i) => `<path d="M32 10v3" stroke="#754d2c" stroke-width="2" transform="rotate(${i * 30} 32 32)"/>`).join("")}<text x="32" y="22" text-anchor="middle" font-size="9" font-family="Georgia" fill="#68442a">12</text><text x="32" y="49" text-anchor="middle" font-size="9" font-family="Georgia" fill="#68442a">6</text><path class="market-hour-hand" d="M32 32V19" stroke="#526944" stroke-width="4" stroke-linecap="round"/><path class="market-minute-hand" d="M32 34V14" stroke="#ae4c35" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="32" r="3" fill="#785037"/></svg><div><time class="market-clock-time"></time><span class="market-clock-status"></span></div></div>`;
 }
@@ -60,23 +60,30 @@ function paintMarketClock() {
 }
 function tickMarketClock() {
   if (typeof state === "undefined") return;
-  const before = [state.marketOpen, state.hour, state.marketStartedAt];
+  if (document.hidden) {
+    Game.pauseMarketClock(state);
+    save();
+    return;
+  }
+  Game.resumeMarketClock(state);
+  Game.checkpointMarketClock(state);
   const closed = Game.syncMarketClock(state);
+  save();
   if (closed) {
     render();
     return;
   }
-  if (
-    before[0] !== state.marketOpen ||
-    before[1] !== state.hour ||
-    before[2] !== state.marketStartedAt
-  )
-    save();
   paintMarketClock();
 }
 setInterval(tickMarketClock, 1000);
 window.addEventListener("pageshow", tickMarketClock);
 window.addEventListener("focus", tickMarketClock);
 document.addEventListener("visibilitychange", tickMarketClock);
-// Opening and normal game actions already save the epoch. Avoid an extra
-// pagehide write: elapsed time is derived on resume, not accumulated on exit.
+function pauseHiddenMarket() {
+  if (typeof state === "undefined") return;
+  Game.pauseMarketClock(state);
+  save();
+}
+window.addEventListener("pagehide", pauseHiddenMarket);
+// Supported by page-lifecycle browsers; visibilitychange handles Safari.
+document.addEventListener("freeze", pauseHiddenMarket);

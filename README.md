@@ -1,3 +1,23 @@
+## Latest market gameplay refinements
+
+The 9 AM–1 PM clock now measures 20 minutes of **visible, active game time**.
+Visibility/pagehide/freeze events save and pause the exact fractional elapsed time;
+returning resumes it. Saves checkpoint every second and on game actions, so even
+an abrupt browser termination without exit events loses at most the last checkpoint
+instead of charging offline time. A recovered game never uses an old timestamp to
+count time away. Legacy open saves use their last recorded game time; other farm
+fields and storage keys are unchanged. Time runs while exploring any location in
+this game, but not while its tab is hidden.
+
+Customers arrive without a speech bubble or visible order. Greeting (including the
+existing wait choice) reveals their response and request in the scene; the existing
+sold-out, checkout, payment, farewell and bag rules remain unchanged.
+
+QA: Node rules/recovery tests; mobile lifecycle/reload/deadline tests at five sizes;
+rendered dialogue placement at six sizes; complete keypad/payment flow at seven
+sizes. Chromium touch emulation is available here, not native iPhone Safari. Please
+also test locking and reopening Safari on a real iPhone before the next phase.
+
 # My Garden Grows 1.0 preview — Phase 4C: Accelerated Market Clock
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original

@@ -24,6 +24,11 @@ try:
     for step in ['greet','choose','pay','thanks']:
      page.evaluate("""({name,step})=>{state=Game.initial();state.owned.scale=state.owned.table=1;state.bagCount=5;for(const c of CROPS)state.inventory[c.id]=state.display[c.id]=5;Game.openMarket(state);Game.newCustomer(state,name);state.customer.want={beans:2,strawberry:1};if(step!=='greet')Game.greet(state,'excellent');if(['pay','thanks'].includes(step)){state.basket={...state.customer.want};Game.ring(state,14)}if(step==='thanks'){state.change=state.tendered-14;Game.finish(state)}go('market');document.querySelector('#app').scrollTop=0;syncGameViewport()}""",{'name':name,'step':step})
      before=page.evaluate('[state.cash,state.inventory,state.bagCount,state.goal,state.day,state.season,state.customer,state.basket,state.marketStartedAt]')
+     if step=='greet':
+      assert page.locator('.market-conversation,.market-speech-tail').count()==0
+      assert page.locator('.market-active-customer').count()==1
+      if w==428:page.screenshot(path=f'/tmp/market-arrival-{name}.png')
+      continue
      assert page.locator('.market-tableau > .market-conversation').count()==1
      assert page.locator('.market-controls .market-conversation').count()==0
      assert page.locator('.market-conversation strong').inner_text()==name

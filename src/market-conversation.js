@@ -30,7 +30,7 @@ function marketRequestText() {
 
 function marketConversation() {
   const c = state.customer;
-  if (!c) return "";
+  if (!c || state.step === "greet") return "";
   const variant =
     (Array.from(c.name).reduce((n, ch) => n + ch.codePointAt(0), 0) +
       state.day +
@@ -45,12 +45,7 @@ function marketConversation() {
     .join(", ");
   const requests = `${order}${order.length < 35 ? ", please" : ""}.`;
   let lines;
-  if (state.step === "greet")
-    lines = [
-      ["Hello!", "Hi there!", "Good morning!"][variant],
-      `I'd like ${requests}`,
-    ];
-  else if (state.step === "pay")
+  if (state.step === "pay")
     lines = [
       ["Thank you!", "Wonderful!", "Thanks!"][variant],
       `Here's ${money(state.tendered)}.`,

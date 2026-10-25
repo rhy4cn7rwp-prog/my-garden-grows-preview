@@ -170,6 +170,7 @@
       supcart: {},
       owned: { table: 0, canopy: 0, bags: 0, scale: 0 },
       hour: 9,
+      marketElapsedMs: 0,
       marketStartedAt: null,
       marketClosedAt: null,
       visitors: 0,
@@ -463,6 +464,14 @@
         s.marketClosedAt >= clean.marketStartedAt
           ? s.marketClosedAt
           : null;
+      // New saves store active play only. Legacy saves retain their last recorded
+      // clock reading, without charging for time spent away before this update.
+      clean.marketElapsedMs = Number.isFinite(s.marketElapsedMs) && s.marketElapsedMs >= 0
+        ? Math.min(marketDurationMs, s.marketElapsedMs)
+        : Math.max(0, Math.min(marketDurationMs,
+            !clean.marketOpen && clean.marketClosedAt !== null
+              ? clean.marketClosedAt - clean.marketStartedAt
+              : (clean.hour - 9) * 60 * marketMinuteMs));
       ensureMarketStart(clean);
       return clean;
     } catch {
@@ -733,6 +742,8 @@
       p.watered = false;
     }
     s.hour = 9;
+    s.marketElapsedMs = 0;
+    marketActiveAnchors.delete(s);
     s.marketStartedAt = null;
     s.marketClosedAt = null;
     s.visitors = 0;
@@ -783,28 +794,33 @@
       s.marketClosedAt = null;
     }
   }
+  // Runtime anchors are deliberately not serialized: reopening starts paused.
+  const marketActiveAnchors = new WeakMap();
   function marketTime(s, now = Date.now()) {
-    const started = validMarketStamp(s.marketStartedAt);
-    const end =
-      !s.marketOpen && validMarketStamp(s.marketClosedAt)
-        ? s.marketClosedAt
-        : now;
-    const elapsed = started ? Math.max(0, end - s.marketStartedAt) : 0;
-    const minutes = started
-      ? 540 + Math.min(240, elapsed / marketMinuteMs)
-      : s.marketPlayed
-        ? Math.max(540, Math.min(780, Math.floor(s.hour * 60)))
-        : 540;
-    return {
-      minutes,
-      wholeMinutes: Math.floor(minutes),
-      expired: started && elapsed >= marketDurationMs,
-      elapsedMs: Math.min(elapsed, marketDurationMs),
-    };
+    const anchor = marketActiveAnchors.get(s);
+    const elapsed = Math.min(marketDurationMs, Math.max(0, s.marketElapsedMs || 0) +
+      (s.marketOpen && anchor !== undefined ? Math.max(0, now - anchor) : 0));
+    const minutes = 540 + elapsed / marketMinuteMs;
+    return { minutes, wholeMinutes: Math.floor(minutes),
+      expired: elapsed >= marketDurationMs, elapsedMs: elapsed };
+  }
+  function pauseMarketClock(s, now = Date.now()) {
+    s.marketElapsedMs = marketTime(s, now).elapsedMs;
+    marketActiveAnchors.delete(s);
+    if (s.marketOpen) s.hour = marketTime(s, now).wholeMinutes / 60;
+  }
+  function resumeMarketClock(s, now = Date.now()) {
+    if (s.marketOpen && !marketActiveAnchors.has(s)) marketActiveAnchors.set(s, now);
+  }
+  function checkpointMarketClock(s, now = Date.now()) {
+    const running = marketActiveAnchors.has(s);
+    pauseMarketClock(s, now);
+    if (running) resumeMarketClock(s, now);
   }
   function syncMarketClock(s, now = Date.now()) {
     if (!s.marketOpen) return false;
     ensureMarketStart(s, now);
+    checkpointMarketClock(s, now);
     const time = marketTime(s, now);
     s.hour = time.wholeMinutes / 60;
     if (time.expired && !s.customer) {
@@ -833,13 +849,17 @@
     s.marketOpen = true;
     s.marketPlayed = true;
     s.hour = 9;
+    s.marketElapsedMs = 0;
     s.marketStartedAt = now;
+    resumeMarketClock(s, now);
     s.marketClosedAt = null;
   }
   function closeMarket(s, now = Date.now()) {
     ensureMarketStart(s, now);
-    if (s.marketOpen && validMarketStamp(s.marketStartedAt))
-      s.marketClosedAt = Math.min(now, s.marketStartedAt + marketDurationMs);
+    if (s.marketOpen) {
+      pauseMarketClock(s, now);
+      s.marketClosedAt = s.marketStartedAt + s.marketElapsedMs;
+    }
     settleMarket(s);
     s.marketOpen = false;
     s.hour = 13;
@@ -1450,6 +1470,9 @@
     hasMarketTable,
     customerLimit,
     marketTime,
+    pauseMarketClock,
+    resumeMarketClock,
+    checkpointMarketClock,
     syncMarketClock,
     chooseStand,
     advanceCustomer,

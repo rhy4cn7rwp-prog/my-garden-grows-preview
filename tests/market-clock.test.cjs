@@ -29,28 +29,23 @@ test("exactly five real seconds per game minute, four hours per twenty minutes",
   assert.equal(G.marketTime(s, END - 1).expired, false);
   assert.equal(G.marketTime(s, END).expired, true);
 });
-test("refresh, backup recovery and long absence retain actual start and farm fields", () => {
-  const s = farm();
-  s.goal = 2;
-  s.seeds.carrot = 7;
+test("pause, recovery and long absence preserve exact fractional active time and farm fields", () => {
+  const s = farm(); s.goal=2; s.seeds.carrot=7;
   G.openMarket(s, START);
-  const r = G.recover(JSON.stringify(s));
-  assert.equal(r.marketStartedAt, START);
-  assert.equal(G.marketTime(r, END + 3600000).wholeMinutes, 780);
-  assert.equal(G.recover("{bad", JSON.stringify(r)).marketStartedAt, START);
-  for (const k of [
-    "cash",
-    "inventory",
-    "seeds",
-    "plots",
-    "goal",
-    "owned",
-    "bagCount",
-  ])
-    assert.deepEqual(r[k], s[k]);
-  G.syncMarketClock(r, END + 3600000);
-  assert.equal(r.marketOpen, false);
-  assert.equal(r.day, s.day);
+  G.pauseMarketClock(s, START+12345);
+  assert.equal(G.marketTime(s, END+999999).elapsedMs, 12345);
+  const r=G.recover(JSON.stringify(s));
+  assert.equal(G.marketTime(r, END+999999).elapsedMs, 12345);
+  for(const k of ["cash","inventory","seeds","plots","goal","owned","bagCount"])
+    assert.deepEqual(r[k],s[k]);
+  G.resumeMarketClock(r, END);
+  G.resumeMarketClock(r, END+1000); // duplicate focus cannot reset the anchor
+  assert.equal(G.marketTime(r, END+7655).elapsedMs,20000);
+  G.checkpointMarketClock(r, END+7655);
+  const backup=G.recover("{bad",JSON.stringify(r));
+  assert.equal(G.marketTime(backup, END+999999).elapsedMs,20000);
+  G.syncMarketClock(backup,END+999999);
+  assert.equal(backup.marketOpen,true);
 });
 test("idle deadline closes and settles deferred costs exactly once", () => {
   const s = farm();
@@ -146,6 +141,7 @@ test("legacy open saves migrate remaining recorded hours once, never reset on re
   const s = farm();
   s.marketOpen = s.marketPlayed = true;
   s.hour = 11;
+  delete s.marketElapsedMs;
   delete s.marketStartedAt;
   delete s.marketClosedAt;
   const before = Date.now();
@@ -156,5 +152,17 @@ test("legacy open saves migrate remaining recorded hours once, never reset on re
   );
   assert.equal(G.recover(JSON.stringify(r)).marketStartedAt, r.marketStartedAt);
   assert.equal(r.hour, 11);
+  assert.equal(G.marketTime(r,after+9999999).elapsedMs,600000);
   assert.equal(r.cash, 50);
+});
+
+test("old timestamp saves migrate recorded open time and exact early-close time without offline charges",()=>{
+  const s=farm();G.openMarket(s,START);G.syncMarketClock(s,START+12345);
+  delete s.marketElapsedMs;
+  const r=G.recover(JSON.stringify(s));
+  assert.equal(G.marketTime(r,END*2).wholeMinutes,542);
+  const old=farm();G.openMarket(old,START);
+  G.closeMarket(old,START+15000);delete old.marketElapsedMs;
+  const closed=G.recover(JSON.stringify(old));
+  assert.equal(G.marketTime(closed,END*2).elapsedMs,15000);
 });
