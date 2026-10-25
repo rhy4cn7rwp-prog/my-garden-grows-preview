@@ -1,0 +1,290 @@
+/* The book is a room accessory; this touch target follows the same fixed lens. */
+.clubhouse-guidebook {
+  position: absolute;
+  z-index: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+  border-radius: 8px;
+}
+.clubhouse-guidebook img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.clubhouse-guidebook[data-composited="true"] img {
+  visibility: hidden;
+}
+.clubhouse-guidebook[hidden] {
+  display: none;
+}
+.clubhouse-guidebook:focus-visible {
+  outline: 3px solid #fff2bd;
+  outline-offset: 3px;
+}
+.clubhouse-home-actions {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+.clubhouse-home-actions .btn {
+  flex: 0 1 auto;
+  padding-inline: 10px;
+  font-size: 15px;
+}
+.clubhouse-book-shortcut {
+  border: 1px solid #927445;
+}
+.guidebook-modal {
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  width: var(--visible-width, 100%);
+  height: var(--visible-height, 100svh);
+  bottom: auto;
+  right: auto;
+  padding: max(8px, var(--viewport-safe-top))
+    max(8px, var(--village-safe-right)) max(8px, var(--viewport-safe-bottom))
+    max(8px, var(--village-safe-left));
+  box-sizing: border-box;
+}
+.guidebook-dialog.dialog {
+  width: 100%;
+  max-width: 460px;
+  max-height: 100%;
+  padding: 12px;
+  border: 4px solid #8c633b;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+  color: #49321f;
+  background: linear-gradient(
+    90deg,
+    #ead5a8 0,
+    #fff2d2 4%,
+    #fff8e4 50%,
+    #f4e3be 100%
+  );
+  box-shadow:
+    inset 6px 0 8px #b38a5629,
+    0 12px 40px #22150c99;
+}
+.guidebook-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #bc986360;
+  padding-bottom: 5px;
+  font:
+    bold 19px Georgia,
+    serif;
+}
+.guidebook-dialog .btn {
+  margin: 0;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 8px 13px;
+  font-size: 17px;
+}
+.guidebook-page {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.guidebook-dialog h2 {
+  font-size: 25px;
+  line-height: 1.15;
+  margin: 0;
+}
+.guidebook-dialog p {
+  font-size: 18px;
+  line-height: 1.45;
+  margin: 0;
+  text-align: left;
+}
+.guidebook-text {
+  display: grid;
+  gap: 8px;
+  padding: 0 4px;
+}
+.guidebook-illustration {
+  height: clamp(110px, 28svh, 220px);
+  min-height: 80px;
+  border-radius: 45% 45% 12px 12px;
+  overflow: hidden;
+  background: #dae7c6;
+  border: 1px solid #bb9b5e66;
+  flex-shrink: 1;
+}
+.guidebook-illustration > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.guide-shopping > img {
+  object-position: center 28%;
+}
+.guide-market > img {
+  object-position: center 50%;
+}
+.guidebook-pages {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.guidebook-pages output {
+  font-size: 17px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.guide-dream-shelf {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 5px;
+  padding: 20px 20px 12px;
+  box-sizing: border-box;
+  background: repeating-linear-gradient(
+    0deg,
+    #c89457 0,
+    #d8ad70 44px,
+    #9d693b 46px,
+    #ecc98d 49px,
+    #b98249 52px
+  );
+}
+.guide-dream-shelf svg {
+  width: 20%;
+  height: 58%;
+  filter: drop-shadow(0 4px 2px #5d3b2970);
+}
+.guide-dream-shelf svg:nth-child(2) {
+  width: 54%;
+  height: 85%;
+}
+.guide-dream-shelf svg:nth-child(3) {
+  width: 18%;
+  height: 94%;
+}
+.guide-home-art {
+  height: 100%;
+  position: relative;
+}
+.guide-home-art > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 55%;
+}
+.guide-earned-ball {
+  position: absolute;
+  width: 18%;
+  height: 29%;
+  left: 32%;
+  bottom: 10%;
+  filter: drop-shadow(0 3px 2px #7e542865);
+}
+.guide-harvest-art {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 20%, #fff5cc, #b6d29b);
+}
+.guide-harvest-art > div {
+  position: absolute;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  inset: 3% 8% 30%;
+  gap: 0;
+}
+.guide-harvest-art .seed-produce-art {
+  width: 30%;
+  height: 100%;
+}
+.guide-harvest-art > svg {
+  position: absolute;
+  bottom: 2%;
+  left: 10%;
+  width: 80%;
+  height: 48%;
+}
+.guide-grow-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (max-height: 650px) {
+  .guidebook-dialog.dialog {
+    padding: 8px;
+    gap: 5px;
+  }
+  .guidebook-dialog h2 {
+    font-size: 23px;
+  }
+  .guidebook-dialog p {
+    font-size: 17px;
+    line-height: 1.3;
+  }
+  .guidebook-illustration {
+    height: clamp(80px, 22svh, 145px);
+  }
+  .guidebook-page {
+    gap: 5px;
+  }
+}
+@media (max-height: 450px) and (orientation: landscape) {
+  .guidebook-dialog.dialog {
+    max-width: 640px;
+  }
+  .guidebook-page {
+    display: block;
+    min-height: 140px;
+  }
+  .guidebook-illustration {
+    float: left;
+    width: 35%;
+    height: 140px;
+    margin-right: 14px;
+  }
+  .guidebook-dialog h2 {
+    text-align: left;
+  }
+  .guidebook-text {
+    display: block;
+  }
+  .guidebook-dialog p {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .guidebook-dialog h2 {
+    font-size: 21px;
+    margin-bottom: 6px;
+  }
+}
+@media (max-width: 350px) {
+  .clubhouse-home-actions .btn {
+    font-size: 14px;
+    padding-inline: 6px;
+  }
+  .guidebook-dialog h2 {
+    font-size: 22px;
+  }
+  .guidebook-dialog p {
+    font-size: 17px;
+  }
+}

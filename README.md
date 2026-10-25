@@ -1,3 +1,37 @@
+## Phase 5: a home in the Clubhouse and optional illustrated guide
+
+Every new/reloaded game now opens in the existing Clubhouse. The shared Home /
+Clubhouse control still leads there, **Go to Town** opens the unchanged village,
+and the direct Dream Shop shortcut remains available. All other destinations,
+treasure ownership, sizing, placement and panoramic rays are preserved.
+
+A green **How to Play** book rests on the lower nook bookshelf. Its artwork is
+composited in room coordinates through the same panoramic lens as the furniture;
+its separate 44px-minimum accessible control follows that projection. The bottom
+How to Play shortcut opens the same book from any viewing direction. This fixed
+room accessory is not a Dream Shop reward and never modifies collection ownership
+or saved treasure positions. Its six optional pages use the requested wording,
+large Back/Next/Close controls, a page counter, keyboard focus containment and
+Escape-to-close. Page illustrations reuse original shop, reward and room artwork,
+plus lightweight original SVG gardening/basket illustrations. No room background
+or existing image file was changed. No new farm-save fields or keys are required.
+
+After a reload or Safari back/forward-cache restoration, an open market stays paused at its saved active-play time until
+**Resume Market** (or direct navigation to the market). The existing customer,
+basket, prices, line answers, cash/change state and clock are recovered by the
+existing validation. Visiting town or reading the guide first does not use market
+time. Once resumed, the original active-play clock/lifecycle behavior continues:
+visibility/pagehide/freeze events pause, with no charge for background time.
+
+Validation: `npm test`; `python tests/mobile_clubhouse_guide.py` covers six
+portrait/landscape touch viewports, safe areas, all six pages with no concealed
+controls or dialog scrolling, Home/Town navigation, exact saved-state recovery,
+resuming and completing a customer transaction, and hidden-tab pause. Existing
+room-relative scaling/dragging, room-space projection, surface placement and
+market clock/closing regression scripts are also used. Browser tests use isolated
+farms in Chromium; actual iPhone Safari toolbars, lock/unlock and VoiceOver still
+need device playtesting.
+
 ## Latest Clubhouse refinement: furniture-relative treasure sizes
 
 The room painting, reward artwork and fixed panoramic camera are unchanged.

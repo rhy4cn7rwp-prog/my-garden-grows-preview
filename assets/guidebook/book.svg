@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="108" viewBox="0 0 120 108">
+<defs><linearGradient id="cover" x2="1" y2="1"><stop stop-color="#5a9b71"/><stop offset="1" stop-color="#2e6248"/></linearGradient><linearGradient id="pages" x2="1" y2="0"><stop stop-color="#e7c58c"/><stop offset="1" stop-color="#fff1ca"/></linearGradient></defs>
+<ellipse cx="61" cy="103" rx="54" ry="4" fill="#57351c" opacity=".3"/>
+<path d="M12 8 103 3 111 96 20 103Z" fill="#634128" stroke="#503920" stroke-width="2"/>
+<path d="m21 11 76-4 9 86-78 8Z" fill="url(#pages)" stroke="#b6935e" stroke-width="2"/>
+<path d="m26 94 77-8m-77 4 77-8" stroke="#cba96e"/>
+<path d="m12 8 88-5 10 86-89 9Z" fill="url(#cover)" stroke="#344f33" stroke-width="3"/>
+<path d="m20 7 9 89" stroke="#c5aa62" stroke-width="3"/>
+<path d="m29 17 52-3 7 63-52 5Z" fill="none" stroke="#e4c77b" stroke-width="1.5"/>
+<path d="M56 65q-19-5-16-18 17-1 17 16 0-17 16-20 5 17-15 22v10" fill="#a9c57b" stroke="#d9dc9b" stroke-width="1.5"/>
+<text x="59" y="33" text-anchor="middle" fill="#fff0c1" font-family="Georgia,serif" font-weight="bold" font-size="13" transform="rotate(-3 59 33)">How to</text>
+<text x="60" y="47" text-anchor="middle" fill="#fff0c1" font-family="Georgia,serif" font-weight="bold" font-size="15" transform="rotate(-3 60 47)">Play</text>
+<path d="m90 81 2 23 6-5 5 4-3-23" fill="#d7904e" stroke="#88532e"/>
+</svg>

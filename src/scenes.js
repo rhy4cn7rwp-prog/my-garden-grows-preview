@@ -10,8 +10,9 @@ function loadGame() {
 }
 const initial = () => Game.initial();
 let state = loadGame();
-if (!document.hidden) Game.resumeMarketClock(state);
-let view = state.customer && state.marketOpen ? "market" : "town",
+// Reopening is a visit home, never a charge for time away or reading the guide.
+let marketAwaitingResume = !!state.marketOpen;
+let view = "clubhouse",
   popup = "",
   selected = "carrot",
   dialogKey = null;
@@ -28,6 +29,10 @@ const $ = (s) => document.querySelector(s),
     }
   };
 function go(v) {
+  if (v === "market" && marketAwaitingResume) {
+    marketAwaitingResume = false;
+    if (!document.hidden) Game.resumeMarketClock(state);
+  }
   const changed = view !== v;
   if (changed) state.notice = "";
   view = v;
@@ -61,7 +66,8 @@ function show(html, key = null) {
   dialogKey = key;
   const register = key === "payment";
   const keypad = key === "total-keypad";
-  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${register ? "register-modal" : keypad ? "total-keypad-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : keypad ? "total-keypad-dialog" : ""}">${html}${register || keypad ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
+  const guide = key === "guidebook";
+  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${guide ? "guidebook-modal" : ""} ${register ? "register-modal" : keypad ? "total-keypad-modal" : ""}" onclick="if(event.target===this)${guide ? "closeGuidebook()" : "closeDialog()"}"><div ${guide ? 'role="dialog" aria-modal="true" aria-labelledby="guidebook-title"' : ""} class="dialog ${guide ? "guidebook-dialog" : ""} ${register ? "register-dialog" : keypad ? "total-keypad-dialog" : ""}">${html}${register || keypad || guide ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
   render();
 }
 function spot(x, y, w, h, action, title) {
@@ -119,7 +125,9 @@ function renderScene() {
   }
   if (view === "market")
     bottom +=
-      (marketStatusNotice() ? `<p role="status">${marketStatusNotice()}</p>` : "") +
+      (marketStatusNotice()
+        ? `<p role="status">${marketStatusNotice()}</p>`
+        : "") +
       bagStatus() +
       (state.lastMarketReport
         ? '<button class="btn alt" onclick="showMarketReport(true)">Previous market report</button>'
@@ -244,7 +252,7 @@ function marketItem(id) {
   if (view !== "market") return;
   let c = crop(id);
   show(
-    `<h2>${c.icon} ${c.name}</h2><p>On hand: ${state.inventory[id] || 0} ${c.unit}</p><p>Price: ${money(Game.marketPrice(state,id))} per ${c.unit}</p><p>Tap “Fill customer basket” to serve the current shopper.</p>`,
+    `<h2>${c.icon} ${c.name}</h2><p>On hand: ${state.inventory[id] || 0} ${c.unit}</p><p>Price: ${money(Game.marketPrice(state, id))} per ${c.unit}</p><p>Tap “Fill customer basket” to serve the current shopper.</p>`,
   );
 }
 function order(feedback = "") {
@@ -265,7 +273,7 @@ function order(feedback = "") {
       .map((item) => {
         const stock = Game.marketStock(state, item.id);
         const count = state.basket[item.id] || 0;
-        return `<div class="basketline"><strong>${item.icon} ${item.name}</strong><p>${stock} ${item.unit} available · ${money(Game.marketPrice(state,item.id))}/${item.unit}</p><div class="qty"><button aria-label="Remove ${item.name}" onclick="basketChange('${item.id}',-1)" ${count ? "" : "disabled"}>−</button><b>${count} in basket</b><button aria-label="Add ${item.name}" onclick="basketChange('${item.id}',1)" ${count < stock ? "" : "disabled"}>+</button></div></div>`;
+        return `<div class="basketline"><strong>${item.icon} ${item.name}</strong><p>${stock} ${item.unit} available · ${money(Game.marketPrice(state, item.id))}/${item.unit}</p><div class="qty"><button aria-label="Remove ${item.name}" onclick="basketChange('${item.id}',-1)" ${count ? "" : "disabled"}>−</button><b>${count} in basket</b><button aria-label="Add ${item.name}" onclick="basketChange('${item.id}',1)" ${count < stock ? "" : "disabled"}>+</button></div></div>`;
       })
       .join("")}</div>
     <p><strong>Your basket:</strong> ${
@@ -345,7 +353,10 @@ function customerService() {
   );
 }
 function offerSomethingElse() {
-  act(() => { Game.offerSomethingElse(state); closeDialog(); });
+  act(() => {
+    Game.offerSomethingElse(state);
+    closeDialog();
+  });
 }
 function offerAlternative(id) {
   act(() => {
@@ -370,6 +381,7 @@ function settings() {
 function reset() {
   if (confirm("Erase this farm and start again with $50?")) {
     state = initial();
-    go("town");
+    marketAwaitingResume = false;
+    go("clubhouse");
   }
 }

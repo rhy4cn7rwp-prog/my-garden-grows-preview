@@ -31,7 +31,7 @@ try:
             # Finding/centering/turning may not silently zoom or change source-space sizes.
             for surface, x, y in [('floor', 1023, 606), ('window-seat', 1000, None), ('chest', 1347, None), ('shelf-nook-middle', 1280, None)]:
                 page.evaluate("([s,x,y])=>{Game.moveClubhouseItem(state,'ball',ClubhouseLayout.canonical('ball',s,x,y??undefined));save();findClubhouseItem('ball')}", [surface,x,y])
-                page.wait_for_timeout(40)
+                page.wait_for_function("!!clubhouseRoom.bookImage?.naturalWidth");page.wait_for_timeout(40)
                 angle = page.evaluate('ClubhouseLayout.effective(state.clubhousePositions,"ball").angle')
                 for offset in [-12, 0, 12]:
                     page.evaluate('a=>lookClubhouse(a)', max(-80,min(80,angle+offset))); page.wait_for_timeout(35)
@@ -40,7 +40,7 @@ try:
                       const r=clubhouseRoom,g=r.geometry,p=ClubhouseLayout.effective(state.clubhousePositions,'ball'),m=ClubhouseLayout.metrics('ball',p);
                       // Independent source-space atlas reconstruction, including the painted chest front.
                       const expected=document.createElement('canvas');expected.width=2172;expected.height=724;
-                      const e=expected.getContext('2d');e.drawImage(r.image,0,0);
+                      const e=expected.getContext('2d');e.drawImage(r.image,0,0);drawClubhouseGuidebook(e);
                       const [sx,sy,sw,sh]=CLUBHOUSE_DISPLAYS.ball.bounds.split(' ').map(Number), px=(p.angle+120)/240*2172,py=p.y*724;
                       e.fillStyle=m.shadow.color;e.beginPath();e.ellipse(px,py,m.shadow.rx,m.shadow.ry,0,0,2*Math.PI);e.fill();
                       e.drawImage(r.rewardImage,sx,sy,sw,sh,px-m.width/2,py-m.height+m.tail,m.width,m.height);

@@ -132,14 +132,20 @@ function roomItemPoint(id, p) {
     clippedBottom = Math.min(visibleBottom, r.usable.bottom),
     overlapX = clippedRight - clippedLeft,
     overlapY = clippedBottom - clippedTop,
-    width = Math.min(r.usable.right-r.usable.left, Math.max(44,overlapX)),
-    height = Math.min(r.usable.bottom-r.usable.top, Math.max(44,overlapY));
+    width = Math.min(r.usable.right - r.usable.left, Math.max(44, overlapX)),
+    height = Math.min(r.usable.bottom - r.usable.top, Math.max(44, overlapY));
   // Keep the target over the visible artwork. Moving a full oversized hit box
   // inward would make an off-screen bicycle intercept neighboring treasures.
-  const x = ClubhouseLayout.clamp((clippedLeft+clippedRight)/2,
-      r.usable.left+width/2,r.usable.right-width/2),
-    y = ClubhouseLayout.clamp((clippedTop+clippedBottom)/2,
-      r.usable.top+height/2,r.usable.bottom-height/2);
+  const x = ClubhouseLayout.clamp(
+      (clippedLeft + clippedRight) / 2,
+      r.usable.left + width / 2,
+      r.usable.right - width / 2,
+    ),
+    y = ClubhouseLayout.clamp(
+      (clippedTop + clippedBottom) / 2,
+      r.usable.top + height / 2,
+      r.usable.bottom - height / 2,
+    );
   return {
     ...size,
     width,
@@ -264,19 +270,22 @@ function compositeClubhouseRoom() {
   const r = clubhouseRoom;
   if (!r.rewardImage?.complete || !r.rewardImage.naturalWidth) return null;
   const owned = Game.dreams.filter((d) => Game.ownsDream(state, d.id));
-  const key = JSON.stringify(
-    owned.map((d) => [
-      d.id,
-      ClubhouseLayout.effective(state.clubhousePositions, d.id),
-      r.gesture?.mode === "drag" && r.gesture.id === d.id,
-    ]),
-  );
+  const key =
+    String(!!r.bookImage?.naturalWidth) +
+    JSON.stringify(
+      owned.map((d) => [
+        d.id,
+        ClubhouseLayout.effective(state.clubhousePositions, d.id),
+        r.gesture?.mode === "drag" && r.gesture.id === d.id,
+      ]),
+    );
   if (r.sceneKey === key && r.scene) return r.scene;
   r.scene ||= document.createElement("canvas");
   r.scene.width = r.image.naturalWidth;
   r.scene.height = r.image.naturalHeight;
   const ctx = r.scene.getContext("2d");
   ctx.drawImage(r.image, 0, 0);
+  drawClubhouseGuidebook(ctx);
   const draw = (d) => {
     if (r.gesture?.mode === "drag" && r.gesture.id === d.id) return;
     const p = ClubhouseLayout.effective(state.clubhousePositions, d.id),
@@ -485,6 +494,7 @@ function paintClubhouse(now) {
     button.style.zIndex = Math.round(p.y * 724);
     button.dataset.surface = p.surface;
   }
+  positionClubhouseGuidebook();
   r.world.dataset.yaw = r.yaw.toFixed(2);
   const direction = document.querySelector(".clubhouse-direction");
   if (direction)
@@ -602,6 +612,7 @@ function destroyInteractiveClubhouse() {
   r.manualPitch = null;
   r.image = null;
   r.rewardImage = null;
+  r.bookImage = null;
   r.scene = null;
   r.sceneKey = null;
   r.abort = null;
@@ -626,6 +637,11 @@ function syncInteractiveClubhouse() {
     r.occCtx = r.occCanvas.getContext("2d");
     r.ctx = r.canvas.getContext("2d", { alpha: false });
     r.image = world.querySelector("img");
+    r.bookImage = new Image();
+    r.bookImage.src = "assets/guidebook/book.svg";
+    r.bookImage.addEventListener("load", requestClubhousePaint, {
+      signal: r.abort.signal,
+    });
     r.rewardImage = new Image();
     r.rewardImage.src = "assets/clubhouse/rewards.webp";
     r.rewardImage.addEventListener("load", requestClubhousePaint, {
@@ -707,7 +723,7 @@ function startRoomGesture(e) {
     stopClubhouseGesture();
     return;
   }
-  if (r.gesture) return;
+  if (r.gesture || e.target.closest(".clubhouse-guidebook")) return;
   r.suppressClickUntil = 0;
   r.animation = null;
   const item = e.target.closest("[data-dream]");
@@ -881,7 +897,7 @@ function drawRoomSurfaces() {
   svg.setAttribute("viewBox", `0 0 ${r.geometry.width} ${r.geometry.height}`);
   svg.style.clipPath = `inset(${r.usable.top}px ${r.geometry.width - r.usable.right}px ${r.geometry.height - r.usable.bottom}px ${r.usable.left}px)`;
   svg.innerHTML = ClubhouseLayout.surfaces
-    .filter((s) => ClubhouseLayout.canPlace(id,s))
+    .filter((s) => ClubhouseLayout.canPlace(id, s))
     .map((surface) => {
       const points = roomProjectedPolygon(ClubhouseLayout.outline(surface));
       if (

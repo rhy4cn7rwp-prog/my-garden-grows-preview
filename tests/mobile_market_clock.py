@@ -38,8 +38,8 @@ try:
    assert page.locator('.market-minute-hand').get_attribute('transform')!=hand
    at(started+300000);assert page.locator('.market-clock-time').inner_text()=='10:00 AM'
    page.reload();assert page.evaluate('state.marketStartedAt')==started
-   # Reload uses the same wall time, then focus catches up from suspension.
-   tap('Farmers Market');assert page.locator('.market-clock-time').inner_text()=='10:00 AM'
+   # Reload opens home paused; resume preserves the exact active-play reading.
+   tap('Resume Market');assert page.locator('.market-clock-time').inner_text()=='10:00 AM'
    tap('Back to village')
    page.evaluate('n=>window.__marketNow=n',started+900000)
    page.evaluate("window.dispatchEvent(new Event('focus'))")
@@ -62,7 +62,7 @@ try:
    at(started+1500000)
    assert page.evaluate('Game.marketTime(state).elapsedMs')==active_before
    assert page.evaluate('[state.customer,state.basket,state.change,state.cash,state.bagCount]')==pending
-   page.reload();tap('💵 Count change')
+   page.reload();tap('Resume Market');tap('💵 Count change')
    assert page.evaluate('Game.marketTime(state).elapsedMs')==active_before
    page.evaluate("()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'))}")
    at(started+5500000)
@@ -73,7 +73,7 @@ try:
    assert page.locator('.market-clock-time').inner_text()=='1:00 PM'
    assert page.evaluate('state.marketOpen')
    page.reload();assert page.evaluate('state.marketStartedAt')==started
-   at(started+5500010);tap('💵 Count change')
+   at(started+5500010);tap('Resume Market');tap('💵 Count change')
    assert page.locator('.register-dialog').evaluate('e=>e.scrollHeight<=e.clientHeight+1')
    for _ in range(3):tap('$1')
    tap('Give change');assert page.evaluate('[state.cash,state.bagCount,state.inventory.carrot]')==[52,4,99]
@@ -96,7 +96,7 @@ try:
    # Early closing remains possible and preserves its actual clock time.
    started=start();at(started+15000);tap('Close market');tap('Close ✕')
    assert page.locator('.market-clock-time').inner_text()=='9:03 AM'
-   page.reload();tap('Farmers Market');at(started+9000000)
+   page.reload();tap('Go to Town');tap('Farmers Market');at(started+9000000)
    assert page.locator('.market-clock-time').inner_text()=='9:03 AM'
    assert page.evaluate('state.cash')==50 and not page.evaluate('state.marketOpen')
    assert not errors,errors

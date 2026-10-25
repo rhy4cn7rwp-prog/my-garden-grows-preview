@@ -60,7 +60,7 @@ function paintMarketClock() {
 }
 function tickMarketClock() {
   if (typeof state === "undefined") return;
-  if (document.hidden) {
+  if (document.hidden || marketAwaitingResume) {
     Game.pauseMarketClock(state);
     save();
     return;
@@ -76,7 +76,16 @@ function tickMarketClock() {
   paintMarketClock();
 }
 setInterval(tickMarketClock, 1000);
-window.addEventListener("pageshow", tickMarketClock);
+window.addEventListener("pageshow", (event) => {
+  // Safari may restore a frozen document rather than run startup scripts again.
+  // Treat that as reopening too; pagehide already checkpointed the session.
+  if (event.persisted && typeof state !== "undefined") {
+    Game.pauseMarketClock(state);
+    marketAwaitingResume = !!state.marketOpen;
+    go("clubhouse");
+  }
+  tickMarketClock();
+});
 window.addEventListener("focus", tickMarketClock);
 document.addEventListener("visibilitychange", tickMarketClock);
 function pauseHiddenMarket() {
