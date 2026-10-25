@@ -68,7 +68,8 @@ body[data-view="market"] #app {
   z-index: 2;
   left: max(6px, var(--village-safe-left));
   bottom: 2px;
-  width: 76%;
+  width: auto;
+  right: max(6px, var(--village-safe-right));
   display: flex;
   align-items: flex-end;
   gap: 5px;
@@ -94,8 +95,7 @@ body[data-view="market"] #app {
   scroll-snap-align: start;
   touch-action: pan-x;
 }
-.market-produce:focus-visible,
-.market-register-prop:focus-visible {
+.market-produce:focus-visible {
   outline: 3px solid #fff3a5;
   outline-offset: -3px;
   border-radius: 8px;
@@ -151,32 +151,6 @@ body[data-view="market"] #app {
 .market-produce-label > span {
   font-size: 12px;
   white-space: normal;
-}
-.market-register-prop {
-  position: absolute;
-  z-index: 3;
-  bottom: 16%;
-  right: max(5px, var(--village-safe-right));
-  width: 21%;
-  min-width: 62px;
-  max-width: 110px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #4c301b;
-}
-.market-register-prop span {
-  position: absolute;
-  left: -6px;
-  right: -2px;
-  bottom: -20px;
-  display: block;
-  background: #fff2d8f5;
-  border-radius: 4px;
-  padding: 3px 1px;
-  font:
-    800 12px/1.2 Georgia,
-    serif;
 }
 .market-empty-display {
   position: absolute;
@@ -258,20 +232,12 @@ body[data-view="market"] #app {
   .farmers-market-game .hud button {
     pointer-events: auto;
   }
-  .market-produce-tray {
-    width: 74%;
-  }
+
 }
 @media (prefers-reduced-motion: reduce) {
   .market-produce-tray {
     scroll-behavior: auto;
   }
-}
-/* Independent register prop on the near tabletop; no painted duplicate. */
-.market-register-prop img {
-  display: block;
-  width: 100%;
-  filter: drop-shadow(0 3px 2px #43250b77);
 }
 .market-tray-hint {
   position: absolute;
@@ -293,4 +259,9 @@ body[data-view="market"] #app {
 }
 .market-produce-crate .market-basket-rim {
   clip-path: inset(50% 0 0 0);
+}
+
+/* The counter now belongs entirely to real produce merchandise. */
+@media (min-width:375px) {
+  .market-produce { flex-basis:calc((100% - 15px) / 4); }
 }

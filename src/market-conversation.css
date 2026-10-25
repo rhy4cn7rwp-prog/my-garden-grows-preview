@@ -408,3 +408,6 @@
 .order-math-line span:last-child { white-space:nowrap; }
 .total-keypad-order { font-size:13px; line-height:1.2; }
 @media (max-height:500px) { .total-keypad-order { font-size:12px; margin:2px 0; } }
+
+.order-math-line.math-line-active { background:#e0edcb; outline:1px solid #749551; border-radius:3px; }
+.order-math-line span:first-child { min-width:0; text-align:left; }

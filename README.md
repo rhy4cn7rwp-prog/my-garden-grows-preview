@@ -1,3 +1,37 @@
+## Latest market refinement: adding first, multiplication next
+
+Before any Dream Shop purchase, the keypad provides calculated item subtotals;
+the player adds them and enters the order total. After the first purchase, each
+new customer asks the player to solve one highlighted multiplication line at a
+time, then enter the final sum. The existing 2/4/6/8/10 numerical milestones remain;
+one purchase alone does not raise prices, quantities or payment difficulty.
+
+Correct line work is saved with its quantity and agreed unit price. Refreshing or
+leaving the keypad retains accepted subtotals; editing the basket invalidates
+stale work. Previously accepted payment-stage saves can still finish normally.
+An already-arrived customer's teaching stage and agreed prices stay stable even
+if a reward is bought elsewhere before checkout finishes.
+
+Practice support is saved separately from permanent dream ownership. Two wrong
+answers ease future numerical orders by one tier (to a minimum of the beginner
+tier). Three first-try correct questions gradually remove one tier of support.
+Retries still receive encouraging hints, and every third customer remains a
+review order. Support never removes multiplication once it is unlocked, changes
+an active order, resets purchases, or alters prices already agreed with a shopper.
+
+The independent decorative register prop has been removed; the original asset
+is retained. Produce baskets and crates now fill the full counter width, with
+four visible slots on larger phones and three on the smallest screens. The real
+checkout keypad and change-counting controls remain in their existing flow.
+Clock, dialogue, closing, purchasing and farming rules are unchanged.
+
+QA covers beginner addition versus first-purchase multiplication, line/total
+retries, saved subtotals and old saves, adaptive easing/recovery, all later tiers,
+complete payment/bag/report flow, and touch layouts with simulated Safari safe
+areas. Screenshots verify full-width produce and speech-bubble clearance. Native
+iPhone Safari is not available here and still needs device playtesting. On very
+short screens the receipt can scroll internally while the keypad stays tappable.
+
 ## Latest Farmers Market: closing, conversations and progressive math
 
 At 1 PM the current customer can finish, then a friendly closing announcement

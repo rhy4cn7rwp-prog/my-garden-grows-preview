@@ -5,7 +5,7 @@ from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
 from pathlib import Path
 from threading import Thread
 from playwright.sync_api import sync_playwright
-from market_ui_helpers import enter_total
+from market_ui_helpers import enter_total, solve_lines
 root=Path(__file__).resolve().parents[1]
 class Quiet(SimpleHTTPRequestHandler):
  def log_message(self,*a):pass
@@ -26,7 +26,7 @@ try:
     for name,n in want:
      for _ in range(n):tap('Add '+name)
     tap('Check basket');tap('Calculate total')
-    actual=page.evaluate('Object.entries(state.basket).map(([id,n])=>`${n} × ${money(Game.marketPrice(state,id))} = ?`)')
+    actual=page.evaluate('Object.entries(state.basket).map(([id,n])=>`${n} × ${money(Game.marketPrice(state,id))} = ${Game.requiresLineMath(state)?"?":money(n*Game.marketPrice(state,id))}`)')
     for line in actual:assert line in page.locator('.total-keypad-order').inner_text()
     assert 'Total: $?' in page.locator('.total-keypad-order').inner_text()
     assert page.locator('.total-keypad-dialog').evaluate('e=>e.scrollHeight<=e.clientHeight+1')
@@ -36,6 +36,7 @@ try:
     if h>=548:
      assert page.locator('.total-keypad-order').evaluate('e=>e.scrollHeight<=e.clientHeight+1'),(w,h,count,page.locator('.total-keypad-order').evaluate('e=>({text:e.innerText,scroll:e.scrollHeight,height:e.clientHeight})'))
     if w==428:page.screenshot(path=f'/tmp/market-math-tier-{count}.png')
+    solve_lines(page)
     total=page.evaluate('Game.totalOrder(state)')
     enter_total(page,str(total+.01));tap('Confirm total');assert page.evaluate('state.step')=='choose'
     enter_total(page,str(total));tap('Confirm total')

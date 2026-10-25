@@ -1,4 +1,4 @@
-/* Player-entered arithmetic only: never fill or expose the answer for them. */
+/* Beginners add provided subtotals; owned dreams unlock multiplication practice. */
 let marketTotalDraft = { key: "", value: "" };
 function marketTotalKeypad(feedback = "") {
   if (!state.customer || state.step !== "choose") return;
@@ -9,21 +9,35 @@ function marketTotalKeypad(feedback = "") {
     state.customer.name,
     state.customer.want,
     state.basket,
+    Game.requiresLineMath(state),
+    Game.nextMathLine(state),
+    state.customer.prices,
   ]);
   if (marketTotalDraft.key !== key) marketTotalDraft = { key, value: "" };
+  const activeLine = Game.nextMathLine(state);
+  const confirm = activeLine ? "Confirm line" : "Confirm total";
+  const heading = activeLine ? "Multiply this item" : "Calculate the total";
   show(
-    `<header class="total-keypad-header"><h2>Calculate the total</h2><button class="register-close" aria-label="Close ✕" onclick="closeDialog()">×</button></header><div class="total-keypad-order"><b>${state.customer.name}'s order:</b>${
-      Object.entries(state.basket).filter(([,n])=>n>0).map(([id,n]) =>
-        `<div class="order-math-line"><span>${crop(id).name}${crop(id).unit === "lb" ? " (lb)" : ""}:</span><span>${n} × ${money(Game.marketPrice(state,id))} = ?</span></div>`
-      ).join("") || "Your basket is empty."
-    }<b>Total: $?</b></div><div class="total-keypad-display"><span>Your total</span><output id="total-answer" aria-label="Your calculated total" aria-live="polite">${marketTotalDraft.value === "" ? "—" : "$" + marketTotalDraft.value}</output></div><p class="total-keypad-feedback" role="status">${feedback || "Use the prices on your stand. Take your time!"}</p><div class="total-keypad-keys">${["7", "8", "9", "Backspace", "4", "5", "6", "Clear", "1", "2", "3", ".", "0", "Confirm total"].map((key) => `<button class="${key === "0" ? "keypad-zero" : key === "Confirm total" ? "keypad-confirm" : ""}" aria-label="${key === "." ? "Decimal point" : key}" onclick="marketTotalPress('${key}')" ${key === "Confirm total" && marketTotalDraft.value === "" ? "disabled" : ""}>${key === "Backspace" ? "⌫" : key === "Confirm total" ? "Confirm total" : key}</button>`).join("")}</div>`,
+    `<header class="total-keypad-header"><h2>${heading}</h2><button class="register-close" aria-label="Close ✕" onclick="closeDialog()">×</button></header><div class="total-keypad-order"><b>${state.customer.name}'s order:</b>${
+      Object.entries(state.basket).filter(([,n])=>n>0).map(([id,n]) => {
+        const solved = Game.lineSolved(state,id);
+        const result = !Game.requiresLineMath(state) ? money(n*Game.marketPrice(state,id)) :
+          solved ? money(state.customer.lineAnswers[id].answerCents/100) + " ✓" : "?";
+        return `<div class="order-math-line ${activeLine === id ? "math-line-active" : ""}" ${activeLine === id ? 'aria-current="step"' : ""}><span>${crop(id).name}${crop(id).unit === "lb" ? " (lb)" : ""}:</span><span>${n} × ${money(Game.marketPrice(state,id))} = ${result}</span></div>`;
+      }).join("") || "Your basket is empty."
+    }<b>Total: $?</b></div><div class="total-keypad-display"><span>${activeLine ? crop(activeLine).name + " subtotal" : "Your total"}</span><output id="total-answer" aria-label="${activeLine ? "Your item subtotal" : "Your calculated total"}" aria-live="polite">${marketTotalDraft.value === "" ? "—" : "$" + marketTotalDraft.value}</output></div><p class="total-keypad-feedback" role="status">${feedback || (activeLine ? "Multiply the highlighted quantity and price." : "Add the item amounts. Take your time!")}</p><div class="total-keypad-keys">${["7", "8", "9", "Backspace", "4", "5", "6", "Clear", "1", "2", "3", ".", "0", confirm].map((key) => `<button class="${key === "0" ? "keypad-zero" : key === confirm ? "keypad-confirm" : ""}" aria-label="${key === "." ? "Decimal point" : key}" onclick="marketTotalPress('${key}')" ${key === confirm && marketTotalDraft.value === "" ? "disabled" : ""}>${key === "Backspace" ? "⌫" : key === confirm ? confirm : key}</button>`).join("")}</div>`,
     "total-keypad",
   );
+  const receipt = document.querySelector(".total-keypad-order");
+  const row = receipt?.querySelector(".math-line-active");
+  if (row) receipt.scrollTop = row.offsetTop - receipt.offsetTop;
+  else if (receipt) receipt.scrollTop = receipt.scrollHeight;
+
 }
 function marketTotalPress(key) {
   if (dialogKey !== "total-keypad" || state.step !== "choose") return;
   let v = marketTotalDraft.value;
-  if (key === "Confirm total") {
+  if (key === "Confirm total" || key === "Confirm line") {
     try {
       Game.checkBasket(state);
     } catch (e) {
@@ -31,9 +45,18 @@ function marketTotalPress(key) {
       return;
     }
     try {
-      Game.ring(state, v === "" ? NaN : Number(v));
-      closeDialog();
+      const id = Game.nextMathLine(state);
+      if (id) {
+        Game.answerMathLine(state, id, v === "" ? NaN : Number(v));
+        marketTotalDraft.value = "";
+        save();
+        marketTotalKeypad(Game.nextMathLine(state) ? "That's right! Try the next item." : "Well done! Now add your item amounts.");
+      } else {
+        Game.ring(state, v === "" ? NaN : Number(v));
+        closeDialog();
+      }
     } catch (e) {
+      save();
       marketTotalKeypad(e.message);
     }
     return;
@@ -66,13 +89,13 @@ document.addEventListener("keydown", (event) => {
     return;
   const key =
     event.key === "Enter"
-      ? "Confirm total"
+      ? Game.nextMathLine(state) ? "Confirm line" : "Confirm total"
       : event.key === "Delete"
         ? "Clear"
         : event.key;
   if (
     /^\d$/.test(key) ||
-    [".", "Backspace", "Clear", "Confirm total"].includes(key)
+    [".", "Backspace", "Clear", "Confirm total", "Confirm line"].includes(key)
   ) {
     event.preventDefault();
     marketTotalPress(key);

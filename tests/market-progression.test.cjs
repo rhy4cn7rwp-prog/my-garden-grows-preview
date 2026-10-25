@@ -1,6 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const G=require('../src/game.js');
+function solve(s){ for(let id; (id=G.nextMathLine(s));) G.answerMathLine(s,id,s.basket[id]*G.marketPrice(s,id)); }
 function stand(count=0){const s=G.initial();s.dreamPurchaseCount=count;s.bagCount=100;s.owned.scale=s.owned.table=1;
  for(const c of G.crops)s.inventory[c.id]=s.display[c.id]=50;G.openMarket(s,1000);return s;}
 test('purchase count migrates from proven ownership and increments only on explicit successful purchase',()=>{
@@ -22,6 +23,7 @@ test('all tiers mix review orders, respect stock, unlock fractions and cap payme
    for(const [id,n] of Object.entries(s.customer.want)){assert.ok(n>0&&n<=G.marketStock(s,id));fractions.add(Math.round(G.marketPrice(s,id)*100)%100);}
    sizes.add(Object.keys(s.customer.want).length);G.greet(s);s.basket={...s.customer.want};
    const total=G.totalOrder(s);if(total>=30)big=true;
+   solve(s);
    assert.throws(()=>G.ring(s,total+.01));assert.equal(s.step,'choose');G.ring(s,total);
    payments.add(s.tendered);assert.ok(s.tendered>=total);
    assert.ok(s.tendered<=(count<8?20:count<10?50:100));
@@ -40,7 +42,7 @@ test('all tiers mix review orders, respect stock, unlock fractions and cap payme
 });
 test('a purchase during checkout and refresh never reprices an existing transaction',()=>{
  const s=stand(1);s.cash=1000;s.visitors=1;G.newCustomer(s,'Maya',1001);G.greet(s);s.basket={...s.customer.want};
- const total=G.totalOrder(s),prices={...s.customer.prices};G.ring(s,total);G.purchaseDream(s,'ball');
+ const total=G.totalOrder(s),prices={...s.customer.prices};solve(s);G.ring(s,total);G.purchaseDream(s,'ball');
  const r=G.recover(JSON.stringify(s));assert.equal(r.step,'pay');assert.deepEqual(r.customer.prices,prices);assert.equal(G.totalOrder(r),total);
 });
 test('one sold-out response chooses stocked produce or declines without spending inventory or bags',()=>{

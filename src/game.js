@@ -158,6 +158,7 @@
       day: 1,
       season: 1,
       goal: 1,
+      mathPractice: { support: 0, streak: 0, mistakes: 0, retrying: false },
       dreamPurchaseCount: 0,
       dreamPurchases: {},
       clubhousePositions: {},
@@ -316,6 +317,13 @@
       }
       clean.dreamPurchaseCount = Math.max(Object.keys(clean.dreamPurchases).length,
         quantity(s.dreamPurchaseCount) ? s.dreamPurchaseCount : 0);
+      const practice = s.mathPractice || {};
+      clean.mathPractice = {
+        support: quantity(practice.support) ? Math.min(5, practice.support) : 0,
+        streak: quantity(practice.streak) ? Math.min(2, practice.streak) : 0,
+        mistakes: practice.mistakes === 1 ? 1 : 0,
+        retrying: practice.retrying === true,
+      };
       // A failed optional room-script download must never reset a valid farm.
       clean.clubhousePositions = roomLayout
         ? roomLayout.recoverPositions(
@@ -877,7 +885,7 @@
   }
   function mathLevel(s) { return Math.min(5, Math.floor(dreamPurchaseCount(s) / 2)); }
   function orderDifficulty(s) {
-    const level = mathLevel(s);
+    const level = Math.max(0, mathLevel(s) - (s.mathPractice?.support || 0));
     // Every third shopper is an easier review; milestones never remove practice.
     return s.visitors % 3 === 2 ? Math.max(0, level - 1) : level;
   }
@@ -925,6 +933,8 @@
       want,
       prices,
       mathLevel: level,
+      lineMath: dreamPurchaseCount(s) > 0,
+      lineAnswers: {},
       personality: ["curious", "thoughtful", "hurried"][
         (s.day + s.visitors) % 3
       ],
@@ -1096,6 +1106,39 @@
       "One of these vegetables is not on the order. Remove it and try again!",
     );
   }
+  function requiresLineMath(s) {
+    return !!s.customer && (s.customer.lineMath ?? (dreamPurchaseCount(s) > 0));
+  }
+  function lineSolved(s, id) {
+    const record = s.customer?.lineAnswers?.[id];
+    return !!record && record.quantity === s.basket[id] &&
+      record.priceCents === cents(marketPrice(s, id)) &&
+      record.answerCents === s.basket[id] * record.priceCents;
+  }
+  function nextMathLine(s) {
+    return requiresLineMath(s) ? Object.keys(s.basket).find(id => s.basket[id] > 0 && !lineSolved(s,id)) : undefined;
+  }
+  function recordMathAttempt(s, correct) {
+    const p = s.mathPractice ||= { support: 0, streak: 0, mistakes: 0, retrying: false };
+    if (!correct) {
+      p.streak = 0; p.retrying = true;
+      if (++p.mistakes >= 2) { p.support = Math.min(mathLevel(s), p.support + 1); p.mistakes = 0; }
+    } else {
+      p.mistakes = 0;
+      if (!p.retrying && ++p.streak >= 3) { p.support = Math.max(0,p.support - 1); p.streak = 0; }
+      p.retrying = false;
+    }
+  }
+  function answerMathLine(s, id, answer) {
+    checkBasket(s);
+    requireRule(requiresLineMath(s) && nextMathLine(s) === id, "Work on the highlighted item first.");
+    const n = s.basket[id], price = cents(marketPrice(s,id));
+    const correct = Number.isFinite(answer) && cents(answer) === n * price;
+    recordMathAttempt(s, correct);
+    requireRule(correct, `Try adding the price ${n} ${n === 1 ? "time" : "times"}, or multiply the quantity by the price. You can try again!`);
+    s.customer.lineAnswers ||= {};
+    s.customer.lineAnswers[id] = {quantity:n, priceCents:price, answerCents:n*price};
+  }
   function ring(s, answer) {
     checkBasket(s);
     requireRule(
@@ -1103,9 +1146,12 @@
         hasEquipment(s, "scale"),
       "You need a scale for produce sold by the pound.",
     );
+    requireRule(!nextMathLine(s), "Finish each item's multiplication first. Take your time!");
     const total = totalOrder(s);
+    const correct = Number.isFinite(answer) && cents(answer) === cents(total);
+    recordMathAttempt(s, correct);
     requireRule(
-      Number.isFinite(answer) && cents(answer) === cents(total),
+      correct,
       "Try multiplying each quantity by its price, then add the amounts.",
     );
     s.tendered =
@@ -1287,6 +1333,8 @@
       name: c.name,
       want: { ...c.want },
       prices: savedPrices,
+      lineMath: typeof c.lineMath === "boolean" ? c.lineMath : dreamPurchaseCount(clean) > 0,
+      lineAnswers: {},
       mathLevel: quantity(c.mathLevel) && c.mathLevel <= 5 ? c.mathLevel : undefined,
       personality: ["curious", "thoughtful", "hurried"].includes(c.personality)
         ? c.personality
@@ -1324,6 +1372,12 @@
             : "good",
       alternativeOffered: c.alternativeOffered === true,
     };
+    for (const [id, record] of Object.entries(c.lineAnswers || {})) {
+      if (!ids.includes(id) || !record || typeof record !== "object") continue;
+      if (record.quantity === s.basket[id] && record.priceCents === cents(savedPrices[id]) &&
+          record.answerCents === record.quantity * record.priceCents)
+        clean.customer.lineAnswers[id] = {quantity:record.quantity,priceCents:record.priceCents,answerCents:record.answerCents};
+    }
     clean.basket = { ...s.basket };
     clean.step = s.step;
     clean.change = Number.isFinite(s.change) && s.change >= 0 ? s.change : 0;
@@ -1507,6 +1561,10 @@
     mathLevel,
     marketPrice,
     offerSomethingElse,
+    requiresLineMath,
+    lineSolved,
+    nextMathLine,
+    answerMathLine,
     ownsDream,
     acknowledgeGoal,
     purchaseDream,

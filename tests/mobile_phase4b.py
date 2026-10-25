@@ -42,7 +42,7 @@ try:
    fit();assert page.locator('#total-answer').inner_text()=='—'
    if w==428:page.screenshot(path='/tmp/phase4b-keypad-iphone.png')
    assert '$7.00' not in page.locator('.total-keypad-dialog').inner_text()
-   assert '2 × $2.00 = ?' in page.locator('.total-keypad-order').inner_text()
+   assert '2 × $2.00 = $4.00' in page.locator('.total-keypad-order').inner_text()
    assert page.get_by_role('button',name='Confirm total',exact=True).is_disabled()
    for k in ['Decimal point','2','5','9']:tap(k)
    assert page.locator('#total-answer').inner_text()=='$0.25'
@@ -55,7 +55,7 @@ try:
    assert page.evaluate('state.step')=='choose'
    assert 'multiplying' in page.locator('.total-keypad-feedback').inner_text();fit()
    assert page.evaluate('[state.cash,state.bagCount,state.inventory,state.sales,state.day,state.season]')==initial
-   tap('Close ✕');tap('Open cash register')
+   tap('Close ✕');tap('🧺 Fill customer basket');tap('Calculate total')
    assert page.locator('#total-answer').inner_text()=='$8'
    tap('Clear')
    if w>=800:page.keyboard.type('7.00');page.keyboard.press('Enter')

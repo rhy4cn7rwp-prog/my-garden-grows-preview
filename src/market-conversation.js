@@ -105,7 +105,6 @@ function syncMarketSpeech() {
   });
   const bubbleRight = bubble.getBoundingClientRect().right;
   const obstacles = [
-    scene.querySelector(".market-register-prop"),
     scene.querySelector(".market-produce-tray"),
     scene.querySelector(".market-tray-hint"),
   ].filter(Boolean);

@@ -62,13 +62,5 @@ function marketProduceDisplay() {
     .join("")}</section>`;
 }
 function farmersMarketScene(controls) {
-  return `<section class="market-tableau ${state.customer ? "market-with-customer" : ""}" aria-label="Your farmers market stall, looking out toward the village"><svg class="market-first-person" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice" aria-label="A red-and-white canopy shelters your wooden counter; flowers frame the village beyond" role="img"><defs><clipPath id="market-behind-counter"><rect width="1536" height="728"/></clipPath></defs><image href="assets/farmers-market/stall.webp" width="1536" height="1024"/>${marketCustomerArt()}</svg>${marketClockFace()}${state.customer && state.step !== "greet" ? '<svg class="market-speech-tail" aria-hidden="true"><path/></svg>' + marketConversation() : ""}${marketProduceDisplay()}<button class="market-register-prop" onclick="marketRegister()" aria-label="Open cash register"><img src="assets/farmers-market/register.webp" alt=""/><span>Cash register</span></button></section><section class="bottom market-controls" aria-label="Customer service and market controls">${controls}</section>`;
-}
-function marketRegister() {
-  if (state.customer && state.step === "pay") return payment();
-  if (state.customer && state.step === "choose") return marketTotalKeypad();
-  show(
-    `<h2>Your cash register</h2><p>${state.customer ? "Fill your customer's basket and calculate the total first. Then you can count their change here." : "Welcome a customer and fill their order. Your cash register will be ready when it is time to count change."}</p>`,
-    "market-register-info",
-  );
+  return `<section class="market-tableau ${state.customer ? "market-with-customer" : ""}" aria-label="Your farmers market stall, looking out toward the village"><svg class="market-first-person" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice" aria-label="A red-and-white canopy shelters your wooden counter; flowers frame the village beyond" role="img"><defs><clipPath id="market-behind-counter"><rect width="1536" height="728"/></clipPath></defs><image href="assets/farmers-market/stall.webp" width="1536" height="1024"/>${marketCustomerArt()}</svg>${marketClockFace()}${state.customer && state.step !== "greet" ? '<svg class="market-speech-tail" aria-hidden="true"><path/></svg>' + marketConversation() : ""}${marketProduceDisplay()}</section><section class="bottom market-controls" aria-label="Customer service and market controls">${controls}</section>`;
 }
