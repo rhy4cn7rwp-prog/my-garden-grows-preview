@@ -26,6 +26,11 @@ try:
    def fit():
     assert page.locator('.supply-packet').count()==5 and page.locator('.spot').count()==0
     assert page.locator('[aria-label="Money balance"]').count()==1
+    assert page.locator('.supply-shelf').count()==0
+    assert page.locator('.supply-table-products [data-market-product]').count()==4
+    assert page.locator('.supply-display > [data-market-product=sign]').count()==1
+    assert page.locator('.supply-table-art').evaluate('e=>e.complete&&e.naturalWidth>0')
+    assert page.locator('.supply-display .supply-aframe-art').evaluate('e=>e.complete&&e.naturalWidth>0')
     for label in page.locator('.supply-packet-name').all():
      assert label.evaluate("e=>e.scrollWidth<=e.clientWidth+1&&e.scrollHeight<=e.clientHeight+1&&parseInt(getComputedStyle(e.parentElement).zIndex)>=1"),label.evaluate("e=>({text:e.textContent,sw:e.scrollWidth,cw:e.clientWidth,sh:e.scrollHeight,ch:e.clientHeight,z:getComputedStyle(e.parentElement).zIndex})")
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight+1')

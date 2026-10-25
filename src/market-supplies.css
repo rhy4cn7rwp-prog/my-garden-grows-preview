@@ -1,4 +1,4 @@
-/* Scoped to Seed & Feed. One illustrated environment; merchandise are real objects. */
+/* Scoped to Market Supplies. Illustrated room with separate merchandise props. */
 body[data-view="supplies"] {
   overflow: hidden;
   background: #b17b3b;
@@ -530,5 +530,161 @@ body[data-view="supplies"] #app {
 @media (max-width: 360px) {
   .supply-packet-name {
     font-size: 12px;
+  }
+}
+
+/* One perspective table: products share its tabletop baseline, with price cards
+   attached to the front apron. The freestanding sign rests on the shop floor. */
+.supply-display {
+  display: block;
+  top: max(47%, calc(var(--supply-counter-bottom, 0px) + 30px));
+  bottom: calc(85px + var(--viewport-safe-bottom));
+}
+.supply-merch-table {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 89%;
+  aspect-ratio: 1586 / 992;
+}
+.supply-table-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.supply-table-products {
+  position: absolute;
+  top: -6%;
+  left: 5%;
+  right: 5%;
+  height: 76%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+.supply-table-products .supply-packet {
+  height: 100%;
+  max-height: none;
+  min-height: 100px;
+  padding: 0;
+  justify-content: flex-start;
+}
+.supply-table-products .supply-produce-art {
+  position: absolute;
+  top: 0;
+  height: 64%;
+  width: 100%;
+  filter: drop-shadow(0 3px 2px #42200c88);
+}
+.supply-table-products .supply-packet-name {
+  position: absolute;
+  top: 66%;
+  font-size: 12px;
+  height: 32px;
+  padding: 1px 2px;
+}
+.supply-table-products .supply-packet-price {
+  position: absolute;
+  top: calc(66% + 33px);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.supply-display > .supply-packet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 30%;
+  height: 82%;
+  min-height: 125px;
+  max-height: 235px;
+  padding: 0;
+}
+.supply-display > .supply-packet .supply-produce-art {
+  position: absolute;
+  bottom: 42px;
+  height: calc(100% - 42px);
+  object-fit: contain;
+  object-position: center bottom;
+}
+.supply-display > .supply-packet .supply-packet-name {
+  position: absolute;
+  bottom: 20px;
+  height: 23px;
+  font-size: 12px;
+}
+.supply-display > .supply-packet .supply-packet-price {
+  position: absolute;
+  bottom: 0;
+  font-size: 12px;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .supply-display {
+    left: 43%;
+    top: 29%;
+    bottom: calc(72px + var(--viewport-safe-bottom));
+  }
+  .supply-merch-table {
+    width: 77%;
+  }
+  .supply-display > .supply-packet {
+    width: 25%;
+    height: 100%;
+  }
+  .supply-table-products .supply-packet-name,
+  .supply-table-products .supply-packet-price {
+    font-size: 11px;
+  }
+}
+@media (orientation: portrait) {
+  .supply-display {
+    bottom: calc(110px + var(--viewport-safe-bottom));
+  }
+  .supply-display > .supply-packet {
+    height: 52%;
+    min-height: 125px;
+  }
+}
+/* Keep merchandise and the floor-standing sign in separate touch regions. */
+.supply-table-products {
+  height: calc(44% + 54px);
+}
+.supply-table-products .supply-produce-art {
+  height: calc(100% - 54px);
+}
+.supply-table-products .supply-packet-name {
+  top: calc(100% - 54px);
+}
+.supply-table-products .supply-packet-price {
+  top: calc(100% - 21px);
+}
+@media (orientation: portrait) {
+  .supply-shop-game {
+    min-height: 680px;
+  }
+  .supply-display {
+    top: max(45%, calc(var(--supply-counter-bottom, 0px) + 12px));
+  }
+  .supply-display > .supply-packet {
+    top: calc((100vw - 20px) * 0.89 * 0.6255 * 0.44 + 55px);
+    height: auto;
+    min-height: 110px;
+  }
+}
+/* The A-frame stands just in front of the right-hand leg, behind price cards.
+   Stacking never steals merchandise touches through transparent art bounds. */
+.supply-table-products .supply-packet {
+  z-index: 3;
+}
+.supply-display > .supply-packet {
+  z-index: 2;
+}
+@media (orientation: portrait) {
+  .supply-display > .supply-packet {
+    top: auto;
+    height: 88%;
+    min-height: 170px;
+    max-height: 240px;
   }
 }

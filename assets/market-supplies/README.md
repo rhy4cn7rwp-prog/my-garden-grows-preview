@@ -16,3 +16,15 @@ not painted into the art. Rack rails, price cards and counter plaque are separat
 visual elements. The plaque matches the room's cover projection. PNG originals
 are preserved; only format conversion was used for runtime WebPs. No external
 image host or font is required.
+
+## Visual refinement
+
+`source/display-table.png` and `source/aframe.png` preserve newly generated
+transparent storybook props. Their quality-90 WebP encodings are used at runtime.
+The existing interior and eight-object atlas remain unchanged. The new sign
+replaces atlas object 3 everywhere, including product details. Four products
+share the perspective tabletop baseline; price cards hang on the apron. The
+A-frame stands near the right leg, with merchandise touch targets above it.
+The $8 reusable sign SKU and all transaction/save rules are unchanged.
+Short portrait windows retain a scrollable room with sticky navigation rather
+than shrinking product touch targets. Normal taller iPhone views fit the room.

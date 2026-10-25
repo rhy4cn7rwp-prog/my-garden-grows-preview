@@ -243,3 +243,14 @@ outside Phase 1C.
   In-market emergency refill intentionally retains its old 10/$3 price/flow.
 - 118 rule tests, seven new shop phone layouts and 15 existing mobile suites
   pass. Physical iPhone Safari still requires user playtesting.
+
+### Phase 3B visual refinement
+
+Preserved the shopkeeper, interior, counter plaque and all purchasing rules.
+Added separate transparent rustic display-table and freestanding hinged
+A-frame chalkboard props. Bags, boxes, tags and baskets rest on a common
+tabletop baseline with contact shadows; live price/name cards remain tappable.
+Original generated PNGs and prior artwork are preserved. The sign remains
+$8/reusable. Mobile touch checks cover all five products, mixed checkout,
+rentals, inventory/recovery, safe areas and navigation at seven sizes.
+Physical iPhone Safari verification remains a player playtest.

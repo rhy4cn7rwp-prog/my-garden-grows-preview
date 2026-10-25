@@ -37,6 +37,8 @@ const MARKET_PRODUCTS = {
   },
 };
 function marketProductArt(index) {
+  if (index === 3)
+    return `<img class="supply-produce-art supply-aframe-art" src="assets/market-supplies/aframe.webp" alt=""/>`;
   const [x, y, w, h] = [
     [30, 20, 390, 418],
     [465, 35, 420, 400],
@@ -50,15 +52,13 @@ function marketProductArt(index) {
   return `<svg class="supply-produce-art" viewBox="${x} ${y} ${w} ${h}" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false"><svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}"><image href="assets/market-supplies/products.webp" width="1792" height="896"/></svg></svg>`;
 }
 function marketSupplyScene() {
-  const row = (ids) =>
-    `<div class="supply-shelf">${ids
-      .map((id) => {
-        const p = MARKET_PRODUCTS[id],
-          sku = MarketSupplyRules.catalog[p.options[0]];
-        return `<button class="supply-packet" data-market-product="${id}" onclick="marketSupplyProduct('${id}')" aria-label="${p.name}">${marketProductArt(p.art)}<span class="supply-packet-name">${p.name}</span><span class="supply-packet-price">${sku.count === 1 ? money(sku.cents / 100) + " each" : sku.count + " for " + money(sku.cents / 100)}</span></button>`;
-      })
-      .join("")}</div>`;
-  return `<div class="supply-shop-world"><img class="supply-shop-interior" src="assets/market-supplies/interior.webp" alt="A friendly shopkeeper welcomes you to a sunny wooden supply store with wicker baskets, flowers, cloth and packing supplies." fetchpriority="high"/>${marketCounterSign()}</div><section class="supply-shop-heading"><p>Welcome! Tap a supply to explore.</p></section><section class="supply-display" aria-label="Market supply shelves">${row(["bags", "boxes", "tags"])}${row(["sign", "basket"])}</section><div class="supply-shop-bottom bottom"><button class="btn" onclick="marketSupplyInventory()">My supplies</button><button class="btn" onclick="marketSupplyEquipment()">Equipment &amp; rentals</button><button class="btn" onclick="marketSupplyBasket()" aria-label="Supply basket">Basket<small>${money(MarketSupplyRules.total(state))}</small></button></div>`;
+  const product = (id) => {
+    const p = MARKET_PRODUCTS[id],
+      sku = MarketSupplyRules.catalog[p.options[0]];
+    const label = { bags: "Paper bags", boxes: "Produce boxes" }[id] || p.name;
+    return `<button class="supply-packet" data-market-product="${id}" onclick="marketSupplyProduct('${id}')" aria-label="${p.name}">${marketProductArt(p.art)}<span class="supply-packet-name">${label}</span><span class="supply-packet-price">${sku.count === 1 ? money(sku.cents / 100) + " each" : sku.count + " for " + money(sku.cents / 100)}</span></button>`;
+  };
+  return `<div class="supply-shop-world"><img class="supply-shop-interior" src="assets/market-supplies/interior.webp" alt="A friendly shopkeeper welcomes you to a sunny wooden supply store with wicker baskets, flowers, cloth and packing supplies." fetchpriority="high"/>${marketCounterSign()}</div><section class="supply-shop-heading"><p>Welcome! Tap a supply to explore.</p></section><section class="supply-display" aria-label="Market supplies display table"><div class="supply-merch-table"><img class="supply-table-art" src="assets/market-supplies/display-table.webp" alt="Rustic wooden merchandise table"/><div class="supply-table-products">${["bags", "boxes", "tags", "basket"].map(product).join("")}</div></div>${product("sign")}</section><div class="supply-shop-bottom bottom"><button class="btn" onclick="marketSupplyInventory()">My supplies</button><button class="btn" onclick="marketSupplyEquipment()">Equipment &amp; rentals</button><button class="btn" onclick="marketSupplyBasket()" aria-label="Supply basket">Basket<small>${money(MarketSupplyRules.total(state))}</small></button></div>`;
 }
 function marketCounterSign() {
   return `<h1 class="supply-counter-sign" aria-label="Market Supplies"><svg viewBox="0 0 1024 1536" aria-hidden="true"><defs><linearGradient id="supply-sign-wood" x2="0" y2="1"><stop stop-color="#efc27b"/><stop offset="1" stop-color="#bf813e"/></linearGradient></defs><g class="supply-counter-plaque"><rect x="225" y="570" width="574" height="94" rx="9" fill="#6d3e1e" opacity=".35" transform="translate(1 5)"/><rect x="225" y="570" width="574" height="94" rx="9" fill="url(#supply-sign-wood)" stroke="#74451f" stroke-width="4"/><rect x="235" y="579" width="554" height="76" rx="5" fill="none" stroke="#f9dd9a" stroke-width="2"/><circle cx="247" cy="616" r="5" fill="#785332"/><circle cx="777" cy="616" r="5" fill="#785332"/><text x="512" y="633" text-anchor="middle" font-family="Georgia,serif" font-size="46" font-weight="bold" fill="#54301a">Market Supplies</text></g></svg></h1>`;
