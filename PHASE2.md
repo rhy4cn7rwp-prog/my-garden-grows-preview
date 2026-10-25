@@ -220,3 +220,12 @@ outside Phase 1C.
 - Crop/produce names, IDs, prices, mechanics, artwork and saved data unchanged.
 - 107 automated tests and mobile shopping, planting recovery and sign checks
   pass; actual iPhone Safari remains unverified.
+
+## Strawberry plants terminology correction
+
+- Strawberry product name changed to “Strawberry Plants” in the shared display
+  map, including shop, details, bundles, basket, receipts and planting inventory.
+- Per-plant and plant-count wording replaces strawberry packet terminology.
+- Artwork, $3 cost, internal strawberry inventory key, saved stock, growing and
+  harvesting behavior unchanged. No migration or gameplay rule changes.
+- 108 automated tests and seven mobile purchase/save layouts pass.

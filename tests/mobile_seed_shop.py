@@ -46,14 +46,14 @@ try:
     assert target and target['height']>5
     page.touchscreen.tap(target['x']+target['width']/2,target['y']+target['height']/2)
     assert page.evaluate('id=>seedName(id)',c['id']) in page.locator('.dialog h2').inner_text()
-    assert f"${c['seed']:.2f} per "+("pack" if c['id']=='potato' else "packet") in page.locator('.dialog').inner_text()
+    assert f"${c['seed']:.2f} per "+("plant" if c['id']=='strawberry' else "pack" if c['id']=='potato' else "packet") in page.locator('.dialog').inner_text()
     assert f"${c['price']:.2f}" in page.locator('.dialog').inner_text()
     tap('+');assert page.evaluate('id=>state.cart[id]',c['id'])==1;tap('Close ✕')
     if c['id']=='beans':
      pending=page.evaluate('state.cart');page.reload();tap('Seed & Feed');assert page.evaluate('state.cart')==pending
    assert page.evaluate('state.cash')==50 and page.evaluate('state.seeds')=={}
    tap('Variety bundle · $11.00 Fixed assortment · save $1.00')
-   assert 'Carrot Seeds × 3, Onion Seeds × 2, Green Bean Seeds × 2, Strawberry Seeds × 1' in page.locator('.dialog').inner_text()
+   assert 'Carrot Seeds × 3, Onion Seeds × 2, Green Bean Seeds × 2, Strawberry Plants × 1' in page.locator('.dialog').inner_text()
    assert 'cannot be customized' in page.locator('.dialog').inner_text()
    plus=page.get_by_role('button',name='+',exact=True);plus.scroll_into_view_if_needed()
    scroll=page.locator('.seed-detail-body').evaluate('(e)=>e.scrollTop');page.locator('.dialog').evaluate("e=>e.dataset.kept='yes'")
@@ -66,6 +66,7 @@ try:
    tap('Pay at checkout');assert 'You paid $29.00' in page.locator('.dialog').inner_text()
    assert 'Your balance is $21.00' in page.locator('.dialog').inner_text()
    assert 'Carrot Seeds: 4 packets purchased' in page.locator('.dialog').inner_text()
+   assert 'Strawberry Plants: 2 plants purchased' in page.locator('.dialog').inner_text()
    expected={c['id']:1+page.evaluate('id=>Game.bundle[id]||0',c['id']) for c in crops}
    assert page.evaluate('state.seeds')==expected and page.evaluate('state.cash')==21
    assert page.evaluate('state.cart')=={}

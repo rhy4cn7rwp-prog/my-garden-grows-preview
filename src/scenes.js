@@ -187,7 +187,7 @@ function seed(id) {
   if (view === "seeds") return seedShopDetails(id);
   let c = crop(id);
   show(
-    `<h2>${c.icon} ${seedName(id)}</h2><p class="tag">${money(c.seed)} per ${id === "potato" ? "pack" : "seed packet"}</p><p>🌞 Sun-loving · 🌱 ${c.days} watered days to harvest</p><p>Harvest about ${c.yield} ${c.unit} · Sell for ${money(c.price)}/${c.unit}</p><p>${c.repeat ? "🔁 Repeat harvests" : "🌾 One harvest per planting"}</p><div class="qty"><button onclick="change('cart','${id}',-1)">−</button><b>${state.cart[id] || 0} in basket</b><button onclick="change('cart','${id}',1)">+</button></div><div><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,
+    `<h2>${c.icon} ${seedName(id)}</h2><p class="tag">${money(c.seed)} per ${id === "strawberry" ? "plant" : id === "potato" ? "pack" : "seed packet"}</p><p>🌞 Sun-loving · 🌱 ${c.days} watered days to harvest</p><p>Harvest about ${c.yield} ${c.unit} · Sell for ${money(c.price)}/${c.unit}</p><p>${c.repeat ? "🔁 Repeat harvests" : "🌾 One harvest per planting"}</p><div class="qty"><button onclick="change('cart','${id}',-1)">−</button><b>${state.cart[id] || 0} in basket</b><button onclick="change('cart','${id}',1)">+</button></div><div><button class="btn" onclick="cart('seeds')">🛒 View basket</button></div>`,
     "seed-" + id,
   );
 }

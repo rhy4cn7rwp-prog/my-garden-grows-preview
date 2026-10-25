@@ -62,7 +62,7 @@ test("bundle information preserves predetermined assortment, exact discount, and
     "Carrot Seeds × 3",
     "Onion Seeds × 2",
     "Green Bean Seeds × 2",
-    "Strawberry Seeds × 1",
+    "Strawberry Plants × 1",
     "$12.00",
     "$1.00",
     "per lb",
@@ -93,7 +93,7 @@ test("planting-material names stay accurate across packets, details and receipts
       carrot: "Carrot Seeds",
       corn: "Corn Seeds",
       beans: "Green Bean Seeds",
-      strawberry: "Strawberry Seeds",
+      strawberry: "Strawberry Plants",
       cucumber: "Cucumber Seeds",
       potato: "Seed Potatoes",
       onion: "Onion Seeds",
@@ -118,4 +118,25 @@ test("planting-material names stay accurate across packets, details and receipts
   for (const id of Object.keys(names)) assert.equal(c.state.seeds[id], 1);
   assert.equal(JSON.stringify(G.crops), before);
   assert.deepEqual(G.recover(JSON.stringify(c.state)).seeds, c.state.seeds);
+});
+
+test("strawberry plants keep the legacy inventory key, exact price and recovered purchased quantities", () => {
+  const c = shop(),
+    originalCrop = JSON.stringify(G.crops.find((x) => x.id === "strawberry"));
+  c.state.seeds.strawberry = 3;
+  c.state.cart = { strawberry: 2 };
+  c.seedShopDetails("strawberry");
+  assert.ok(c.html.includes("Strawberry Plants"));
+  assert.ok(c.html.includes("$3.00 per plant"));
+  c.seedShopBasket();
+  assert.ok(c.html.includes("Strawberry Plants × 2"));
+  c.seedShopCheckout();
+  assert.equal(c.state.cash, 44);
+  assert.equal(c.state.seeds.strawberry, 5);
+  assert.ok(c.html.includes("Strawberry Plants: 2 plants purchased"));
+  assert.equal(G.recover(JSON.stringify(c.state)).seeds.strawberry, 5);
+  assert.equal(
+    JSON.stringify(G.crops.find((x) => x.id === "strawberry")),
+    originalCrop,
+  );
 });

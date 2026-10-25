@@ -5,17 +5,36 @@ Changes and deployment are restricted to `my-garden-grows-preview`. The original
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
 
+## Strawberry plants terminology
+
+The strawberry product is now **Strawberry Plants** throughout the store,
+accessible product labels, bundle contents, basket, receipt and planting
+inventory/choices. Details show the unchanged $3 price **per plant**; receipts
+count plants. Mixed baskets and the fixed eight-item bundle use “items” instead
+of describing the strawberry product as a seed packet. Artwork is unchanged.
+
+The existing internal `strawberry` ID and `state.seeds.strawberry` inventory key
+are retained. Existing stock and saved purchases need no migration. Growing time,
+yield, repeat harvests, produce price, seed/plant purchase arithmetic and all
+other rules remain unchanged. The harvested fruit is still “Strawberries.”
+
+All 108 automated tests pass, including adding two plants to existing legacy
+stock, charging exactly $6 and recovering all five plants after saving. The full
+mobile seed-shop suite verifies purchasing, bundle quantities, receipt wording
+and refresh recovery at seven phone-sized layouts. Native Safari remains a
+manual-device check.
+
 ## Accurate planting-material names
 
 A presentation-only shared name map now labels seed packets, product details,
 bundle contents, baskets, receipts, available planting inventory and planting
 choices consistently: singular crop names before **Seeds**, and **Seed Potatoes**
-for potato planting material. Potato purchase units say “pack.” Harvested produce
+for potato planting material; strawberries use **Strawberry Plants**. Potato purchase units say “pack.” Harvested produce
 keeps its existing crop names. Crop IDs, saved `seeds` keys, all prices, quantities,
 watered growing days, yields, repeat harvests and purchase rules are unchanged;
 no save migration or artwork change is needed.
 
-All 107 automated tests pass, including exact name checks in the shop, basket and
+All 108 automated tests pass, including exact name checks in the shop, basket and
 receipt, unchanged crop metadata and purchased inventory recovery. Mobile seed
 shopping covers all ten labels at seven phone layouts, including payment and
 refresh. Planting-inventory/reservation/recovery and existing storybook-sign
@@ -40,7 +59,7 @@ basket controls; the plaque and packet rows have separate physical space.
 `tests/mobile_storybook_signs.py` checks all four seasonal title variants, plaque
 attachment/visibility, non-overlap with touch targets, toolbar resizing and exact
 saved state at seven phone layouts. Seed-shop purchases/receipts/recovery and the
-three existing village suites pass, alongside all 107 rule/presentation tests.
+three existing village suites pass, alongside all 108 rule/presentation tests.
 Native physical iPhone Safari remains a manual check.
 
 ## Seed & Feed interior — current Phase 2D
@@ -74,7 +93,7 @@ unchanged. Original art remains intact; the two new generated PNGs are preserved
 under `assets/seed-shop/source/`, with WebP runtime art totaling about 875 KiB.
 Only this shop interior is redesigned.
 
-**Validation:** `npm test` passes 107 rule/presentation tests. Four new checks cover
+**Validation:** `npm test` passes 108 rule/presentation tests. Four new checks cover
 live catalog merchandise, mixed individual/bundle payments and receipt inventory,
 fixed assortment arithmetic/selling units, and empty/over-budget checkout.
 `tests/mobile_seed_shop.py` uses actual touch events at 320×360, 320×440, 375×548,
@@ -139,7 +158,7 @@ surface types at five phone/landscape sizes. It also compares the visible browse
 screenshot against the canvas throughout the unobstructed play area. It also checks a constant lens,
 refresh recovery, camera limits and unchanged farm/ownership/money. The existing
 actual-touch placement, customer/purchase and room-gesture suites remain in use.
-`npm test` passes **107 rule tests**. All mobile automation is isolated Chromium;
+`npm test` passes **108 rule tests**. All mobile automation is isolated Chromium;
 **native iPhone Safari remains unverified** because this environment has no
 physical iPhone and its WebKit browser download is blocked by the proxy.
 
@@ -276,7 +295,7 @@ congratulations/selection and existing market/farming rules are unchanged.
 
 ### Phase 2D validation and remaining manual checks
 
-`npm test` passes all **107 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
+`npm test` passes all **108 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
 painted-edge bounds, valid defaults, owned-only moves, compatible surfaces,
 collision rejection, exact save recovery, old/malformed layouts, per-item/cascade
 and whole-room resets, and recovery when optional room code is unavailable.
@@ -678,7 +697,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
   changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
   readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
   and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
-- `npm test`: 107 rule tests covering clubhouse ownership/checkout, goal congratulations
+- `npm test`: 108 rule tests covering clubhouse ownership/checkout, goal congratulations
   without auto-purchase, explicit next-goal selection, prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,
