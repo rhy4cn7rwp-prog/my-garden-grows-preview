@@ -67,3 +67,11 @@ test('repeated fractional sales and reports match integer-cent cash movement wit
  G.closeMarket(s,3000);const after=s.cash,report=G.accountingReport(s);assert.equal(cents(report.sales),sales);assert.equal(cents(s.cash),initial+sales-200);assert.equal(cents(report.net),sales-200);
  G.closeMarket(s,3001);assert.equal(s.cash,after);assert.equal(s.bagCount,880);
 });
+
+test('beginners also get smaller future orders after repeated change errors, then regain normal practice',()=>{
+ const s=stand(0);prepare(s,3);assert.throws(()=>G.finish(s));assert.throws(()=>G.finish(s));assert.equal(s.changePractice.support,1);
+ count(s);G.finish(s);G.advanceCustomer(s,'good',1100);prepare(s,3);
+ assert.equal(s.customer.mathLevel,0);assert.equal(Object.keys(s.customer.want).length,1);assert.deepEqual(Object.values(s.customer.want),[1]);assert.ok(s.tendered<=10);
+ for(let i=0;i<3;i++){count(s);G.finish(s);G.advanceCustomer(s,'good',1101+i);if(i<2)prepare(s,3);}
+ assert.equal(s.changePractice.support,0);prepare(s,3);assert.equal(Object.keys(s.customer.want).length,2);assert.equal(G.dreamPurchaseCount(s),0);
+});

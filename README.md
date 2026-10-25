@@ -26,7 +26,8 @@ Change practice is saved separately from multiplication/addition practice. Two
 incorrect change confirmations lower future numerical difficulty by one tier.
 Three first-try successful change transactions gradually restore a tier. The
 more supportive of the two skill settings controls future prices, order size and
-payments. Correct item math cannot immediately erase change-making support.
+payments. At the beginner floor, support uses one product with quantity one and small
+whole-dollar payments. Correct item math cannot immediately erase change-making support.
 Adding extra coins or using a non-optimal solution is never treated as an error.
 Mistakes never spend cash, consume bags/produce, or erase dream ownership. An
 active customer's agreed prices/payment remain fixed while support changes.

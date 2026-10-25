@@ -931,8 +931,9 @@
     const level = orderDifficulty(s), prices = Object.fromEntries(
       crops.map(c => [c.id, priceForLevel(c.id, level, s.visitors)]));
     const a = stock[s.visitors % stock.length], want = {};
-    const products = Math.min(stock.length, level >= 3 ? 3 : level >= 2 ? 2 + s.visitors % 2 : 1 + s.visitors % 2);
-    const maxQuantity = [2, 2, 3, 4, 5, 8][level];
+    const supportedBeginner = level === 0 && (s.changePractice?.support || 0) > 0;
+    const products = Math.min(stock.length, supportedBeginner ? 1 : level >= 3 ? 3 : level >= 2 ? 2 + s.visitors % 2 : 1 + s.visitors % 2);
+    const maxQuantity = supportedBeginner ? 1 : [2, 2, 3, 4, 5, 8][level];
     const budget = marketOrderBudgets[level];
     let subtotal = 0;
     for (let i = 0; i < products; i++) {
@@ -1176,7 +1177,7 @@
     const p = s.changePractice ||= { support:0, streak:0, mistakes:0, retrying:false };
     if (!correct) {
       p.streak=0; p.retrying=true;
-      if (++p.mistakes >= 2) { p.support=Math.min(mathLevel(s),p.support+1); p.mistakes=0; }
+      if (++p.mistakes >= 2) { p.support=Math.min(5,p.support+1); p.mistakes=0; }
     } else {
       p.mistakes=0;
       if (!p.retrying && ++p.streak >= 3) { p.support=Math.max(0,p.support-1); p.streak=0; }
