@@ -1,0 +1,296 @@
+/* First-person stall. Scoped layout never changes the existing register dialog. */
+body[data-view="market"] {
+  background: #bf8b4b;
+  overflow: hidden;
+}
+body[data-view="market"] #app {
+  position: fixed;
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  width: var(--visible-width, 100%);
+  height: var(--visible-height, 100svh);
+  min-height: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.farmers-market-game {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  height: 100%;
+  min-height: 600px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  background: #eed5a1;
+}
+.farmers-market-game .hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: max(4px, var(--viewport-safe-top))
+    max(8px, var(--village-safe-right)) 3px max(8px, var(--village-safe-left));
+  border: 0;
+  background: transparent;
+}
+.farmers-market-game .farm-status {
+  background: #fff5dff5;
+  border-radius: 14px;
+  padding: 4px 12px;
+  box-shadow: 0 2px 7px #57301c44;
+}
+.market-tableau {
+  position: relative;
+  flex: 1;
+  min-height: 265px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #d6e8b6;
+}
+.market-first-person {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+.market-active-customer {
+  pointer-events: none;
+}
+.market-produce-tray {
+  position: absolute;
+  z-index: 2;
+  left: max(6px, var(--village-safe-left));
+  bottom: 2px;
+  width: 76%;
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #a6763f #e6c58d;
+  padding: 3px 3px 5px;
+  scroll-snap-type: x proximity;
+}
+.market-produce {
+  flex: 0 0 calc((100% - 10px) / 3);
+  min-width: 83px;
+  height: 135px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #4d311b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  scroll-snap-align: start;
+  touch-action: pan-x;
+}
+.market-produce:focus-visible,
+.market-register-prop:focus-visible {
+  outline: 3px solid #fff3a5;
+  outline-offset: -3px;
+  border-radius: 8px;
+}
+.market-produce-basket {
+  display: block;
+  position: relative;
+  height: 71px;
+  width: 100%;
+  filter: drop-shadow(0 3px 2px #43250b66);
+}
+.market-produce-basket > .supply-produce-art {
+  position: absolute;
+  width: 100%;
+  height: 60px;
+  bottom: 0;
+}
+.market-produce-basket > .seed-produce-art {
+  position: absolute;
+  width: 82%;
+  height: 61px;
+  left: 9%;
+  bottom: 18px;
+}
+.market-basket-rim {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(66% 0 0 0);
+}
+.market-basket-rim .supply-produce-art {
+  position: absolute;
+  width: 100%;
+  height: 60px;
+  bottom: 0;
+}
+.market-produce-label {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 57px;
+  justify-content: center;
+  padding: 2px 1px;
+  line-height: 1.15;
+  background: #fff2d8f5;
+  border-radius: 4px;
+  box-shadow: 0 2px 2px #57301c44;
+}
+.market-produce-label strong {
+  font:
+    800 12px/1.2 Georgia,
+    serif;
+}
+.market-produce-label > span {
+  font-size: 12px;
+  white-space: normal;
+}
+.market-register-prop {
+  position: absolute;
+  z-index: 3;
+  bottom: 16%;
+  right: max(5px, var(--village-safe-right));
+  width: 21%;
+  min-width: 62px;
+  max-width: 110px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #4c301b;
+}
+.market-register-prop span {
+  position: absolute;
+  left: -6px;
+  right: -2px;
+  bottom: -20px;
+  display: block;
+  background: #fff2d8f5;
+  border-radius: 4px;
+  padding: 3px 1px;
+  font:
+    800 12px/1.2 Georgia,
+    serif;
+}
+.market-empty-display {
+  position: absolute;
+  bottom: 15px;
+  left: 5%;
+  width: 66%;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff1d9e8;
+  text-align: center;
+  font:
+    800 15px/1.25 Georgia,
+    serif;
+}
+.market-empty-display span {
+  font: 600 12px/1.3 system-ui;
+}
+.market-controls.bottom {
+  flex-shrink: 0;
+  min-height: 0;
+  border: 0;
+  border-top: 3px solid #916234;
+  padding: 7px max(9px, var(--village-safe-right))
+    max(7px, var(--viewport-safe-bottom)) max(9px, var(--village-safe-left));
+  background: linear-gradient(#fff3d9, #f0d3a0);
+}
+.market-controls h2 {
+  font-size: 20px;
+}
+.market-controls .btn {
+  min-height: 44px;
+  padding: 6px 9px;
+  font-size: 14px;
+}
+.market-controls .customer-actions {
+  gap: 4px;
+}
+.market-controls .customer-actions .btn {
+  background: #248e48;
+  color: white;
+  border-color: #12622c;
+}
+.market-controls .bag-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 0;
+}
+.market-controls .bag-status p {
+  margin: 0;
+  font-size: 12px;
+}
+.market-controls .bag-status p .small {
+  display: none;
+}
+.market-controls > .small {
+  font-size: 11px;
+}
+@media (min-width: 540px) and (max-height: 500px) {
+  .farmers-market-game {
+    display: grid;
+    grid-template-columns: 53% 47%;
+    min-height: 0;
+    max-width: none;
+  }
+  .market-tableau {
+    min-height: 0;
+    height: 100%;
+  }
+  .market-controls {
+    overflow-y: auto;
+    height: 100%;
+    padding-top: max(65px, var(--viewport-safe-top)) !important;
+  }
+  .farmers-market-game .hud {
+    pointer-events: none;
+  }
+  .farmers-market-game .hud button {
+    pointer-events: auto;
+  }
+  .market-produce-tray {
+    width: 74%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .market-produce-tray {
+    scroll-behavior: auto;
+  }
+}
+/* Independent register prop on the near tabletop; no painted duplicate. */
+.market-register-prop img {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 3px 2px #43250b77);
+}
+.market-tray-hint {
+  position: absolute;
+  bottom: 146px;
+  left: max(8px, var(--village-safe-left));
+  z-index: 2;
+  padding: 2px 5px;
+  border-radius: 5px;
+  color: #4e321b;
+  background: #fff3dfe8;
+  font-size: 11px;
+  pointer-events: none;
+}
+.market-produce-crate .supply-produce-art {
+  object-fit: contain;
+}
+.market-produce-crate > .seed-produce-art {
+  bottom: 28px;
+}
+.market-produce-crate .market-basket-rim {
+  clip-path: inset(50% 0 0 0);
+}

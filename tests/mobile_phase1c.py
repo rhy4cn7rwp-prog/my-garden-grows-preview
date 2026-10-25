@@ -25,9 +25,9 @@ try:
    page.reload();assert page.evaluate('state.bagCount')==10
    page.evaluate('''()=>{state=Game.initial();state.inventory={beans:20};state.display={beans:20};state.owned.scale=1;state.owned.table=1;state.standMode='owned';go('market');}''')
    # Sticky touch hover no longer exposes labels or dotted produce selection frames.
-   assert page.locator('.market-scene .spot[title],.market-scene .spot .tip').count()==0
-   page.locator('.market-scene .spot').nth(1).hover()
-   assert page.locator('.market-scene .spot').nth(1).evaluate('(e)=>getComputedStyle(e).outlineStyle')=='none'
+   assert page.locator('.farmers-market-game .spot,.farmers-market-game .tip').count()==0
+   page.locator('.market-produce').first.hover()
+   assert page.locator('.market-produce').first.evaluate('(e)=>getComputedStyle(e).outlineStyle')=='none'
    tap('Arrange Produce / Open Market')
    assert 'Paper bags remaining: 0' in page.locator('.dialog').inner_text()
    tap('Open market');tap('Welcome Next Customer');tap('Hi! What can I get for you?');tap('🧺 Fill customer basket')

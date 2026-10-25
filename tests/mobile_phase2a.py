@@ -64,6 +64,10 @@ try:
      assert page.locator('.seed-packet' if scene=='seeds' else '.supply-packet').count()==(10 if scene=='seeds' else 5)
      assert page.locator('.spot').count()==0
      assert page.locator('.seed-shop-interior' if scene=='seeds' else '.supply-shop-interior').is_visible()
+    elif scene=='market':
+     assert page.locator('.market-tableau').count()==1
+     assert page.locator('.spot').count()==0
+     assert page.get_by_role('button',name='Open cash register',exact=True).count()==1
     else:
      trim=128 if scene in ['garden','supplies','market'] else 64
      geometry=page.locator('.interior-crop').evaluate('e=>({crop:e.getBoundingClientRect().toJSON(),stage:e.querySelector(".stage").getBoundingClientRect().toJSON()})')

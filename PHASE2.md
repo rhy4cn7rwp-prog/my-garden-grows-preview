@@ -254,3 +254,20 @@ Original generated PNGs and prior artwork are preserved. The sign remains
 $8/reusable. Mobile touch checks cover all five products, mixed checkout,
 rentals, inventory/recovery, safe areas and navigation at seven sizes.
 Physical iPhone Safari verification remains a player playtest.
+
+### Phase 4A — Farmers Market, first-person player perspective
+
+Replaced the old static market and fixed crop hotspots with a new illustrated
+red-and-white canopy stall, looking outward from the player's counter toward
+the village. Human customer portraits are separate from the environment and
+clipped at the far counter edge. No second shopkeeper or animal customer is
+shown. Painted foreground baskets use actual harvested crop data, current
+stand quantities and unchanged prices; a real illustrated register opens the
+existing payment UI. Four initial human variants support the existing names.
+
+No Game rules, saved data format, pricing, rental/stand bonuses, bag use,
+accounting or other scenes were changed. Promotional discounts remain future
+work. Seven-size mobile visual/touch checks plus existing transaction, register,
+finance, bag, navigation and shop regressions verify the integration. Physical
+iPhone Safari still requires playtesting. Very short main scenes scroll; the
+existing compact payment panel retains its no-scroll layout.

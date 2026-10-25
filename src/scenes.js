@@ -97,10 +97,6 @@ function renderScene() {
     }</p><p>Tap a plot to plant, inspect or harvest. ${state.plots.filter(Boolean).every((p) => p.watered) ? "💧 Plants watered today!" : "Plants need water to grow."}</p><div class="row"><button class="btn" onclick="water()">💧 Water all</button><button class="btn" onclick="plantPlanned()">🌱 Plant plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="cancelPlanting()" ${Object.keys(state.plan).length ? "" : "disabled"}>Cancel planting plan</button><button class="btn" onclick="harvestReady()">Harvest All Ready Crops</button><button class="btn alt" onclick="endDay()">☀️ End day</button><button class="btn alt" onclick="inventory()">🧺 Harvest basket</button></div>`;
   }
   if (view === "market") {
-    stage +=
-      spot(3, 57, 31, 40, "marketItem('carrot')", "Carrots") +
-      spot(35, 57, 30, 40, "marketItem('corn')", "Corn") +
-      spot(66, 57, 33, 40, "marketItem('cucumber')", "Cucumbers");
     let c = state.customer;
     if (state.hour >= 13)
       bottom = `<h2>🍎 Market closed · 1 PM</h2><button class="btn" onclick="showMarketReport()">View market-day report</button><button class="btn" onclick="go('garden')">Return to garden · end day to reopen</button>`;
@@ -136,10 +132,12 @@ function renderScene() {
         ? marketSupplyScene()
         : view === "seeds"
           ? seedShopScene()
-          : view === "clubhouse"
-            ? clubhouseScene()
-            : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
-  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "seeds" ? "seed-shop-game" : view === "supplies" ? "supply-shop-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
+          : view === "market"
+            ? farmersMarketScene(bottom)
+            : view === "clubhouse"
+              ? clubhouseScene()
+              : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
+  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "seeds" ? "seed-shop-game" : view === "supplies" ? "supply-shop-game" : view === "market" ? "farmers-market-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
   document.body.dataset.view = view;
 
   const app = $("#app"),

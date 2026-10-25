@@ -1,9 +1,47 @@
-# My Garden Grows 1.0 preview — Phase 3B: Market Supplies
+# My Garden Grows 1.0 preview — Phase 4A: Farmers Market
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 4A: first-person Farmers Market
+
+The player stands behind the selling counter, looking toward a village market.
+A separate red-and-white canopy scene, four reusable human customer portraits,
+painted register prop and real harvested-produce buttons replace the original
+static market with its three fixed crop hotspots. Exactly one human is shown
+when a customer is active; the portrait follows the saved customer name, without
+adding or changing any saved identity, preference or scoring data.
+
+The horizontal harvest tray includes only crops actually held, with live
+**on-stand quantities** from `Game.marketStock` and unchanged regular crop prices.
+Harvested stock that has not been arranged is marked zero on stand. Swipe the
+tray when more than three varieties are available. No promotional pricing or
+supply requirement was introduced. The decorative stall does not confer an
+owned table/canopy bonus: existing stand choices, rentals and customer limits
+still apply and are displayed in the controls.
+
+The illustrated register is a real button: it opens the existing change-counting
+activity at the payment step. Customer greetings, alternatives, basket checks,
+calculating totals, payment, one-bag-per-sale, farewells and accounting retain
+their existing rules and dialogs. Neither `game.js` nor save keys/version were
+changed. Other shop/village/clubhouse artwork is unchanged.
+
+`tests/mobile_farmers_market.py` verifies seven touch viewport/safe-area layouts,
+all ten crop displays, persistent active customers and finances, real register
+access and a completed sale with one bag. Existing financial, bag, customer,
+register, navigation and shop regressions also run. The cash register remains
+scroll-free in the tested short viewport and toolbar simulations. Very short
+main-market screens may scroll to keep customer controls readable; the harvest
+tray scrolls horizontally within its own region, not the page.
+
+Physical iPhone Safari remains a manual playtest. Four initial portrait variants
+are shared among twenty existing customer names; additional people can be added
+to the atlas without rewriting customer transactions. New source illustrations
+are preserved under `assets/farmers-market/source`, with mobile WebP runtime
+assets. The art uses separate foreground produce/register components; future
+promotion layouts can extend the price cards, but discounts are not implemented.
 
 ## Phase 3B: Market Supplies
 
@@ -14,13 +52,13 @@ choose quantities and review a basket before paying. The familiar navigation,
 money/calendar display, safe areas and short-screen shelf scrolling are retained.
 No other shop interior or existing artwork was redesigned.
 
-| Product | Provisional game price | Inventory type |
-| --- | --- | --- |
-| Paper produce bags | 5 for $1; 20 for $3 | Consumable; existing purchased bag pool |
-| Cardboard produce boxes | 5 for $3 | Consumable |
-| Price tags | 10 for $1 | Consumable |
-| Market sign | $8 each | Reusable |
-| Produce baskets | $5 each | Reusable |
+| Product                 | Provisional game price | Inventory type                          |
+| ----------------------- | ---------------------- | --------------------------------------- |
+| Paper produce bags      | 5 for $1; 20 for $3    | Consumable; existing purchased bag pool |
+| Cardboard produce boxes | 5 for $3               | Consumable                              |
+| Price tags              | 10 for $1              | Consumable                              |
+| Market sign             | $8 each                | Reusable                                |
+| Produce baskets         | $5 each                | Reusable                                |
 
 Bag choices show **20¢ each** versus **15¢ each**. Twenty bags bought as four
 small packs cost $4, versus $3 in bulk: $1 saved, with a larger upfront purchase
@@ -227,7 +265,6 @@ floor, cushion, shelf and chest. Nearby releases can snap inward up to 18 source
 pixels from a usable edge; distant or crowded releases return to the previous
 saved location. Larger ball margins can move an old edge placement slightly along
 its existing surface; older cushion contacts migrate to the cushion top.
-
 
 `tests/mobile_clubhouse_spatial.py` independently rebuilds the expected source
 composition and compares every rendered pixel across viewing angles and four
