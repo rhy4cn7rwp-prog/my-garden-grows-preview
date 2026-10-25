@@ -170,6 +170,8 @@
       supcart: {},
       owned: { table: 0, canopy: 0, bags: 0, scale: 0 },
       hour: 9,
+      marketStartedAt: null,
+      marketClosedAt: null,
       visitors: 0,
       sales: 0,
       customer: null,
@@ -452,6 +454,16 @@
         );
       restoreCustomer(clean, s, ids);
       if (supplyShop) Object.assign(clean, supplyShop.recover(s));
+      clean.marketStartedAt = validMarketStamp(s.marketStartedAt)
+        ? s.marketStartedAt
+        : null;
+      clean.marketClosedAt =
+        validMarketStamp(s.marketClosedAt) &&
+        clean.marketStartedAt !== null &&
+        s.marketClosedAt >= clean.marketStartedAt
+          ? s.marketClosedAt
+          : null;
+      ensureMarketStart(clean);
       return clean;
     } catch {
       return backup ? recover(backup) : initial();
@@ -721,6 +733,8 @@
       p.watered = false;
     }
     s.hour = 9;
+    s.marketStartedAt = null;
+    s.marketClosedAt = null;
     s.visitors = 0;
     s.sales = 0;
     s.customer = null;
@@ -754,7 +768,52 @@
     } else s.plots[i] = null;
     return `Harvested ${n} ${c.unit} of ${c.name}. ${again ? "This plant will grow another harvest." : "This plot is free to replant."}`;
   }
-  function openMarket(s) {
+  const marketMinuteMs = 5000,
+    marketDurationMs = 240 * marketMinuteMs;
+  function validMarketStamp(value) {
+    return Number.isSafeInteger(value) && value >= 0;
+  }
+  function ensureMarketStart(s, now = Date.now()) {
+    // Older saves only recorded a game hour. Convert their remaining time once;
+    // a valid saved timestamp is never replaced by recovery or navigation.
+    if (s.marketOpen && !validMarketStamp(s.marketStartedAt)) {
+      s.marketStartedAt = Math.round(
+        now - Math.max(0, Math.min(4, s.hour - 9)) * 60 * marketMinuteMs,
+      );
+      s.marketClosedAt = null;
+    }
+  }
+  function marketTime(s, now = Date.now()) {
+    const started = validMarketStamp(s.marketStartedAt);
+    const end =
+      !s.marketOpen && validMarketStamp(s.marketClosedAt)
+        ? s.marketClosedAt
+        : now;
+    const elapsed = started ? Math.max(0, end - s.marketStartedAt) : 0;
+    const minutes = started
+      ? 540 + Math.min(240, elapsed / marketMinuteMs)
+      : s.marketPlayed
+        ? Math.max(540, Math.min(780, Math.floor(s.hour * 60)))
+        : 540;
+    return {
+      minutes,
+      wholeMinutes: Math.floor(minutes),
+      expired: started && elapsed >= marketDurationMs,
+      elapsedMs: Math.min(elapsed, marketDurationMs),
+    };
+  }
+  function syncMarketClock(s, now = Date.now()) {
+    if (!s.marketOpen) return false;
+    ensureMarketStart(s, now);
+    const time = marketTime(s, now);
+    s.hour = time.wholeMinutes / 60;
+    if (time.expired && !s.customer) {
+      closeMarket(s, now);
+      return true;
+    }
+    return false;
+  }
+  function openMarket(s, now = Date.now()) {
     requireRule(
       !s.marketPlayed && !s.marketOpen,
       "Your market has already opened today. End the farming day before opening again.",
@@ -774,8 +833,13 @@
     s.marketOpen = true;
     s.marketPlayed = true;
     s.hour = 9;
+    s.marketStartedAt = now;
+    s.marketClosedAt = null;
   }
-  function closeMarket(s) {
+  function closeMarket(s, now = Date.now()) {
+    ensureMarketStart(s, now);
+    if (s.marketOpen && validMarketStamp(s.marketStartedAt))
+      s.marketClosedAt = Math.min(now, s.marketStartedAt + marketDurationMs);
     settleMarket(s);
     s.marketOpen = false;
     s.hour = 13;
@@ -783,19 +847,17 @@
     s.basket = {};
     s.step = "greet";
   }
-  function newCustomer(s, name) {
-    requireRule(s.marketOpen && s.hour < 13, "The market is closed.");
-    requireRule(!s.customer, "Finish serving this customer first.");
+  function newCustomer(s, name, now = Date.now()) {
+    syncMarketClock(s, now);
     requireRule(
-      s.visitors < customerLimit(s),
-      `Your ${hasMarketTable(s) ? "table" : "blanket"} has welcomed all ${customerLimit(s)} customers for today. Close the market and return tomorrow.`,
+      s.marketOpen && !marketTime(s, now).expired,
+      "The market is closed.",
     );
-    const stock = crops.filter(
-      (c) => (s.display[c.id] || 0) > 0 && canSellCrop(s, c.id),
-    );
+    requireRule(!s.customer, "Finish serving this customer first.");
+    const stock = crops.filter((c) => marketStock(s, c.id) > 0);
     requireRule(stock.length, "Your display is sold out.");
     const a = stock[s.visitors % stock.length],
-      want = { [a.id]: Math.min(s.display[a.id], (s.visitors % 2) + 1) };
+      want = { [a.id]: Math.min(marketStock(s, a.id), (s.visitors % 2) + 1) };
     if (stock.length > 1 && s.visitors % 2)
       want[stock[(s.visitors + 1) % stock.length].id] = 1;
     // Some shoppers come looking for a crop we do not stock today.
@@ -1284,8 +1346,8 @@
       ? !!s.owned.table
       : s.standMode === "rental" && s.tableRented;
   }
-  function customerLimit(s) {
-    return hasMarketTable(s) ? 6 : 3;
+  function customerLimit() {
+    return Infinity;
   }
   function chooseStand(s, mode) {
     requireRule(
@@ -1302,7 +1364,7 @@
     );
     s.standMode = mode;
   }
-  function advanceCustomer(s, farewell = "good") {
+  function advanceCustomer(s, farewell = "good", now = Date.now()) {
     requireRule(
       s.customer && s.step === "thanks",
       "Finish helping your customer first.",
@@ -1318,10 +1380,10 @@
         : farewell === "good"
           ? "Your customer says: ‘Thanks! Have a good day!’"
           : "Your customer waves goodbye.";
-    s.hour = Math.min(13, s.hour + 0.5);
     s.customer = null;
     s.basket = {};
     s.change = 0;
+    syncMarketClock(s, now);
   }
   function canReceiveSeedHelp(s) {
     if (cents(s.cash) >= 100) return false;
@@ -1387,6 +1449,8 @@
     addAllToDisplay,
     hasMarketTable,
     customerLimit,
+    marketTime,
+    syncMarketClock,
     chooseStand,
     advanceCustomer,
     canReceiveSeedHelp,

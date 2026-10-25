@@ -74,7 +74,7 @@ try:
   page.get_by_role('button',name='Open market',exact=True).tap()
   assert page.evaluate('state.cash')==1
   page.reload()
-  assert page.evaluate('[state.cash,state.tableRented,Game.customerLimit(state)]')==[1,True,6]
+  assert page.evaluate('[state.cash,state.tableRented,Game.customerLimit(state)===Infinity]')==[1,True,True]
   assert not errors,errors
   print('PASS: v1 save migration → Job Board placeholder → free seeds → grow/harvest → reviewed deferred offer without accepting → free blanket sale → saved recovery → paid rental persists; touch-only 390×844')
   browser.close()

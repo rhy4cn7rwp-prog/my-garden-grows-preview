@@ -66,6 +66,7 @@ function spot(x, y, w, h, action, title) {
   return `<button class="spot" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%" aria-label="${title}" ${view === "market" ? "" : `title="${title}"`} onclick="${action}">${view === "market" ? "" : `<span class="tip">${title}</span>`}</button>`;
 }
 function renderScene() {
+  Game.syncMarketClock(state);
   save();
   let stage = "",
     bottom = "";
@@ -99,11 +100,11 @@ function renderScene() {
   }
   if (view === "market") {
     let c = state.customer;
-    if (state.hour >= 13)
-      bottom = `<h2>🍎 Market closed · 1 PM</h2><button class="btn" onclick="showMarketReport()">View market-day report</button><button class="btn" onclick="go('garden')">Return to garden · end day to reopen</button>`;
+    if (state.marketPlayed && !state.marketOpen && !c)
+      bottom = `<h2>🍎 Market closed</h2><button class="btn" onclick="showMarketReport()">View market-day report</button><button class="btn" onclick="go('garden')">Return to garden · end day to reopen</button>`;
     else {
       if (!c) {
-        bottom = `<h2>🍎 Farmers Market</h2>${state.marketOpen ? `<button class="btn market-primary" onclick="newCustomer()">Welcome Next Customer</button><p>${state.visitors} / ${Game.customerLimit(state)} customers welcomed</p><button class="btn alt" onclick="marketStand()">Arrange Produce</button><button class="btn alt" onclick="closeMarket()">Close market</button>` : '<p>Arrange your harvest before opening.</p><button class="btn" onclick="marketStand()">Arrange Produce / Open Market</button>'}`;
+        bottom = `<h2>🍎 Farmers Market</h2>${state.marketOpen ? `<button class="btn market-primary" onclick="newCustomer()" ${CROPS.some((c) => Game.marketStock(state, c.id) > 0) ? "" : "disabled"}>Welcome Next Customer</button><p>${state.visitors} customers welcomed</p><button class="btn alt" onclick="marketStand()">Arrange Produce</button><button class="btn alt" onclick="closeMarket()">Close market</button>` : '<p>Arrange your harvest before opening.</p><button class="btn" onclick="marketStand()">Arrange Produce / Open Market</button>'}`;
       } else {
         const request = Object.entries(c.want)
           .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
@@ -113,7 +114,7 @@ function renderScene() {
         const choosing = Game.missingProduce(state).length
           ? `<button class="btn" onclick="customerService()">Help with sold-out produce</button>`
           : `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="customerService()">Talk about the order</button>`;
-        bottom = `<h2>🍎 Market Day · ${Math.floor(state.hour)}:${state.hour % 1 ? "30" : "00"}</h2>${marketConversation()}${state.step === "choose" ? `<p><strong>Customer requests:</strong> ${request}.</p>` : ""}<div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
+        bottom = `<h2>🍎 Market Day</h2>${marketConversation()}${state.step === "choose" ? `<p><strong>Customer requests:</strong> ${request}.</p>` : ""}<div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()}</p>`;
       }
     }
   }

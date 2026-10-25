@@ -1,0 +1,38 @@
+.market-clock {
+  position: absolute;
+  z-index: 4;
+  top: calc(max(4px, var(--viewport-safe-top)) + 57px);
+  left: max(5px, var(--village-safe-left));
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 5px 2px 1px;
+  border: 1px solid #bc935e;
+  border-radius: 24px 10px 10px 24px;
+  background: #fff5dfee;
+  box-shadow: 0 2px 4px #69432644;
+  color: #54351e;
+  pointer-events: none;
+}
+.market-clock svg {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.market-clock-time {
+  display: block;
+  font:
+    800 13px/1.2 Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+}
+.market-clock-status {
+  display: block;
+  max-width: 58px;
+  font: 600 10px/1.2 system-ui;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .market-clock {
+    top: 58px;
+  }
+}

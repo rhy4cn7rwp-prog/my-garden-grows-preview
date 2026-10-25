@@ -60,7 +60,7 @@ test("selecting rental does not charge; market opening charges exactly $1", () =
   assert.equal(s.cash, 50);
   G.openMarket(s);
   assert.equal(s.cash, 49);
-  assert.equal(G.customerLimit(s), 6);
+  assert.equal(G.customerLimit(s), Infinity);
   assert.equal(s.tableRented, true);
   assert.throws(() => G.openMarket(s));
   assert.equal(s.cash, 49);
@@ -87,7 +87,7 @@ test("a paid rental survives reload without a duplicate charge", () => {
   G.openMarket(s);
   const r = G.recover(JSON.stringify(s));
   assert.equal(r.cash, 49);
-  assert.equal(G.customerLimit(r), 6);
+  assert.equal(G.customerLimit(r), Infinity);
   assert.throws(() => G.openMarket(r));
   assert.equal(r.cash, 49);
 });
@@ -105,7 +105,7 @@ test("rentals expire at day/season end and never auto-renew", () => {
   assert.equal(s.standMode, "blanket");
   G.openMarket(s);
   assert.equal(s.cash, 49);
-  assert.equal(G.customerLimit(s), 3);
+  assert.equal(G.customerLimit(s), Infinity);
 });
 test("owned tables are free; purchases select owned stand and cannot be duplicated", () => {
   const s = stocked();
@@ -115,7 +115,7 @@ test("owned tables are free; purchases select owned stand and cannot be duplicat
   assert.equal(s.standMode, "owned");
   G.openMarket(s);
   assert.equal(s.cash, 42);
-  assert.equal(G.customerLimit(s), 6);
+  assert.equal(G.customerLimit(s), Infinity);
   s.supcart.table = 1;
   assert.throws(() => G.purchase(s, "supplies"));
 });
@@ -124,23 +124,25 @@ test("players may choose a free blanket even with an owned table", () => {
   s.owned.table = 1;
   G.chooseStand(s, "blanket");
   G.openMarket(s);
-  assert.equal(G.customerLimit(s), 3);
+  assert.equal(G.customerLimit(s), Infinity);
   assert.equal(s.cash, 50);
   assert.throws(() => G.chooseStand(s, "owned"));
 });
-test("blanket has fewer customers and less sales opportunity than rented table", () => {
+test("blankets and tables both admit unlimited customers within the real-time window", () => {
   const a = stocked(),
     b = stocked();
   G.openMarket(a);
   G.chooseStand(b, "rental");
   G.openMarket(b);
-  for (let i = 0; i < 3; i++) sell(a);
-  assert.throws(() => G.newCustomer(a, "Noah"));
-  for (let i = 0; i < 6; i++) sell(b);
-  assert.throws(() => G.newCustomer(b, "Noah"));
-  assert.equal(a.sales, 12);
-  assert.equal(b.sales, 27);
-  assert.equal(b.cash, 76);
+  for (let i = 0; i < 12; i++) {
+    sell(a);
+    sell(b);
+  }
+  assert.equal(a.visitors, 12);
+  assert.equal(b.visitors, 12);
+  assert.equal(a.sales, b.sales);
+  assert.equal(b.cash, a.cash - 1);
+  assert.ok(a.hour < 13);
   assert.ok(b.hour < 13);
 });
 test("order completion and advancing cannot double-credit a sale", () => {

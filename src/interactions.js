@@ -126,10 +126,9 @@ function closeMarket() {
   showMarketReport();
 }
 function newCustomer() {
-  if (state.visitors >= Game.customerLimit(state)) {
-    show(
-      `<h2>Your market day</h2><p>${Game.hasMarketTable(state) ? "Your table welcomed " + state.visitors + " customers today! Come back tomorrow for another market." : "Your blanket attracted 3 customers today! Some shoppers chose other vendors with tables and canopies instead. A better market setup could help you attract more customers tomorrow."}</p><button class="btn" onclick="closeMarket()">Close market</button>`,
-    );
+  Game.syncMarketClock(state);
+  if (!state.marketOpen && state.marketPlayed && !state.customer) {
+    showMarketReport();
     return;
   }
   act(() => {
@@ -180,9 +179,9 @@ function standLabel() {
 }
 function standOptions() {
   if (state.marketPlayed || state.marketOpen)
-    return `<p>${standLabel()} · up to ${Game.customerLimit(state)} customers today.</p>`;
+    return `<p>${standLabel()} · Welcome customers until 1:00 PM while produce is available.</p>`;
   return `<fieldset><legend>Choose today's stand</legend>
-    <p>Blanket: free, up to 3 customers. Table: up to 6 customers. Produce prices stay the same; more visitors give more chances to sell.</p>
+    <p>Blanket: free. Table: owned or rented. Both can welcome customers until 1:00 PM while produce is available. Produce prices stay the same.</p>
     <button class="btn ${state.standMode === "blanket" ? "" : "alt"}" aria-pressed="${state.standMode === "blanket"}" onclick="selectStand('blanket')">Free blanket · $0</button>
     ${state.owned.table ? `<button class="btn ${state.standMode === "owned" ? "" : "alt"}" aria-pressed="${state.standMode === "owned"}" onclick="selectStand('owned')">Use owned table · $0</button>` : `<button class="btn ${state.standMode === "rental" ? "" : "alt"}" aria-pressed="${state.standMode === "rental"}" onclick="selectStand('rental')">Rent table · $1 today</button>`}
     <p>${standLabel()}. The usual table rental costs $1 when opening. If you cannot pay upfront, review the $3 pay-after-market option. Rentals expire at End Day and never renew automatically.</p></fieldset>`;
@@ -378,5 +377,6 @@ function render() {
   renderedView = view;
   renderedDialogKey = dialogKey;
   syncGameViewport();
+  if (typeof paintMarketClock === "function") paintMarketClock();
 }
 render();

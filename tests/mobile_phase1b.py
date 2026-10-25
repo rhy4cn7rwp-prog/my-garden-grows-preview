@@ -92,10 +92,10 @@ try:
    # Limit feedback is friendly and the idle market action order remains sensible.
    fixture("state.inventory.carrot=2;state.display.carrot=2;state.marketOpen=true;state.marketPlayed=true;state.visitors=3")
    tap('Farmers Market');tap('Welcome Next Customer')
-   assert 'Your blanket attracted 3 customers today!' in page.locator('.dialog').inner_text()
-   assert "Let's try that again" not in page.locator('.dialog').inner_text()
+   assert page.evaluate('state.customer!==null && state.visitors===4')
+   assert page.locator('.dialog').count()==0
    assert not errors,errors
    page.close()
   browser.close()
-  print('PASS: 390×844 and 320×568 touch/scroll preservation, shopping, seed reservation/reload/cancel, harvest/display bulk actions, scale eligibility, explicit deferred rentals, checkout/settlement/carryover, friendly limits')
+  print('PASS: 390×844 and 320×568 touch/scroll preservation, shopping, seed reservation/reload/cancel, harvest/display bulk actions, scale eligibility, explicit deferred rentals, checkout/settlement/carryover, unlimited timed admissions')
 finally:server.shutdown()

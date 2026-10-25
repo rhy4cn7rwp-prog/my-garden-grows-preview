@@ -50,6 +50,8 @@ function accountingMarkup(report) {
   </section>`;
 }
 function showMarketReport(previous = false) {
+  if (!previous && typeof markMarketClockReport === "function")
+    markMarketClockReport();
   const report = previous
     ? state.lastMarketReport
     : Game.accountingReport(state);

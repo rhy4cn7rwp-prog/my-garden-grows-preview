@@ -35,9 +35,9 @@ try:
    page.locator('.produce-choices button[aria-label^="Add " ]').first.tap();enter_total(page,'4');tap('Confirm total')
    assert page.evaluate('state.step')=='pay'
    tap('💵 Count change')
-   before=page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.hour,state.step])')
+   before=page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.step])')
    modalTap('Buy more bags');tap('Buy 10 bags · $3')
-   assert page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.hour,state.step])')==before
+   assert page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.step])')==before
    assert page.evaluate('[state.cash,state.bagCount]')==[47,10]
    assert 'Paper bags remaining: 10' in page.locator('.dialog').inner_text()
    # Refresh returns to the same customer/order rather than discarding progress.

@@ -289,3 +289,22 @@ Phone/landscape/desktop tests cover input, geometry, retries, payment, completed
 sales, recovery and reduced motion, alongside the existing regression suites.
 Physical iPhone Safari still needs a player playtest. Unconfirmed answer drafts
 remain session-only, as with the previous native input.
+
+### Phase 4C — Accelerated market clock
+
+Added an original small wooden analog/digital clock near the top-left of the
+market, beside the customer. Time is 9:00 AM–1:00 PM over exactly 20 real minutes:
+5,000 ms per game minute, based on a saved opening epoch rather than callback
+counts. Browser focus/pageshow/visibility recovery catches up after suspension.
+
+Removed visitor caps and customer-driven half-hour jumps. Stock and the exact
+1 PM deadline govern admissions. An active customer can finish every step and
+farewell before closing/report/one-time settlement. Idle closure is automatic.
+Early closure freezes its recorded time; End Day resets the next market epoch.
+Legacy open saves migrate their previously recorded remaining game hours once;
+known saved epochs are retained, with all other progress preserved.
+
+125 domain tests and the mobile clock suite cover boundary timing, recovery,
+background simulation, unlimited visitors, active checkout and early closure,
+alongside existing regression suites. Native iPhone Safari still needs a device
+playtest because WebKit installation was blocked by the environment's network.

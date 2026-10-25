@@ -1,9 +1,53 @@
-# My Garden Grows 1.0 preview — Phase 4B: Conversations & Register
+# My Garden Grows 1.0 preview — Phase 4C: Accelerated Market Clock
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 4C: accelerated market clock
+
+The Farmers Market runs from **9:00 AM to 1:00 PM game time**. Each game minute
+is exactly 5,000 real milliseconds, so the four-hour market lasts 1,200,000 ms
+(20 real minutes). A small original wooden analog clock and AM/PM time sit below
+the navigation on the left, clear of the customer. There is no countdown display.
+Hands and digital time are derived from the epoch, rather than counting timer
+callbacks. The DOM updates without replacing conversation or checkout controls.
+
+Official opening saves additive `marketStartedAt` epoch milliseconds in the
+existing version-1 save and backup. Navigation, refresh, focus/visibility resume
+and Safari `pageshow` use that same epoch; background/phone suspension does not
+pause or extend the session. An early close saves `marketClosedAt`, freezing the
+actual displayed closing time. End Day clears these timestamps for the next
+market, without automatically advancing the farming day at market closing.
+
+Customer-count caps and per-customer half-hour jumps have been removed. All
+stand choices can admit customers while the clock is before 1 PM and sellable
+stand stock remains. Table/scale purchases and rentals keep their prices and
+inventory rules; copy no longer promises a three/six-customer cap. At the exact
+deadline new admissions are rejected. An already-active customer may complete
+all greeting, order, math, change, bag and farewell steps without a new timer.
+When that customer leaves—or immediately if the stand is idle—the market closes,
+settles existing deferred charges once and presents its accounting report. A
+last-millisecond admission click opens that report instead of a retry error.
+Early closing remains available between customers.
+
+Older open saves cannot contain an actual historical epoch: their recorded game
+hour is converted once into equivalent remaining time at first recovery, then
+the resulting epoch is saved. Existing money, purchases, orders, counted change,
+inventory and farming progress are retained. Saves with a valid start epoch
+never have it reset on recovery. Closed legacy saves retain their recorded hour.
+No save version/storage-key change or progress reset is required.
+
+`tests/market-clock.test.cjs` covers exact millisecond boundaries, fractional
+hands, epoch/backup recovery, stock and unlimited admissions, one-time settlement,
+active customer completion, early closing, next day and legacy migration.
+`tests/mobile_market_clock.py` tests five phone/landscape layouts using controlled
+wall time: AM/noon/PM, moving hands, refresh, navigation, simulated long
+suspension, preserved checkout, auto-report, admission races and early close.
+The existing financial, register, dialogue, navigation, clubhouse and shopping
+regressions also run. Native iPhone Safari remains a manual playtest; downloading
+the WebKit runtime in this environment was blocked with HTTP 403.
 
 ## Phase 4B: customer conversations and total keypad
 

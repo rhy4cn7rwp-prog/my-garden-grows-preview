@@ -31,7 +31,7 @@ try:
    page.evaluate("""()=>{state=Game.initial();state.cash=37;state.goal=2;state.bagCount=4;state.owned.table=1;state.owned.scale=1;state.standMode='owned';state.marketOpen=state.marketPlayed=true;state.visitors=1;
     for(const c of CROPS){state.inventory[c.id]=5;state.display[c.id]=3;}
     state.customer={name:'Maya',want:{carrot:2},personality:'curious',decision:50,satisfaction:50,response:'arrival',greeting:null,alternativeOffered:false};state.step='greet';render();}""")
-   before=page.evaluate('state')
+   before=page.evaluate('Object.fromEntries(Object.entries(state).filter(([k])=>k!=="hour"))')
    assert page.locator('.market-active-customer').count()==1
    assert page.locator('.market-produce').count()==10
    assert page.locator('.farmers-market-game .spot,.farmers-market-game .tip').count()==0
@@ -54,11 +54,11 @@ try:
     r=product.bounding_box();assert r['width']>=44 and r['height']>=44,r
     assert product.locator('.market-produce-label').evaluate('e=>e.scrollWidth<=e.clientWidth+1&&e.scrollHeight<=e.clientHeight+1')
     product.tap();assert 'On hand: 5' in page.locator('.dialog').inner_text();tap('Close ✕')
-   assert page.evaluate('state')==before
+   assert page.evaluate('Object.fromEntries(Object.entries(state).filter(([k])=>k!=="hour"))')==before
    appearance=page.locator('.market-active-customer svg').first.get_attribute('viewBox')
    page.reload();assert page.evaluate('state.customer.name')=='Maya'
    assert page.locator('.market-active-customer svg').first.get_attribute('viewBox')==appearance
-   assert page.evaluate('state')==before
+   assert page.evaluate('Object.fromEntries(Object.entries(state).filter(([k])=>k!=="hour"))')==before
    # Both the visible illustrated register and the existing count-change button work.
    tap('Hi! What can I get for you?');tap('🧺 Fill customer basket')
    tap('Add Carrots');tap('Add Carrots');tap('Check basket')

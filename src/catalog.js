@@ -14,7 +14,7 @@ const DREAMS = Game.dreams.map((item, i) => [
   item.price,
 ]);
 const SUPPLIES = [
-  ["table", "🪵", "Wooden market table", 8, "Attracts more customers"],
+  ["table", "🪵", "Wooden market table", 8, "Reusable table for displaying your harvest"],
   ["canopy", "⛱️", "Striped shade canopy", 10, "Protects produce from the sun"],
   ["bags", "🛍️", "10 brown paper bags", 3, "Pack of ten"],
   [
