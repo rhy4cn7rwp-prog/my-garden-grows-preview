@@ -119,6 +119,7 @@ function openMarket() {
   act(() => {
     Game.openMarket(state);
     closeDialog();
+    document.querySelector("#app").scrollTop = 0;
   });
 }
 function closeMarket() {

@@ -46,7 +46,7 @@ try:
    fixture();before=baseline()
    assert page.locator('.customer-actions button').count()==3
    tap('Hi! Welcome to my stand! What can I help you find today?')
-   assert 'lovely welcome' in page.locator('.bottom').inner_text()
+   assert 'lovely welcome' in page.locator('.market-conversation').inner_text()
    tap('🧺 Fill customer basket')
    assert page.locator('.produce-choices .basketline').count()==5
    assert page.locator('#total-answer,input[type=number]').count()==0
@@ -98,7 +98,7 @@ try:
    tap('Help with sold-out produce')
    assert page.locator('.dialog [onclick^="offerAlternative"]').count()==5
    page.locator('[onclick="offerAlternative(\'cucumber\')"]').tap()
-   assert 'try that instead' in page.locator('.bottom').inner_text();assert baseline()==before
+   assert 'try that instead' in page.locator('.market-conversation').inner_text();assert baseline()==before
    tap('🧺 Fill customer basket');tap('Add Cucumbers');tap('Check basket')
    enter_total(page,'3');tap('Confirm total');tap('💵 Count change');fit();tap('$1');tap('$1');tap('Give change')
    assert page.evaluate('[state.cash,state.bagCount,state.customersServed,state.inventory.cucumber]')==[53,2,1,2]
@@ -106,17 +106,17 @@ try:
    # Some customers decline: no forced sale, no money, produce, or bag consumed.
    fixture('{onion:1}',personality='thoughtful',decision=99);before=baseline();tap('Hi! What can I get for you?');tap('Help with sold-out produce')
    page.locator('[onclick="offerAlternative(\'carrot\')"]').tap()
-   assert 'on my list' in page.locator('.bottom').inner_text();assert page.evaluate('state.step')=='thanks'
+   assert 'on my list' in page.locator('.market-conversation').inner_text();assert page.evaluate('state.step')=='thanks'
    tap('Bye!');assert baseline()==before
    for personality,expected in [('curious','choose'),('hurried','thanks')]:
     fixture(personality=personality);before=baseline();tap('Wait quietly for the customer to ask for something.')
     assert page.evaluate('state.step')==expected;assert baseline()==before
     if expected=='choose':
      tap('Talk about the order');tap("We're sold out today, but I hope you'll visit us again!")
-     assert 'come back another day' in page.locator('.bottom').inner_text()
+     assert 'come back another day' in page.locator('.market-conversation').inner_text()
     tap('Bye!');assert baseline()==before
    fixture('{onion:1}');before=baseline();tap('Hi! What can I get for you?');tap('Help with sold-out produce');tap("I'm sorry, we're sold out of that today.")
-   assert 'letting me know' in page.locator('.bottom').inner_text();tap('Thanks for shopping with us!');assert baseline()==before
+   assert 'letting me know' in page.locator('.market-conversation').inner_text();tap('Thanks for shopping with us!');assert baseline()==before
    assert not errors,errors
    page.close()
   browser.close()

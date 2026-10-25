@@ -276,3 +276,128 @@
     min-height: 26px;
   }
 }
+/* The speech belongs to the same projected room as the customer, not the
+   controls panel. syncMarketSpeech uses the portrait's source-space anchors. */
+.market-tableau .market-conversation {
+  position: absolute;
+  z-index: 4;
+  margin: 0;
+  padding: 6px;
+  border-width: 1.5px;
+  border-radius: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: visible;
+  font-size: 13px;
+}
+.market-tableau .market-conversation::before {
+  content: none;
+}
+.market-tableau .market-conversation > strong {
+  flex-shrink: 0;
+  font-size: 13px;
+  line-height: 1.15;
+}
+.market-speech-copy {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.market-tableau .market-conversation p {
+  font-size: 13px;
+  line-height: 1.18;
+  margin: 0;
+}
+.market-speech-tail {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.market-speech-tail path {
+  fill: #fffaf0;
+  stroke: #be9661;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+}
+.market-tableau .market-payment-offer {
+  flex-shrink: 0;
+  justify-content: center;
+}
+.market-tableau .market-payment-offer svg {
+  width: 64px;
+  height: 24px;
+}
+.market-tableau .market-payment-offer span {
+  display: none;
+}
+@media (orientation: portrait) {
+  .market-tableau.market-with-customer {
+    height: auto;
+    min-height: 380px;
+    max-height: calc(100vw * 1.3);
+    flex: 1 0 380px;
+  }
+}
+@media (max-width: 360px) {
+  .market-tableau .market-conversation {
+    padding: 5px;
+  }
+  .market-tableau .market-conversation p {
+    font-size: 12px;
+    line-height: 1.15;
+  }
+  .market-tableau .market-conversation > strong {
+    font-size: 12px;
+  }
+}
+/* Fade text without translating it outside the narrow mobile bubble. */
+.market-tableau .market-dialogue-line {
+  animation-name: market-speech-fade;
+}
+@keyframes market-speech-fade {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .market-tableau .market-dialogue-line {
+    animation: none;
+  }
+}
+.market-speech-copy {
+  padding-bottom: 3px;
+}
+/* Responses stay below the illustration in landscape too. The independently
+   fitted keypad and change register keep their existing compact layouts. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .farmers-market-game {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .market-tableau {
+    height: 265px;
+    min-height: 265px;
+    flex: none;
+  }
+  .market-tableau.market-with-customer {
+    height: 380px;
+    min-height: 380px;
+  }
+  .market-controls.bottom {
+    height: auto;
+    overflow: visible;
+    padding-top: 7px !important;
+  }
+}

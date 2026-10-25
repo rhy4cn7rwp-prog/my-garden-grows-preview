@@ -36,43 +36,107 @@ function marketConversation() {
       state.day +
       state.visitors) %
     3;
+  const order = Object.entries(c.want)
+    .map(([id, n]) =>
+      crop(id).unit === "lb"
+        ? `${n} lb of ${crop(id).name.toLowerCase()}`
+        : marketQuantityText(id, n),
+    )
+    .join(", ");
+  const requests = `${order}${order.length < 35 ? ", please" : ""}.`;
   let lines;
   if (state.step === "greet")
     lines = [
-      [
-        "Hello! It's lovely to see your stand.",
-        "Hi there! Your harvest looks lovely.",
-        "Good morning! May I shop at your stand?",
-      ][variant],
-      `I'd like ${marketRequestText()}, please.`,
+      ["Hello!", "Hi there!", "Good morning!"][variant],
+      `I'd like ${requests}`,
     ];
   else if (state.step === "pay")
     lines = [
-      [
-        "That sounds right. Thank you!",
-        "Wonderful, thank you for adding that up!",
-        "Thanks for helping me with my order!",
-      ][variant],
-      `Here is ${money(state.tendered)}. I'll wait while you count my change.`,
+      ["Thank you!", "Wonderful!", "Thanks!"][variant],
+      `Here's ${money(state.tendered)}.`,
     ];
   else if (state.step === "thanks")
     lines = [
-      Game.customerResponse(state),
       c.response === "sale-complete"
         ? [
-            "I can't wait to enjoy my harvest. See you again!",
-            "Have a lovely market day!",
-            "I'll enjoy these. Goodbye for now!",
+            "Thank you! See you again!",
+            "Thank you! Have a lovely day!",
+            "Thank you! I'll enjoy these!",
           ][variant]
-        : "Have a good market day. Goodbye for now!",
+        : {
+            "wait-left": "I'm in a hurry. Maybe next time!",
+            "alternative-declined": "I need what's on my list. Thanks!",
+            "soldout-sorry": "Thanks for letting me know!",
+            "soldout-return": "I'll come back another day!",
+          }[c.response] || Game.customerResponse(state),
     ];
-  else
+  else {
+    const responses = {
+      excellent: "What a lovely welcome!",
+      good: "Hi! Thank you.",
+      "wait-stayed": "Hello!",
+      "alternative-accepted": "I'll try that instead!",
+    };
     lines = [
-      Game.customerResponse(state),
-      `I'd like ${marketRequestText()}, please.`,
+      responses[c.response] || Game.customerResponse(state),
+      `I'd like ${requests}`,
     ];
-  return `<div class="market-conversation" aria-live="polite" aria-atomic="true"><strong>${c.name} says:</strong>${lines.map((line, i) => `<p class="market-dialogue-line" style="--line-delay:${i * 650}ms">${line}</p>`).join("")}${state.step === "pay" ? `<div class="market-payment-offer" aria-label="Customer presents ${money(state.tendered)}"><svg viewBox="0 0 160 60" aria-hidden="true"><rect x="2" y="2" width="156" height="56" rx="6" fill="#d7ead0" stroke="#375d43" stroke-width="3"/><rect x="9" y="8" width="142" height="44" rx="4" fill="none" stroke="#6e9272"/><text x="80" y="40" text-anchor="middle" font-family="Georgia,serif" font-size="32" font-weight="bold" fill="#254e37">${money(state.tendered)}</text></svg><span>Payment offered</span></div>` : ""}</div>`;
+  }
+  return `<div class="market-conversation" aria-live="polite" aria-atomic="true"><strong>${c.name}</strong><div class="market-speech-copy">${lines.map((line, i) => `<p class="market-dialogue-line" style="--line-delay:${i * 650}ms">${line}</p>`).join("")}</div>${state.step === "pay" ? `<div class="market-payment-offer" aria-label="Customer presents ${money(state.tendered)}"><svg viewBox="0 0 160 60" aria-hidden="true"><rect x="2" y="2" width="156" height="56" rx="6" fill="#d7ead0" stroke="#375d43" stroke-width="3"/><rect x="9" y="8" width="142" height="44" rx="4" fill="none" stroke="#6e9272"/><text x="80" y="40" text-anchor="middle" font-family="Georgia,serif" font-size="32" font-weight="bold" fill="#254e37">${money(state.tendered)}</text></svg><span>Payment offered</span></div>` : ""}</div>`;
 }
+function syncMarketSpeech() {
+  const scene = document.querySelector(".market-with-customer");
+  const bubble = scene?.querySelector(".market-conversation");
+  if (!bubble) return;
+  const rect = scene.getBoundingClientRect(),
+    w = scene.clientWidth,
+    h = scene.clientHeight;
+  // The portrait and tail share the SVG camera's exact xMidYMid slice projection.
+  const k = Math.max(w / 1536, h / 1024),
+    ox = (w - 1536 * k) / 2,
+    oy = (h - 1024 * k) / 2;
+  const left = ox + 930 * k,
+    mouthX = ox + 768 * k,
+    mouthY = oy + [451, 433, 462, 445][marketPortraitIndex()] * k;
+  const topLimit =
+    document.querySelector(".farmers-market-game .hud").getBoundingClientRect()
+      .bottom -
+    rect.top +
+    6;
+  const obstacles = [
+    scene.querySelector(".market-register-prop"),
+    scene.querySelector(".market-produce-tray"),
+    scene.querySelector(".market-tray-hint"),
+  ].filter(Boolean);
+  const bottomLimit = Math.min(
+    h - 8,
+    ...obstacles
+      .map((e) => e.getBoundingClientRect())
+      .filter((r) => r.right > rect.left + left && r.left < rect.right - 7)
+      .map((r) => r.top - rect.top - 7),
+  );
+  Object.assign(bubble.style, {
+    left: left + "px",
+    width: Math.max(75, w - left - 7) + "px",
+    maxHeight: Math.max(60, bottomLimit - topLimit) + "px",
+  });
+  const bh = bubble.offsetHeight;
+  const top = Math.max(topLimit, Math.min(mouthY - bh / 2, bottomLimit - bh));
+  bubble.style.top = top + "px";
+  const baseY = Math.max(top + 12, Math.min(top + bh - 12, mouthY));
+  const length = Math.min(14, Math.max(8, 25 * k));
+  const tipX = left - length,
+    tipY = baseY + ((mouthY - baseY) * length) / Math.max(1, left - mouthX);
+  const tail = scene.querySelector(".market-speech-tail");
+  tail.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  tail
+    .querySelector("path")
+    .setAttribute(
+      "d",
+      `M ${left + 2} ${baseY - 5} L ${tipX} ${tipY} L ${left + 2} ${baseY + 5} Z`,
+    );
+}
+
 function marketFarewell(farewell) {
   // Complete the original action immediately; only the departing illustration
   // lingers. Navigation, refresh and reduced motion never depend on a timer.

@@ -29,8 +29,7 @@ const MARKET_CUSTOMER_PORTRAITS = {
   Ruby: 0,
   Mateo: 1,
 };
-function marketCustomerArt() {
-  if (!state.customer) return "";
+function marketPortraitIndex() {
   // Stable across refreshes without inventing or migrating saved character data.
   const fallback =
     Array.from(state.customer.name).reduce(
@@ -38,7 +37,11 @@ function marketCustomerArt() {
       0,
     ) % MARKET_CUSTOMER_BOUNDS.length;
   const assigned = MARKET_CUSTOMER_PORTRAITS[state.customer.name];
-  const index = Number.isInteger(assigned) ? assigned : fallback;
+  return Number.isInteger(assigned) ? assigned : fallback;
+}
+function marketCustomerArt() {
+  if (!state.customer) return "";
+  const index = marketPortraitIndex();
   const [x, y, w, h] = MARKET_CUSTOMER_BOUNDS[index];
   return `<g class="market-active-customer" role="img" aria-label="${state.customer.name}, your customer, faces you across the counter" clip-path="url(#market-behind-counter)"><svg x="558" y="230" width="420" height="515" viewBox="${x} ${y} ${w} ${h}" preserveAspectRatio="xMidYMax meet"><svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}"><image href="assets/farmers-market/customers.webp" width="2172" height="724"/></svg></svg></g>`;
 }
@@ -59,7 +62,7 @@ function marketProduceDisplay() {
     .join("")}</section>`;
 }
 function farmersMarketScene(controls) {
-  return `<section class="market-tableau" aria-label="Your farmers market stall, looking out toward the village"><svg class="market-first-person" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice" aria-label="A red-and-white canopy shelters your wooden counter; flowers frame the village beyond" role="img"><defs><clipPath id="market-behind-counter"><rect width="1536" height="728"/></clipPath></defs><image href="assets/farmers-market/stall.webp" width="1536" height="1024"/>${marketCustomerArt()}</svg>${marketClockFace()}${marketProduceDisplay()}<button class="market-register-prop" onclick="marketRegister()" aria-label="Open cash register"><img src="assets/farmers-market/register.webp" alt=""/><span>Cash register</span></button></section><section class="bottom market-controls" aria-label="Customer service and market controls">${controls}</section>`;
+  return `<section class="market-tableau ${state.customer ? "market-with-customer" : ""}" aria-label="Your farmers market stall, looking out toward the village"><svg class="market-first-person" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice" aria-label="A red-and-white canopy shelters your wooden counter; flowers frame the village beyond" role="img"><defs><clipPath id="market-behind-counter"><rect width="1536" height="728"/></clipPath></defs><image href="assets/farmers-market/stall.webp" width="1536" height="1024"/>${marketCustomerArt()}</svg>${marketClockFace()}${state.customer ? '<svg class="market-speech-tail" aria-hidden="true"><path/></svg>' + marketConversation() : ""}${marketProduceDisplay()}<button class="market-register-prop" onclick="marketRegister()" aria-label="Open cash register"><img src="assets/farmers-market/register.webp" alt=""/><span>Cash register</span></button></section><section class="bottom market-controls" aria-label="Customer service and market controls">${controls}</section>`;
 }
 function marketRegister() {
   if (state.customer && state.step === "pay") return payment();

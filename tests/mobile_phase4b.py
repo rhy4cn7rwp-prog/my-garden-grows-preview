@@ -21,7 +21,7 @@ try:
    def tap(label):page.get_by_role('button',name=label,exact=True).click() if w>=800 else page.get_by_role('button',name=label,exact=True).tap()
    page.evaluate("""()=>{state=Game.initial();state.bagCount=2;state.owned.table=state.owned.scale=1;state.standMode='owned';state.marketOpen=state.marketPlayed=true;state.visitors=1;state.inventory={carrot:4,tomato:3,corn:2};state.display={...state.inventory};state.customer={name:'Maya',want:{carrot:2,tomato:1},personality:'curious',satisfaction:50,decision:50,greeting:null,alternativeOffered:false,response:'arrival'};state.step='greet';go('market')}""")
    initial=page.evaluate('[state.cash,state.bagCount,state.inventory,state.sales,state.day,state.season]')
-   assert '2 carrots and 1 tomato' in page.locator('.market-conversation').inner_text()
+   assert '2 carrots, 1 tomato' in page.locator('.market-conversation').inner_text()
    assert '$' not in page.locator('.market-conversation').inner_text()
    assert page.locator('.market-dialogue-line').count()==2
    assert page.locator('.market-payment-offer').count()==0

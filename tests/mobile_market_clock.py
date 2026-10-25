@@ -49,8 +49,8 @@ try:
    tap('Welcome Next Customer');tap('Hi! What can I get for you?')
    clock=page.locator('.market-clock').bounding_box();scene=page.locator('.market-first-person').bounding_box()
    scale=max(scene['width']/1536,scene['height']/1024)
-   customer_left=scene['x']+(scene['width']-1536*scale)/2+558*scale
-   assert clock['x']+clock['width']<=customer_left+1,(w,h,clock,customer_left)
+   customer_head_left=scene['x']+(scene['width']-1536*scale)/2+640*scale
+   assert clock['x']+clock['width']<=customer_head_left+1,(w,h,clock,customer_head_left)
    if w==428:
     page.locator('#app').evaluate('e=>e.scrollTop=0');page.screenshot(path='/tmp/market-clock-customer-iphone.png')
    tap('🧺 Fill customer basket');tap('Add Carrots')

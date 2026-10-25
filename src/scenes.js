@@ -106,15 +106,12 @@ function renderScene() {
       if (!c) {
         bottom = `<h2>🍎 Farmers Market</h2>${state.marketOpen ? `<button class="btn market-primary" onclick="newCustomer()" ${CROPS.some((c) => Game.marketStock(state, c.id) > 0) ? "" : "disabled"}>Welcome Next Customer</button><p>${state.visitors} customers welcomed</p><button class="btn alt" onclick="marketStand()">Arrange Produce</button><button class="btn alt" onclick="closeMarket()">Close market</button>` : '<p>Arrange your harvest before opening.</p><button class="btn" onclick="marketStand()">Arrange Produce / Open Market</button>'}`;
       } else {
-        const request = Object.entries(c.want)
-          .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
-          .join(" and ");
         const greetings = `<button class="btn" onclick="greetCustomer('excellent')">Hi! Welcome to my stand! What can I help you find today?</button><button class="btn" onclick="greetCustomer('good')">Hi! What can I get for you?</button><button class="btn" onclick="greetCustomer('wait')">Wait quietly for the customer to ask for something.</button>`;
         const farewells = `<button class="btn" onclick="marketFarewell('excellent')">Thank you so much! I hope to see you again!</button><button class="btn" onclick="marketFarewell('good')">Thanks for shopping with us!</button><button class="btn" onclick="marketFarewell('brief')">Bye!</button>`;
         const choosing = Game.missingProduce(state).length
           ? `<button class="btn" onclick="customerService()">Help with sold-out produce</button>`
           : `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="customerService()">Talk about the order</button>`;
-        bottom = `<h2>🍎 Market Day</h2>${marketConversation()}${state.step === "choose" ? `<p><strong>Customer requests:</strong> ${request}.</p>` : ""}<div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()}</p>`;
+        bottom = `<h2>🍎 Market Day</h2><div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()}</p>`;
       }
     }
   }

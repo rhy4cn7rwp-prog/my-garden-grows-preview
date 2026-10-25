@@ -308,3 +308,18 @@ known saved epochs are retained, with all other progress preserved.
 background simulation, unlimited visitors, active checkout and early closure,
 alongside existing regression suites. Native iPhone Safari still needs a device
 playtest because WebKit installation was blocked by the environment's network.
+
+### Farmers Market speech bubble placement correction
+
+Moved the single cream/brown customer bubble into the scene, beside the head,
+with a pointed tail directed along a per-portrait mouth anchor. The bubble and
+tail use the artwork's source-space camera projection at every viewport size.
+Removed the underneath dialogue panel and repeated order text. Response and
+transaction controls remain below the illustration in portrait and landscape.
+Shorter natural dialogue preserves quantities, service outcomes and payment
+amounts, with no Game, clock, inventory, financial or save changes.
+
+Rendered layout checks cover four portraits × four interaction stages × six
+phone/landscape sizes, including long two-crop orders, face/clock/produce/register
+clearance and text fit. Actual screenshots were manually reviewed. Existing
+customer, money, clock/recovery and navigation suites also verify the change.

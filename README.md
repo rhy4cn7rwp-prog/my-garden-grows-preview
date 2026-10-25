@@ -5,6 +5,31 @@ Changes and deployment are restricted to `my-garden-grows-preview`. The original
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
 
+## Latest visual correction: speech inside the market scene
+
+Customer dialogue is rendered exactly once inside `.market-tableau`, beside the
+customer's head. The cream bubble, brown outline and separate pointed SVG tail
+share the portrait's 1536×1024 camera projection. Each portrait has a measured
+mouth-height anchor. Resizing reprojects those anchors through the same uniform
+`xMidYMid slice` scale and crop as the artwork, rather than positioning speech
+against the page. Bubble bounds avoid the clock, face, produce and register.
+
+Greetings, requested crops/quantities, payment and thanks use shorter natural
+speech. The large below-scene dialogue panel and repeated order sentence are
+removed. Player greeting/service/farewell buttons and transaction controls stay
+below the illustration, including landscape. The illustrated scene uses the
+freed space; short screens retain normal vertical scrolling. Official opening
+returns the market scroll view to the top so the stall and clock are visible.
+
+No Game rules, timer epochs, transactions, pricing, inventory or save fields
+changed. The total keypad and change register retain their fitted layouts.
+`tests/mobile_market_speech.py` checks all four portraits at greeting, ordering,
+payment and thanks across six phone/landscape sizes (96 combinations), measures
+actual rendered bounds and text fit, and captures screenshots for visual review.
+Phone screenshots were manually inspected, not just component-count assertions.
+The existing service, keypad, clock, accounting/bag and navigation tests verify
+compatibility. Native iPhone Safari remains a manual device check.
+
 ## Phase 4C: accelerated market clock
 
 The Farmers Market runs from **9:00 AM to 1:00 PM game time**. Each game minute
