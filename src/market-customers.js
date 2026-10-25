@@ -8,23 +8,35 @@
     "tone": "gentle",
     "hello": "How lovely!",
     "bye": "See you in the garden!",
-    "legacyPortrait": 2
+    "legacyPortrait": 2,
+    "details": [
+      "Gardens make me smile.",
+      "I love a garden walk."
+    ]
   },
   {
     "name": "Noah",
     "trait": "upbeat home cook",
-    "tone": "upbeat",
+    "tone": "cook",
     "hello": "Hello, neighbor!",
     "bye": "Happy cooking!",
-    "legacyPortrait": 1
+    "legacyPortrait": 1,
+    "details": [
+      "I love trying recipes!",
+      "Fresh food, new ideas!"
+    ]
   },
   {
     "name": "Ava",
     "trait": "thoughtful storyteller",
-    "tone": "thoughtful",
+    "tone": "storyteller",
     "hello": "Lovely to see you.",
     "bye": "See you next time!",
-    "legacyPortrait": 0
+    "legacyPortrait": 0,
+    "details": [
+      "I grew beans as a child.",
+      "Markets bring back stories."
+    ]
   },
   {
     "name": "Oliver",
@@ -32,7 +44,11 @@
     "tone": "curious",
     "hello": "What looks tasty?",
     "bye": "See you soon!",
-    "legacyPortrait": 3
+    "legacyPortrait": 3,
+    "details": [
+      "How is your garden?",
+      "I wonder what grew today!"
+    ]
   },
   {
     "name": "Sophia",
@@ -40,23 +56,35 @@
     "tone": "upbeat",
     "hello": "Ready to cook!",
     "bye": "Time to get cooking!",
-    "portrait": 0
+    "portrait": 0,
+    "details": [
+      "A new recipe to plan!",
+      "Cooking is an adventure!"
+    ]
   },
   {
     "name": "Liam",
-    "trait": "outdoorsy weekend walker",
-    "tone": "outdoors",
+    "trait": "playful weekend explorer",
+    "tone": "playful",
     "hello": "A lovely day out!",
     "bye": "Enjoy the sunshine!",
-    "portrait": 1
+    "portrait": 1,
+    "details": [
+      "A tasty little adventure!",
+      "A fresh-air snack stop!"
+    ]
   },
   {
     "name": "Ella",
-    "trait": "quiet nature observer",
-    "tone": "gentle",
+    "trait": "shy nature observer",
+    "tone": "shy",
     "hello": "What a nice stand!",
     "bye": "Have a peaceful day!",
-    "portrait": 2
+    "portrait": 2,
+    "details": [
+      "Such lovely leaves.",
+      "I like a quiet garden."
+    ]
   },
   {
     "name": "Leo",
@@ -64,7 +92,11 @@
     "tone": "curious",
     "hello": "Picnic time soon!",
     "bye": "Picnic time!",
-    "portrait": 3
+    "portrait": 3,
+    "details": [
+      "Picnic time is coming!",
+      "I am helping with a picnic!"
+    ]
   },
   {
     "name": "Emma",
@@ -72,15 +104,23 @@
     "tone": "practical",
     "hello": "Time to plan lunch!",
     "bye": "Off to make lunch!",
-    "portrait": 4
+    "portrait": 4,
+    "details": [
+      "I have my shopping list.",
+      "Time to plan a meal."
+    ]
   },
   {
     "name": "Lucas",
     "trait": "friendly soup maker",
-    "tone": "gentle",
+    "tone": "storyteller",
     "hello": "Something fresh today!",
     "bye": "Time to head home!",
-    "portrait": 5
+    "portrait": 5,
+    "details": [
+      "I once grew a tiny garden.",
+      "My first crop was a carrot."
+    ]
   },
   {
     "name": "Mia",
@@ -88,31 +128,47 @@
     "tone": "creative",
     "hello": "Let’s try a recipe!",
     "bye": "Time to try my recipe!",
-    "portrait": 6
+    "portrait": 6,
+    "details": [
+      "A new snack idea today!",
+      "Colors give me ideas!"
+    ]
   },
   {
     "name": "Henry",
     "trait": "patient puzzle lover",
-    "tone": "thoughtful",
+    "tone": "playful",
     "hello": "Shopping is a puzzle!",
     "bye": "Off to my puzzle!",
-    "portrait": 7
+    "portrait": 7,
+    "details": [
+      "A tasty puzzle to solve!",
+      "My list is a little puzzle!"
+    ]
   },
   {
     "name": "Zoe",
-    "trait": "bright flower enthusiast",
-    "tone": "upbeat",
+    "trait": "talkative flower enthusiast",
+    "tone": "talkative",
     "hello": "Such lovely colors!",
     "bye": "Enjoy these colors!",
-    "portrait": 8
+    "portrait": 8,
+    "details": [
+      "The flowers look lovely!",
+      "I met a friend on my walk!"
+    ]
   },
   {
     "name": "Amelia",
-    "trait": "careful new cook",
-    "tone": "practical",
+    "trait": "quiet beginner cook",
+    "tone": "shy",
     "hello": "I’m trying a recipe!",
     "bye": "Time to start cooking!",
-    "portrait": 9
+    "portrait": 9,
+    "details": [
+      "I am learning to cook.",
+      "One small recipe today."
+    ]
   },
   {
     "name": "Jack",
@@ -120,23 +176,35 @@
     "tone": "outdoors",
     "hello": "A nice stop today!",
     "bye": "See you on my walk!",
-    "portrait": 10
+    "portrait": 10,
+    "details": [
+      "A lovely stop on my walk!",
+      "Fresh air makes me smile."
+    ]
   },
   {
     "name": "Grace",
-    "trait": "kind family host",
-    "tone": "gentle",
+    "trait": "friendly talkative family host",
+    "tone": "talkative",
     "hello": "Fresh food to share!",
     "bye": "Time to share these!",
-    "portrait": 11
+    "portrait": 11,
+    "details": [
+      "Fresh food brings us together!",
+      "I am planning a shared meal."
+    ]
   },
   {
     "name": "Ethan",
-    "trait": "enthusiastic kitchen helper",
-    "tone": "upbeat",
+    "trait": "shy kitchen helper",
+    "tone": "shy",
     "hello": "I’m helping cook!",
     "bye": "Back to the kitchen!",
-    "portrait": 12
+    "portrait": 12,
+    "details": [
+      "I am helping cook.",
+      "One meal to help with."
+    ]
   },
   {
     "name": "Aria",
@@ -144,7 +212,11 @@
     "tone": "creative",
     "hello": "Something new today!",
     "bye": "Off to try a recipe!",
-    "portrait": 13
+    "portrait": 13,
+    "details": [
+      "I like trying new recipes!",
+      "A colorful meal idea!"
+    ]
   },
   {
     "name": "Ruby",
@@ -152,15 +224,23 @@
     "tone": "curious",
     "hello": "What grew today?",
     "bye": "Happy gardening!",
-    "portrait": 14
+    "portrait": 14,
+    "details": [
+      "What grew the fastest?",
+      "I like watching seeds grow!"
+    ]
   },
   {
     "name": "Mateo",
     "trait": "warm community cook",
-    "tone": "gentle",
+    "tone": "cook",
     "hello": "Good food to share!",
     "bye": "See you next market!",
-    "portrait": 15
+    "portrait": 15,
+    "details": [
+      "Time to try a new recipe!",
+      "Cooking is my happy place!"
+    ]
   },
   {
     "name": "Isabel",
@@ -168,7 +248,11 @@
     "tone": "upbeat",
     "hello": "A picnic to plan!",
     "bye": "Off to my picnic!",
-    "portrait": 16
+    "portrait": 16,
+    "details": [
+      "I am planning a picnic!",
+      "A nice day to share a meal!"
+    ]
   },
   {
     "name": "Ben",
@@ -176,7 +260,11 @@
     "tone": "practical",
     "hello": "Lunch ideas today!",
     "bye": "Time for sandwiches!",
-    "portrait": 17
+    "portrait": 17,
+    "details": [
+      "A few things for lunch.",
+      "I brought my shopping list."
+    ]
   },
   {
     "name": "Nina",
@@ -184,7 +272,11 @@
     "tone": "creative",
     "hello": "So many colors!",
     "bye": "Have a colorful day!",
-    "portrait": 18
+    "portrait": 18,
+    "details": [
+      "Such pretty colors.",
+      "I like drawing gardens."
+    ]
   },
   {
     "name": "Theo",
@@ -192,31 +284,47 @@
     "tone": "outdoors",
     "hello": "A fine garden day!",
     "bye": "Enjoy your garden!",
-    "portrait": 19
+    "portrait": 19,
+    "details": [
+      "A fine day for a walk!",
+      "I saw a bird on my way!"
+    ]
   },
   {
     "name": "Priya",
     "trait": "thoughtful flavor explorer",
-    "tone": "thoughtful",
+    "tone": "cook",
     "hello": "New flavors today!",
     "bye": "Time for new flavors!",
-    "portrait": 20
+    "portrait": 20,
+    "details": [
+      "I love a new flavor!",
+      "A fresh recipe idea today!"
+    ]
   },
   {
     "name": "Sam",
-    "trait": "energetic lunch helper",
-    "tone": "upbeat",
+    "trait": "funny lunch helper",
+    "tone": "playful",
     "hello": "Time for lunch!",
     "bye": "Off to help with lunch!",
-    "portrait": 21
+    "portrait": 21,
+    "details": [
+      "A tasty mission today!",
+      "Lettuce have a good day!"
+    ]
   },
   {
     "name": "Clara",
-    "trait": "gentle book lover",
-    "tone": "gentle",
+    "trait": "gentle book-loving storyteller",
+    "tone": "storyteller",
     "hello": "A storybook day!",
     "bye": "Time for my book!",
-    "portrait": 22
+    "portrait": 22,
+    "details": [
+      "This feels like a storybook.",
+      "I read about a tiny garden."
+    ]
   },
   {
     "name": "Luis",
@@ -224,11 +332,20 @@
     "tone": "curious",
     "hello": "What can I try?",
     "bye": "See you next time!",
-    "portrait": 23
+    "portrait": 23,
+    "details": [
+      "What is growing today?",
+      "Can plants surprise us?"
+    ]
   }
 ];
 
   const profile = name => profiles.find(p=>p.name===name);
+  function behavior(name) {
+    const tone=profile(name)?.tone;
+    return tone ? (tone==="practical" ? "hurried" :
+      ["gentle","thoughtful","shy","storyteller"].includes(tone) ? "thoughtful" : "curious") : null;
+  }
   const day = s => (s.season-1)*20+s.day;
   const integer = n => Number.isSafeInteger(n) && n>=0;
   function emptyHistory(){return {sequence:0,recent:[],people:{}};}
@@ -288,27 +405,54 @@
     practical:{hello:["Hello! Ready to cook!","Hi! Time for lunch!","Hello! Looks fresh!"],order:["I'd like","May I have","Could I get"],thanks:["Thank you! Time to cook!","Thanks! Just right!","Thank you! See you!"],sold:["I'll try another day!","Thanks for checking!","Thanks for telling me!"]},
     creative:{hello:["Hello! Lovely colors!","Hi! New ideas today!","Hi! Something fresh!"],order:["Could I try","I'd love","May I have"],thanks:["Thank you! Inspiring!","Thanks! Time to cook!","Thank you! Lovely!"],sold:["I'll try next time!","Thanks for checking!","Another day, then!"]}
   };
+  Object.assign(voices, {
+    shy:{hello:["Hello.","Hi, please.","Nice to see you."],order:["May I have","Could I get","I'd like"],thanks:["Thank you. Lovely.","Thank you very much.","Thanks. See you soon."],sold:["Thanks for checking.","Another day, then.","I'll visit again."]},
+    talkative:{hello:["Hi! A lovely day out!","Hello! I met a friend!","Nice to stop and chat!"],order:["I'd love","May I get","Could I have"],thanks:["Thank you! Lovely chat!","Thanks! Enjoy your day!","Thank you! See you soon!"],sold:["Thanks for checking!","We'll try next time!","Another day to visit!"]},
+    playful:{hello:["Hi! A tasty mission!","A fresh-food adventure!","Hello, garden friend!"],order:["Could I try","I'd love","Can I get"],thanks:["Thanks! A tasty success!","Thank you! Great teamwork!","Thanks! See you soon!"],sold:["A new plan, then!","Next time, garden friend!","Thanks for checking!"]},
+    cook:{hello:["Hi! Ready to cook!","A new recipe today!","Hello! Fresh ideas!"],order:["I'd love","Could I get","May I have"],thanks:["Thank you! Time to cook!","Thanks! Fresh inspiration!","Thank you! Looks lovely!"],sold:["I'll try another recipe!","Thanks for checking!","I'll cook that another day!"]},
+    storyteller:{hello:["Hello! A lovely market!","What a storybook day!","This brings back memories!"],order:["May I have","I'd like","Could I get"],thanks:["Thank you! A lovely visit!","Thanks! See you next time!","Thank you! What a nice day!"],sold:["Another market day, then!","Thanks for checking!","I'll visit another day!"]}
+  });
+  const greetingReplies={
+    gentle:{excellent:["What a lovely welcome!","Thank you! How kind!"],wait:["Hello, dear!","May I shop with you?","A lovely quiet moment."]},
+    upbeat:{excellent:["Thanks! What a welcome!","What a cheerful hello!"],wait:["Hi there!","Hello! Ready to shop!","A lovely day to visit!"]},
+    thoughtful:{excellent:["Thank you for the welcome!","How thoughtful. Thanks!"],wait:["Hello. May I ask?","Nice to see your stand.","A quiet moment is nice."]},
+    curious:{excellent:["Thanks! What's growing?","What a friendly welcome!"],wait:["Hi! What's fresh?","May I ask about plants?","What grew today?"]},
+    outdoors:{excellent:["Thanks! A lovely stop!","What a sunny welcome!"],wait:["Hello from my walk!","Hi! A nice stop today!","A fine day to shop!"]},
+    practical:{excellent:["Thank you. Ready to shop!","Thanks for your help!"],wait:["Hello. A few things, please.","May I place an order?","Hello. I have my list."]},
+    creative:{excellent:["Thanks! Such lovely colors!","A warm welcome! Thanks!"],wait:["Hello! Fresh ideas today!","Hi! A new idea today!","May I try something new?"]},
+    shy:{excellent:["Thank you. That's kind.","Oh, thank you."],wait:["Hello. May I ask?","Hi. I'd like to shop.","May I order, please?"]},
+    talkative:{excellent:["What a lovely welcome!","Thanks! How is your day?"],wait:["Hello! Lovely weather!","Hi! I just had a nice walk!","Nice to stop and chat!"]},
+    playful:{excellent:["Thanks! Hello, garden friend!","A five-star hello! Thanks!"],wait:["Hi! A tasty mission!","A quiet hello from me!","Hello, garden friend!"]},
+    cook:{excellent:["Thanks! Fresh inspiration!","What a welcome! Thanks!"],wait:["Hello! A recipe to plan!","May I shop for my meal?","Hi! Fresh ideas today!"]},
+    storyteller:{excellent:["What a warm welcome!","How kind! A lovely visit!"],wait:["Hello! This takes me back.","A quiet little market visit.","May I share a little hello?"]}
+  };
   function dialogue(c,step,order,paid,cropName){
     const p=profile(c.name);if(!p)return null;
     const v=Number.isInteger(c.dialogueVariant)?c.dialogueVariant%3:0,voice=voices[p.tone];
     if(step==="pay")return [voice.thanks[v],`Here's ${paid}.`];
     if(step==="thanks"){
       if(c.response==="sale-complete")return [voice.thanks[v],p.bye];
-      if(c.response==="wait-left")return [["I have to dash. See you!","I must hurry. Thanks!","See you another day!"][v]];
+      // Keep old in-progress saves that were already leaving readable.
+      if(c.response==="wait-left")return ["See you another day!"];
       if(c.response==="alternative-declined")return [["Thanks! I need what's on my list.","Maybe next time. Thanks!","Thanks! I'll keep looking."][v]];
       if(c.response==="soldout-return")return [["I'll come back another day!","See you next market!","I'll visit again soon!"][v]];
       return [voice.sold[v]];
     }
-    let hello=c.response==="alternative-accepted"?["I'll try that instead!","Yes, let's try that!","That sounds lovely!"][v]:
-      c.response==="excellent"?["What a lovely welcome!","Thanks for the welcome!",p.hello][v]:
-      c.response==="wait-stayed"?"Hello!":v===0?p.hello:(voice.hello[v]===p.hello?"Nice to meet you!":voice.hello[v]);
+    const replies=greetingReplies[p.tone];
+    let hello;
+    if(c.response==="alternative-accepted")hello=["I'll try that instead!","Yes, let's try that!","That sounds lovely!"][v];
+    else if(c.response==="wait-stayed")hello=replies.wait[v];
+    else if(c.response==="excellent")hello=v===2?p.details[0]:replies.excellent[v];
+    else hello=v===0?p.hello:v===1?voice.hello[1]:p.details[1];
     if(c.rememberVisit && c.response!=="alternative-accepted"){
-      hello=c.rememberedCrop && cropName ? [`Hi again! Loved your ${cropName}!`,`Thanks for the ${cropName}!`,`I enjoyed your ${cropName}!`][v]:
-        ["Nice to see you again!","Hi again! What's fresh?","Glad you're here again!"][v];
+      const quiet=p.tone==="shy";
+      hello=c.rememberedCrop && cropName ?
+        [`${quiet?"":"Hi again! "}Loved your ${cropName}!`,`Thanks for the ${cropName}!`,`I enjoyed your ${cropName}!`][v]:
+        (quiet?["Hello again.","Nice to see you again.","Glad you're here."]:["Nice to see you again!","Hi again! What's fresh?","Glad you're here again!"])[v];
     }
     return [hello,`${voice.order[v]} ${order}.`];
   }
-  const api={profiles,profile,emptyHistory,recover,pick,arrive,recordSale,dialogue};
+  const api={profiles,profile,behavior,emptyHistory,recover,pick,arrive,recordSale,dialogue};
   if(typeof module!=="undefined" && module.exports)module.exports=api;
   else root.MarketCustomers=api;
 })(typeof globalThis!=="undefined"?globalThis:this);

@@ -939,7 +939,7 @@
       mathLevel: level,
       lineMath: dreamPurchaseCount(s) > 0,
       lineAnswers: {},
-      personality: ["curious", "thoughtful", "hurried"][
+      personality: marketCustomers?.behavior(name) || ["curious", "thoughtful", "hurried"][
         (s.day + s.visitors) % 3
       ],
       satisfaction: 50,
@@ -995,14 +995,10 @@
     );
     const c = s.customer;
     c.greeting = choice;
-    satisfaction(s, choice === "excellent" ? 20 : choice === "good" ? 10 : -5);
-    const leaves = choice === "wait" && c.personality === "hurried";
-    c.response = leaves
-      ? "wait-left"
-      : choice === "wait"
-        ? "wait-stayed"
-        : choice;
-    s.step = leaves ? "thanks" : "choose";
+    // Greeting styles change conversation, never whether a child gets to serve.
+    satisfaction(s, 10);
+    c.response = choice === "wait" ? "wait-stayed" : choice;
+    s.step = "choose";
   }
   function suggestAlternative(s, id) {
     requireRule(
@@ -1018,7 +1014,7 @@
     c.alternativeOffered = true;
     const chance =
       ({ curious: 70, thoughtful: 40, hurried: 25 }[c.personality] ?? 45) +
-      (c.greeting === "excellent" ? 15 : c.greeting === "good" ? 5 : 0);
+      5;
     const accepted = (c.decision ?? 50) < chance;
     if (accepted) {
       const otherCost = Object.entries(c.want).filter(([key])=>!missingProduce(s).includes(key))

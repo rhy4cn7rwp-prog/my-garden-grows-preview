@@ -116,7 +116,7 @@ try:
    page.locator('[onclick="offerSomethingElse()"]').tap()
    assert 'on my list' in page.locator('.market-conversation').inner_text();assert page.evaluate('state.step')=='thanks'
    tap('Bye!');assert baseline()==before
-   for personality,expected in [('curious','choose'),('hurried','thanks')]:
+   for personality,expected in [('curious','choose'),('hurried','choose')]:
     fixture(personality=personality);before=baseline();tap('Wait quietly for the customer to ask for something.')
     assert page.evaluate('state.step')==expected;assert baseline()==before
     if expected=='choose':

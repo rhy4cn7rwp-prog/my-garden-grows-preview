@@ -1,3 +1,40 @@
+## Phase 3: consistent personalities and welcoming greetings
+
+This phase builds on the existing **28 distinct illustrated neighbors**, retaining
+all names, portraits, saved visits and purchase memories. It does not regenerate
+or replace the established customer collection. Children, teens, adults and
+seniors retain their recognizable appearances.
+
+Customers now keep a fixed personality across visits. Twelve dialogue styles
+include shy, talkative, playful, practical, cooking, gardening/curious, creative,
+outdoors and storytelling voices. Each profile adds two short personal details
+alongside its existing opening/parting lines. Choice-sensitive replies and three
+rotating phrase variants keep conversations varied, with brief responses for shy
+people and little observations/stories for more talkative neighbors. All speech
+stays beside the portrait inside the existing illustrated scene.
+
+All three player greetings now lead to the customer's order. Greeting style has
+no satisfaction penalty and no effect on alternative acceptance: each earns the
+same positive response score, and existing preference categories still determine
+whether an alternative is accepted. A quiet greeting never causes a walkout.
+The choice remains meaningful as conversational practice, rather than a hidden
+financial advantage. Player response buttons and their equal green styling remain.
+
+Rotation and light relationships are preserved: favor fewer visits today and
+longer absence; avoid the last eight arrivals; occasionally welcome a known buyer.
+There is no visitor cap. Existing saved history survives refresh and market days.
+Regulars only praise crops from recorded completed purchases; no missing past
+history is invented. There are no new loyalty levels or reputation controls.
+Existing in-progress orders retain their saved prices, math work and payment;
+new arrivals use their character's fixed preferences.
+
+Validation includes every character × every greeting through a full sale, stable
+personalities across days/refresh, equivalent outcomes for all greeting styles,
+all three phrase variants on phone layouts, existing rotation/memory recovery,
+speech-bubble geometry, all math tiers, inventory/bags, payment and closing/report.
+Native iPhone Safari is not available here; tests use Chromium touch emulation,
+small Safari-sized viewports and safe areas, plus rendered screenshot inspection.
+
 ## Latest targeted market corrections
 
 The tabletop now renders only crops with positive sellable stand stock, rather

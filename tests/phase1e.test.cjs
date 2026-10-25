@@ -100,7 +100,7 @@ test("active payment recovery rejects extra unrequested produce without taking m
   assert.equal(recovered.cash, 50);
   assert.deepEqual(recovered.inventory, s.inventory);
 });
-test("three greetings have distinct responses; waiting sometimes retains and sometimes loses a customer without costs", () => {
+test("three greetings have distinct responses and always retain the customer without penalties", () => {
   const responses = [];
   for (const choice of ["excellent", "good", "wait"]) {
     const s = stand();
@@ -112,7 +112,7 @@ test("three greetings have distinct responses; waiting sometimes retains and som
     assert.equal(finances(s), before);
     assert.equal(
       s.customer.satisfaction,
-      { excellent: 70, good: 60, wait: 45 }[choice],
+      60,
     );
     assert.throws(() => G.greet(s, choice));
   }
@@ -122,8 +122,8 @@ test("three greetings have distinct responses; waiting sometimes retains and som
   s.customer.personality = "hurried";
   const before = finances(s);
   G.greet(s, "wait");
-  assert.equal(s.step, "thanks");
-  G.advanceCustomer(s, "excellent");
+  assert.equal(s.step, "choose");
+  assert.equal(s.customer.response, "wait-stayed");
   assert.equal(finances(s), before);
 });
 test("occasional sold-out requests coexist with ordinary stock requests and survive saves", () => {
@@ -174,7 +174,7 @@ test("alternatives use sellable displayed stock and preserve zero-bag, money, an
   assert.equal(s.bagCount, 2);
   assert.equal(s.inventory.cucumber, 2);
 });
-test("customer preferences and excellent greeting can improve acceptance without guaranteeing a sale", () => {
+test("customer preferences vary acceptance while all greeting styles receive equal treatment", () => {
   function offer(personality, greeting, decision) {
     const s = stand();
     s.customer.want = { onion: 1 };
@@ -186,7 +186,9 @@ test("customer preferences and excellent greeting can improve acceptance without
   }
   assert.equal(offer("curious", "good", 50).accepted, true);
   assert.equal(offer("thoughtful", "good", 50).accepted, false);
-  assert.equal(offer("thoughtful", "excellent", 50).accepted, true);
+  assert.equal(offer("thoughtful", "excellent", 50).accepted, false);
+  assert.equal(offer("thoughtful", "wait", 50).accepted, false);
+  assert.equal(offer("curious", "wait", 50).accepted, true);
   const { s, accepted } = offer("curious", "excellent", 99);
   assert.equal(accepted, false);
   assert.equal(s.step, "thanks");
