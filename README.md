@@ -1,9 +1,44 @@
-# My Garden Grows 1.0 preview — Phase 4A: Farmers Market
+# My Garden Grows 1.0 preview — Phase 4B: Conversations & Register
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 4B: customer conversations and total keypad
+
+The market now has speech bubbles containing the actual requested crops and
+quantities, with short varied greetings, existing service responses, and thanks.
+Sentences appear gently in sequence and remain readable until the player acts;
+there are no reading timers, automatic sales or satisfaction changes. The smiling
+painted portraits move subtly, and a brief departure fades out after the player's
+farewell. Reduced-motion settings remove these effects. The existing artwork
+has no independently animated eyelids or mouths; no facial animation was painted
+onto the portraits.
+
+Correct totals trigger a customer response and a visual payment offer, based
+only on the existing tendered amount. No correct total is shown before the
+player calculates it. The arithmetic activity uses a separate wooden/brass
+**Calculate total** keypad with visible unit prices, number/decimal keys,
+backspace, clear and confirmation. There is no text input or editable element,
+so tapping cannot summon iOS's native keyboard. Desktop number keys, decimal,
+Backspace, Delete, Enter and Escape work as well. Incorrect baskets still return
+to basket preparation; incorrect totals can be corrected on the keypad.
+
+Answer drafts remain available when the keypad is closed and reopened within
+the same page and basket. A refresh retains the farm, order, basket and payment
+state through existing saves; an unconfirmed answer draft is not saved, matching
+the previous unsaved numeric entry. The Game rules, prices, finances, inventory,
+bag use, savings, seasons and other scenes are unchanged. The existing separate
+change-counting register is retained.
+
+`tests/mobile_phase4b.py` covers phone/landscape and desktop layouts, safe areas,
+no-scroll key/control geometry, no native editable control, blank/incorrect
+answers, decimal limits, backspace/clear, keyboard input, payment timing, sale,
+one bag, refresh and reduced motion. Previous customer, finance, bag, register,
+market, navigation, clubhouse and shop checks now enter totals using the visible
+keypad rather than filling the retired native number input. Tests use isolated
+Chromium mobile contexts; physical iPhone Safari remains a manual playtest.
 
 ## Phase 4A: first-person Farmers Market
 

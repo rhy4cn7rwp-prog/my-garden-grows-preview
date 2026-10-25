@@ -141,14 +141,10 @@ function newCustomer() {
   });
 }
 function ring() {
-  const input = document.getElementById("total-answer");
-  try {
-    Game.ring(state, input && input.value !== "" ? Number(input.value) : NaN);
-    closeDialog();
-  } catch (e) {
-    order(e.message);
-  }
+  if (dialogKey === "total-keypad") marketTotalPress("Confirm total");
+  else marketTotalKeypad();
 }
+
 function finish() {
   if (state.step === "pay" && Game.bagsRemaining(state) === 0) {
     bagShop();

@@ -1,5 +1,6 @@
 """Touch-only recovery/rental regression; PREVIEW_URL optionally tests the hosted preview."""
 import os
+from market_ui_helpers import enter_total
 from functools import partial
 from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
 from pathlib import Path
@@ -54,8 +55,8 @@ try:
    page.get_by_role('button',name='Hi! What can I get for you?',exact=True).tap()
   page.get_by_role('button',name='🧺 Fill customer basket',exact=True).tap()
   page.locator('.produce-choices button[aria-label^="Add " ]').first.tap()
-  page.locator('#total-answer').fill('2')
-  page.get_by_role('button',name='⚖️ Check total / collect payment',exact=True).tap()
+  enter_total(page,'2')
+  page.get_by_role('button',name='Confirm total',exact=True).tap()
   page.get_by_role('button',name='💵 Count change',exact=True).tap()
   for _ in range(3):page.get_by_role('button',name='$1',exact=True).tap()
   page.get_by_role('button',name='Give change',exact=True).tap()

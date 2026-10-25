@@ -271,3 +271,21 @@ work. Seven-size mobile visual/touch checks plus existing transaction, register,
 finance, bag, navigation and shop regressions verify the integration. Physical
 iPhone Safari still requires playtesting. Very short main scenes scroll; the
 existing compact payment panel retains its no-scroll layout.
+
+### Phase 4B — Customer conversations and in-game total keypad
+
+Added persistent speech bubbles with gently sequenced actual orders, service
+responses, post-validation payment offers and thanks. Cosmetic customer sway
+and departure respect reduced motion and never advance Game state on a timer.
+The painted smiling faces are preserved without independently animated eyes.
+
+Replaced native numeric entry with an original wooden/brass button keypad,
+visible unit prices, decimal/backspace/clear and confirm. Supports touch and
+hardware keys without focusing a text input. Wrong totals remain editable;
+wrong baskets return for correction. Existing change-counting, bags and all
+financial/progression/save rules remain unchanged. No other scene was altered.
+
+Phone/landscape/desktop tests cover input, geometry, retries, payment, completed
+sales, recovery and reduced motion, alongside the existing regression suites.
+Physical iPhone Safari still needs a player playtest. Unconfirmed answer drafts
+remain session-only, as with the previous native input.

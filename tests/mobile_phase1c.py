@@ -1,5 +1,6 @@
 """Touch-only bag/refill/register/report tests, isolated from real players' saves."""
 import os
+from market_ui_helpers import enter_total
 from functools import partial
 from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
 from pathlib import Path
@@ -31,7 +32,7 @@ try:
    tap('Arrange Produce / Open Market')
    assert 'Paper bags remaining: 0' in page.locator('.dialog').inner_text()
    tap('Open market');tap('Welcome Next Customer');tap('Hi! What can I get for you?');tap('🧺 Fill customer basket')
-   page.locator('.produce-choices button[aria-label^="Add " ]').first.tap();page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment')
+   page.locator('.produce-choices button[aria-label^="Add " ]').first.tap();enter_total(page,'4');tap('Confirm total')
    assert page.evaluate('state.step')=='pay'
    tap('💵 Count change')
    before=page.evaluate('JSON.stringify([state.customer,state.basket,state.visitors,state.hour,state.step])')
@@ -79,7 +80,7 @@ try:
    # Empty bag stock offers a refill at completion and keeps counted change.
    page.evaluate('''()=>{state=Game.initial();state.inventory.corn=3;state.display.corn=3;go('market');}''')
    tap('Arrange Produce / Open Market');tap('Open market');tap('Welcome Next Customer');tap('Hi! What can I get for you?');tap('🧺 Fill customer basket');page.locator('.produce-choices button[aria-label^="Add " ]').first.tap()
-   page.locator('#total-answer').fill('3');tap('⚖️ Check total / collect payment');tap('💵 Count change');tap('$1');tap('$1');tap('Give change')
+   enter_total(page,'3');tap('Confirm total');tap('💵 Count change');tap('$1');tap('$1');tap('Give change')
    assert page.evaluate('[state.sales,state.bagCount]')==[0,0]
    tap('Buy 10 bags · $3');tap('Give change')
    assert page.evaluate('[state.cash,state.bagCount,state.customersServed]')==[50,9,1]

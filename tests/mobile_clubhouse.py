@@ -1,6 +1,7 @@
 """Clubhouse purchases, personal collections, legacy/backup saves and phone layouts.
 Uses isolated fixture farms and touch Chromium; physical iPhone Safari is unverified.
 """
+from market_ui_helpers import enter_total
 from functools import partial
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -142,8 +143,8 @@ try:
   page.evaluate("()=>{state=Game.initial();state.cash=98;Game.chooseGoal(state,0);state.bagCount=5;state.inventory.carrot=state.display.carrot=4;Game.openMarket(state);Game.newCustomer(state,'Maya');state.customer.want={carrot:1};go('market');}")
   def tap_goal(name):page.get_by_role('button',name=name,exact=True).tap()
   tap_goal('Hi! What can I get for you?');tap_goal('🧺 Fill customer basket')
-  tap_goal('Add Carrots');tap_goal('Check basket');page.locator('#total-answer').fill('2')
-  tap_goal('⚖️ Check total / collect payment');tap_goal('💵 Count change')
+  tap_goal('Add Carrots');tap_goal('Check basket');enter_total(page,'2')
+  tap_goal('Confirm total');tap_goal('💵 Count change')
   due=page.evaluate('state.tendered-Game.totalOrder(state)')
   for _ in range(int(due)):tap_goal('$1')
   tap_goal('Give change')

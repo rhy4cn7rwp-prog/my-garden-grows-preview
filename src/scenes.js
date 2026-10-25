@@ -58,7 +58,8 @@ function closeDialog() {
 function show(html, key = null) {
   dialogKey = key;
   const register = key === "payment";
-  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${register ? "register-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : ""}">${html}${register ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
+  const keypad = key === "total-keypad";
+  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${register ? "register-modal" : keypad ? "total-keypad-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : keypad ? "total-keypad-dialog" : ""}">${html}${register || keypad ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
   render();
 }
 function spot(x, y, w, h, action, title) {
@@ -108,11 +109,11 @@ function renderScene() {
           .map(([id, n]) => `${n} ${crop(id).unit} ${crop(id).name}`)
           .join(" and ");
         const greetings = `<button class="btn" onclick="greetCustomer('excellent')">Hi! Welcome to my stand! What can I help you find today?</button><button class="btn" onclick="greetCustomer('good')">Hi! What can I get for you?</button><button class="btn" onclick="greetCustomer('wait')">Wait quietly for the customer to ask for something.</button>`;
-        const farewells = `<button class="btn" onclick="advance('excellent')">Thank you so much! I hope to see you again!</button><button class="btn" onclick="advance('good')">Thanks for shopping with us!</button><button class="btn" onclick="advance('brief')">Bye!</button>`;
+        const farewells = `<button class="btn" onclick="marketFarewell('excellent')">Thank you so much! I hope to see you again!</button><button class="btn" onclick="marketFarewell('good')">Thanks for shopping with us!</button><button class="btn" onclick="marketFarewell('brief')">Bye!</button>`;
         const choosing = Game.missingProduce(state).length
           ? `<button class="btn" onclick="customerService()">Help with sold-out produce</button>`
           : `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="customerService()">Talk about the order</button>`;
-        bottom = `<h2>🍎 Market Day · ${Math.floor(state.hour)}:${state.hour % 1 ? "30" : "00"}</h2><p><b>${c.name}:</b> ${Game.customerResponse(state)}</p>${state.step === "choose" ? `<p><strong>Customer requests:</strong> ${request}.</p>` : ""}<div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
+        bottom = `<h2>🍎 Market Day · ${Math.floor(state.hour)}:${state.hour % 1 ? "30" : "00"}</h2>${marketConversation()}${state.step === "choose" ? `<p><strong>Customer requests:</strong> ${request}.</p>` : ""}<div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()} · up to ${Game.customerLimit(state)} customers</p>`;
       }
     }
   }
@@ -274,7 +275,7 @@ function order(feedback = "") {
         .join(", ") || "Empty"
     }</p>
     <button class="btn alt" onclick="checkBasket()">Check basket</button>
-    <label>Calculate the total: $<input id="total-answer" type="number" min="0" step="0.01" inputmode="decimal"></label><button class="btn" onclick="ring()">⚖️ Check total / collect payment</button>${Object.keys(c.want).some((id) => crop(id).unit === "lb") && !Game.hasEquipment(state, "scale") ? '<button class="btn alt" onclick="rentalOffer(\'scale\')">Need a scale? Review rental</button>' : ""}`,
+    <button class="btn" onclick="marketTotalKeypad()">Calculate total</button>${Object.keys(c.want).some((id) => crop(id).unit === "lb") && !Game.hasEquipment(state, "scale") ? '<button class="btn alt" onclick="rentalOffer(\'scale\')">Need a scale? Review rental</button>' : ""}`,
     "order",
   );
 }

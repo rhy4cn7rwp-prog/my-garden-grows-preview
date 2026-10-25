@@ -3,6 +3,7 @@ Uses isolated browser storage. Set BROWSER=webkit with an installed WebKit runti
 for an additional engine check; this is not a substitute for real iPhone testing.
 """
 import os
+from market_ui_helpers import enter_total
 from functools import partial
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -48,7 +49,7 @@ try:
    assert 'lovely welcome' in page.locator('.bottom').inner_text()
    tap('🧺 Fill customer basket')
    assert page.locator('.produce-choices .basketline').count()==5
-   assert page.locator('#total-answer').evaluate('e=>parseFloat(getComputedStyle(e).fontSize)')>=16
+   assert page.locator('#total-answer,input[type=number]').count()==0
    assert page.get_by_role('button',name='Add Onions',exact=True).count()==0  # harvested but not on stand
    assert page.get_by_role('button',name='Add Green beans',exact=True).count()==0
    # Wrong vegetable; over-request quantity is allowed up to stand stock, but never deducted.
@@ -60,12 +61,12 @@ try:
    page.reload();assert page.evaluate('state.basket')=={'corn':1,'carrot':3,'tomato':1}
    tap('🧺 Fill customer basket');tap('Remove Carrots');tap('Check basket')
    assert 'not on the order' in page.locator('.order-feedback').inner_text()
-   page.locator('#total-answer').fill('10');tap('⚖️ Check total / collect payment')
+   enter_total(page,'10');tap('Confirm total')
    assert page.evaluate('state.step')=='choose';assert baseline()==before
    tap('Remove Corn');tap('Check basket');assert 'matches the order' in page.locator('.order-feedback').inner_text()
-   page.locator('#total-answer').fill('8');tap('⚖️ Check total / collect payment')
-   assert 'multiplying' in page.locator('.order-feedback').inner_text();assert baseline()==before
-   page.locator('#total-answer').fill('7');tap('⚖️ Check total / collect payment');tap('💵 Count change');fit()
+   enter_total(page,'8');tap('Confirm total')
+   assert 'multiplying' in page.locator('.total-keypad-feedback').inner_text();assert baseline()==before
+   enter_total(page,'7');tap('Confirm total');tap('💵 Count change');fit()
    if width==375:
     # Model Safari: layout viewport stays tall while visible toolbar space is smaller and offset.
     page.evaluate('''()=>{const v=visualViewport;Object.defineProperty(v,'height',{configurable:true,get:()=>380});Object.defineProperty(v,'offsetTop',{configurable:true,get:()=>12});v.dispatchEvent(new Event('resize'));}''')
@@ -99,7 +100,7 @@ try:
    page.locator('[onclick="offerAlternative(\'cucumber\')"]').tap()
    assert 'try that instead' in page.locator('.bottom').inner_text();assert baseline()==before
    tap('🧺 Fill customer basket');tap('Add Cucumbers');tap('Check basket')
-   page.locator('#total-answer').fill('3');tap('⚖️ Check total / collect payment');tap('💵 Count change');fit();tap('$1');tap('$1');tap('Give change')
+   enter_total(page,'3');tap('Confirm total');tap('💵 Count change');fit();tap('$1');tap('$1');tap('Give change')
    assert page.evaluate('[state.cash,state.bagCount,state.customersServed,state.inventory.cucumber]')==[53,2,1,2]
    tap('Thanks for shopping with us!')
    # Some customers decline: no forced sale, no money, produce, or bag consumed.

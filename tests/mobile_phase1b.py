@@ -1,5 +1,6 @@
 """Phase 1B touch/scroll/inventory/deferred-payment regression, in isolated browser saves."""
 import os
+from market_ui_helpers import enter_total
 from functools import partial
 from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
 from pathlib import Path
@@ -79,7 +80,7 @@ try:
    buttons=page.locator('.bottom button').all_text_contents()
    assert buttons[0]=='Welcome Next Customer' and 'Open market' not in buttons
    tap('Welcome Next Customer');tap('Hi! What can I get for you?');tap('🧺 Fill customer basket');page.locator('.produce-choices button[aria-label^="Add " ]').first.tap()
-   page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment');tap('💵 Count change');tap('$1');tap('Give change');tap('Thank you so much! I hope to see you again!')
+   enter_total(page,'4');tap('Confirm total');tap('💵 Count change');tap('$1');tap('Give change');tap('Thank you so much! I hope to see you again!')
    assert page.evaluate('state.cash')==4
    tap('Close market')
    assert '$4.00' in page.locator('.accounting-report tr').filter(has_text='Deferred equipment payments').inner_text()

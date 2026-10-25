@@ -3,6 +3,7 @@ Chromium touch contexts simulate Safari's available viewport and safe areas;
 physical iPhone Safari still requires a device playtest.
 """
 import os
+from market_ui_helpers import enter_total
 from functools import partial
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -61,7 +62,7 @@ try:
    # Both the visible illustrated register and the existing count-change button work.
    tap('Hi! What can I get for you?');tap('🧺 Fill customer basket')
    tap('Add Carrots');tap('Add Carrots');tap('Check basket')
-   page.locator('#total-answer').fill('4');tap('⚖️ Check total / collect payment')
+   enter_total(page,'4');tap('Confirm total')
    paid_before=page.evaluate('[state.cash,state.bagCount,state.inventory.carrot]')
    tap('Open cash register')
    register=page.locator('.register-dialog')

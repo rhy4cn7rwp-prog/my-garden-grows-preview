@@ -63,6 +63,7 @@ function farmersMarketScene(controls) {
 }
 function marketRegister() {
   if (state.customer && state.step === "pay") return payment();
+  if (state.customer && state.step === "choose") return marketTotalKeypad();
   show(
     `<h2>Your cash register</h2><p>${state.customer ? "Fill your customer's basket and calculate the total first. Then you can count their change here." : "Welcome a customer and fill their order. Your cash register will be ready when it is time to count change."}</p>`,
     "market-register-info",
