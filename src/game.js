@@ -1525,12 +1525,7 @@
       "Choose a farewell.",
     );
     satisfaction(s, farewell === "excellent" ? 3 : farewell === "good" ? 2 : 0);
-    s.notice =
-      farewell === "excellent"
-        ? "Your customer smiles: ‘Thank you! I hope to visit again!’"
-        : farewell === "good"
-          ? "Your customer says: ‘Thanks! Have a good day!’"
-          : "Your customer waves goodbye.";
+    s.notice = "";
     s.customer = null;
     s.basket = {};
     s.change = 0;

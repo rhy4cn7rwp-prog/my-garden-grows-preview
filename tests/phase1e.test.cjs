@@ -207,7 +207,7 @@ test("both sold-out apologies and all farewells are friendly, preserve earnings 
       assert.equal(s.customer, null);
       assert.equal(finances(s), before);
       assert.ok(score >= 50);
-      assert.ok(s.notice.length > 10);
+      assert.equal(s.notice, "");
       assert.throws(() => G.advanceCustomer(s, farewell));
     }
 });

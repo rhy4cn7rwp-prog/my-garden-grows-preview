@@ -1,3 +1,23 @@
+## Latest targeted market corrections
+
+The tabletop now renders only crops with positive sellable stand stock, rather
+than all harvested inventory. A sold-out basket/crate and label disappear together;
+restocking restores them. One to three remaining displays center automatically
+without stretching the original illustrations. Rendering does not change crop,
+inventory, display, sales or customer-history records.
+
+NPC farewells remain in the existing in-scene speech bubble until departure.
+Leaving a customer no longer creates a standalone status message. Legacy farewell
+notices are also suppressed in market controls and stand preparation; functional
+bag/equipment notices remain intact. Farewell satisfaction and transaction rules
+are unchanged.
+
+QA covers actual sale → empty stand stock with harvest still in storage → restock
+→ refresh, balanced 3/2/1/0 arrangements, bubble-only goodbyes, six phone layouts,
+all 28 customer portraits, existing clock/closing behavior and domain regressions.
+Native iPhone Safari still requires a device playtest; rendered checks here use
+Chromium touch emulation with Safari-sized viewports and safe areas.
+
 ## Latest Farmers Market: neighbors and returning regulars
 
 The market now has **28 individually illustrated human customers**. All twenty

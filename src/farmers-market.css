@@ -265,3 +265,7 @@ body[data-view="market"] #app {
 @media (min-width:375px) {
   .market-produce { flex-basis:calc((100% - 15px) / 4); }
 }
+
+/* Center the remaining stock without enlarging baskets into oversized artwork. */
+.market-produce-tray.market-produce-balanced { justify-content:center; }
+.market-produce-balanced .market-produce { flex:0 0 clamp(83px,28vw,128px); }

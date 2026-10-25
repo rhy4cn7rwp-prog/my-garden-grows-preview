@@ -91,7 +91,7 @@ try:
    tap('Give change')
    assert page.evaluate('[state.cash,state.bagCount,state.customersServed,state.inventory.carrot,state.inventory.tomato,state.inventory.corn]')==[57,2,1,2,2,2]
    paid=baseline();tap('Thank you so much! I hope to see you again!');assert baseline()==paid
-   assert 'smiles' in page.locator('.bottom').inner_text();page.reload();assert page.evaluate('[state.cash,state.bagCount]')==[57,2]
+   assert 'Your customer' not in page.locator('.bottom').inner_text();page.reload();assert page.evaluate('[state.cash,state.bagCount]')==[57,2]
    # Sold-out request, real stock alternatives, accepted substitution, full educational checkout.
    fixture('{onion:1}',decision=10);before=baseline();tap('Hi! What can I get for you?')
    page.reload();assert page.evaluate('state.customer.want')=={'onion':1}

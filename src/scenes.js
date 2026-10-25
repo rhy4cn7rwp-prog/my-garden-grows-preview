@@ -119,7 +119,7 @@ function renderScene() {
   }
   if (view === "market")
     bottom +=
-      (state.notice ? `<p role="status">${state.notice}</p>` : "") +
+      (marketStatusNotice() ? `<p role="status">${marketStatusNotice()}</p>` : "") +
       bagStatus() +
       (state.lastMarketReport
         ? '<button class="btn alt" onclick="showMarketReport(true)">Previous market report</button>'

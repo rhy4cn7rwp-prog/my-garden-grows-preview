@@ -90,7 +90,7 @@ function harvest(i) {
 }
 function marketStand() {
   show(
-    `<h2>Arrange your market stand</h2>${bagStatus()}<p>Every completed purchase uses exactly one bag, regardless of items or quantities.</p>${standOptions()}${financeSummary()}<button class="btn alt" onclick="rentalMenu()">Daily equipment rentals</button><button class="btn" onclick="addAllProduce()" ${state.customer ? "disabled" : ""}>Add All Produce to Stand</button>${state.notice ? `<p role="status">${state.notice}</p>` : ""}${
+    `<h2>Arrange your market stand</h2>${bagStatus()}<p>Every completed purchase uses exactly one bag, regardless of items or quantities.</p>${standOptions()}${financeSummary()}<button class="btn alt" onclick="rentalMenu()">Daily equipment rentals</button><button class="btn" onclick="addAllProduce()" ${state.customer ? "disabled" : ""}>Add All Produce to Stand</button>${marketStatusNotice() ? `<p role="status">${marketStatusNotice()}</p>` : ""}${
       CROPS.filter((c) => state.inventory[c.id])
         .map(
           (c) =>
