@@ -304,20 +304,22 @@ function totalOrder() {
 }
 function paymentDialog() {
   let t = totalOrder(),
-    due = state.tendered - t;
+    due = Game.changeDue(state);
   show(
     `<header class="register-header"><h2>💵 Cash Register</h2><button class="register-close" aria-label="Close ✕" onclick="closeDialog()">×</button></header>
     <div class="register-receipt"><p><span>Order total</span><strong>${money(t)}</strong></p><p><span>${state.customer.name} pays</span><strong>${money(state.tendered)}</strong></p><p><span>Change due</span><strong>${money(due)}</strong></p></div>
     <div class="money-tray">${[1, 5, 10, 20, 0.01, 0.05, 0.1, 0.25].map(moneyButton).join("")}</div>
-    <div class="register-count" role="status"><strong>Change counted: ${money(state.change)}</strong><small>Count up: ${money(t + state.change)} → ${money(state.tendered)}</small></div>
+    <div class="register-count" role="status"><strong>Change counted: ${money(state.change)}</strong><small>Count up: ${money((Math.round(t * 100) + Math.round(state.change * 100)) / 100)} → ${money(state.tendered)}</small></div>
     ${bagStatus(true)}
     <div class="register-actions"><button class="btn alt" onclick="state.change=0;payment()">Start over</button><button class="btn" onclick="finish()">Give change</button></div>`,
     "payment",
   );
 }
 function addMoney(n) {
-  state.change = Math.round((state.change + n) * 100) / 100;
-  payment();
+  act(() => {
+    Game.addChange(state, n);
+    payment();
+  });
 }
 
 function greetCustomer(choice) {

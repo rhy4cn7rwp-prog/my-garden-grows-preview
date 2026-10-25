@@ -160,6 +160,7 @@
       season: 1,
       goal: 1,
       mathPractice: { support: 0, streak: 0, mistakes: 0, retrying: false },
+      changePractice: { support: 0, streak: 0, mistakes: 0, retrying: false },
       dreamPurchaseCount: 0,
       dreamPurchases: {},
       clubhousePositions: {},
@@ -325,6 +326,13 @@
         streak: quantity(practice.streak) ? Math.min(2, practice.streak) : 0,
         mistakes: practice.mistakes === 1 ? 1 : 0,
         retrying: practice.retrying === true,
+      };
+      const changePractice = s.changePractice || {};
+      clean.changePractice = {
+        support: quantity(changePractice.support) ? Math.min(5, changePractice.support) : 0,
+        streak: quantity(changePractice.streak) ? Math.min(2, changePractice.streak) : 0,
+        mistakes: changePractice.mistakes === 1 ? 1 : 0,
+        retrying: changePractice.retrying === true,
       };
       // A failed optional room-script download must never reset a valid farm.
       clean.clubhousePositions = roomLayout
@@ -888,14 +896,24 @@
   }
   function mathLevel(s) { return Math.min(5, Math.floor(dreamPurchaseCount(s) / 2)); }
   function orderDifficulty(s) {
-    const level = Math.max(0, mathLevel(s) - (s.mathPractice?.support || 0));
+    const support = Math.max(s.mathPractice?.support || 0, s.changePractice?.support || 0);
+    const level = Math.max(0, mathLevel(s) - support);
     // Every third shopper is an easier review; milestones never remove practice.
     return s.visitors % 3 === 2 ? Math.max(0, level - 1) : level;
   }
+  const marketOrderBudgets = [20, 20, 20, 40, 60, 90];
+  // Pool lengths avoid multiples of three, so review visits cannot hide a new fraction.
+  const priceFractions = [
+    [0],
+    [50, 25],
+    [0, 25, 50, 75],
+    [0, 25, 50, 75, 5, 10, 0],
+    [0, 25, 50, 75, 10, 20, 5, 15, 30, 40, 60, 80, 0],
+    Array.from({length:20}, (_,i)=>i*5),
+  ];
   function priceForLevel(id, level, visit) {
-    const fraction = level === 0 ? 0 : level === 1
-      ? [25, 50][visit % 2] : [0, 25, 50, 75][visit % 4];
-    return (cents(get(id).price) + fraction) / 100;
+    const pool = priceFractions[level];
+    return (cents(get(id).price) + pool[visit % pool.length]) / 100;
   }
   function marketPrice(s, id) {
     if (!get(id)) return 0;
@@ -915,7 +933,7 @@
     const a = stock[s.visitors % stock.length], want = {};
     const products = Math.min(stock.length, level >= 3 ? 3 : level >= 2 ? 2 + s.visitors % 2 : 1 + s.visitors % 2);
     const maxQuantity = [2, 2, 3, 4, 5, 8][level];
-    const budget = [20, 20, 20, 20, 50, 90][level];
+    const budget = marketOrderBudgets[level];
     let subtotal = 0;
     for (let i = 0; i < products; i++) {
       const item = stock[(s.visitors + i) % stock.length];
@@ -974,7 +992,7 @@
       (c) =>
         marketStock(s, c.id) > 0 &&
         !s.customer.want[c.id] &&
-        cents(marketPrice(s,c.id)) <= cents([20,20,20,20,50,90][s.customer.mathLevel ?? 0]) -
+        cents(marketPrice(s,c.id)) <= cents(marketOrderBudgets[s.customer.mathLevel ?? 0]) -
           Object.entries(s.customer.want).filter(([id])=>!missingProduce(s).includes(id))
             .reduce((n,[id,q])=>n+cents(marketPrice(s,id))*q,0),
     );
@@ -1020,7 +1038,7 @@
       const otherCost = Object.entries(c.want).filter(([key])=>!missingProduce(s).includes(key))
         .reduce((n,[key,q])=>n+cents(marketPrice(s,key))*q,0);
       const quantity = Math.min(c.want[missing], marketStock(s, id),
-        Math.floor((cents([20,20,20,20,50,90][c.mathLevel ?? 0])-otherCost)/cents(marketPrice(s,id))));
+        Math.floor((cents(marketOrderBudgets[c.mathLevel ?? 0])-otherCost)/cents(marketPrice(s,id))));
       delete c.want[missing];
       c.want[id] = quantity;
       // Start a fresh basket for the customer's newly agreed order. No stock is consumed.
@@ -1142,6 +1160,46 @@
     s.customer.lineAnswers ||= {};
     s.customer.lineAnswers[id] = {quantity:n, priceCents:price, answerCents:n*price};
   }
+  function lineTotal(s, id) {
+    return cents(marketPrice(s,id)) * (s.basket[id] || 0) / 100;
+  }
+  function changeDue(s) {
+    return (cents(s.tendered) - cents(totalOrder(s))) / 100;
+  }
+  function addChange(s, value) {
+    requireRule(s.customer && s.step === "pay", "Open a customer's payment first.");
+    const amount = cents(value);
+    requireRule(Number.isFinite(value) && Math.abs(value*100-amount)<1e-7 && [1,5,10,25,100,500,1000,2000].includes(amount), "Choose a bill or coin from the tray.");
+    s.change = (cents(s.change) + amount) / 100;
+  }
+  function recordChangeAttempt(s, correct) {
+    const p = s.changePractice ||= { support:0, streak:0, mistakes:0, retrying:false };
+    if (!correct) {
+      p.streak=0; p.retrying=true;
+      if (++p.mistakes >= 2) { p.support=Math.min(mathLevel(s),p.support+1); p.mistakes=0; }
+    } else {
+      p.mistakes=0;
+      if (!p.retrying && ++p.streak >= 3) { p.support=Math.max(0,p.support-1); p.streak=0; }
+      p.retrying=false;
+    }
+  }
+  function customerTenderCents(s, total) {
+    const level=s.customer.mathLevel, visit=Math.max(0,s.visitors-1);
+    if (level >= 3) {
+      // Larger notes are occasional, and only for a substantial order.
+      if (total >= 2500 && visit % 11 === 0) return 10000;
+      if (total >= 1000 && total <= 5000 && visit % 5 === 0) return 5000;
+    }
+    const notes = level === undefined || level >= 3 ? [500,1000,2000,5000,10000] : [500,1000,2000];
+    const nearest=notes.findIndex(n=>n>=total);
+    if (nearest >= 0) {
+      if (level === 2 && total >= 500 && visit % 4 === 0)
+        return notes[Math.min(nearest+1, notes.length-1)];
+      return notes[nearest];
+    }
+    // Keep unusual but valid older pending orders payable too.
+    return [5000,10000].find(n=>n>=total) || Math.ceil(total/10000)*10000;
+  }
   function ring(s, answer) {
     checkBasket(s);
     requireRule(
@@ -1157,11 +1215,7 @@
       correct,
       "Try adding the item amounts, one at a time. You can try again!",
     );
-    s.tendered =
-      (s.customer.mathLevel === undefined ? [5, 10, 20, 50, 100] :
-        s.customer.mathLevel >= 5 ? [20, 50, 100] :
-        s.customer.mathLevel >= 4 ? [20, 50] : [5, 10, 20]).find((n) => n >= total) ||
-      Math.ceil(total / 100) * 100;
+    s.tendered = customerTenderCents(s, cents(total)) / 100;
     s.step = "pay";
     s.change = 0;
   }
@@ -1170,10 +1224,10 @@
       s.step === "pay" && s.customer,
       "This sale has already finished.",
     );
-    requireRule(
-      cents(s.change) === cents(s.tendered - totalOrder(s)),
-      "Count back the exact change.",
-    );
+    if (!Number.isFinite(s.change) || cents(s.change) !== cents(changeDue(s))) {
+      recordChangeAttempt(s, false);
+      throw Error("Count up from the order total to the payment. Try another combination, or start over. Take your time!");
+    }
     requireRule(
       Object.entries(s.customer.want).every(([id, n]) => s.basket[id] === n) &&
         Object.keys(s.basket).every((id) => s.customer.want[id] !== undefined),
@@ -1190,6 +1244,7 @@
         "Not enough produce.",
       );
     }
+    recordChangeAttempt(s, true);
     for (const [id, n] of Object.entries(s.basket)) {
       s.inventory[id] -= n;
       s.display[id] -= n;
@@ -1320,15 +1375,16 @@
       return;
     const savedPrices = Object.fromEntries(crops.map(item => [item.id,
       Number.isFinite(c.prices?.[item.id]) && c.prices[item.id] >= item.price &&
-        c.prices[item.id] <= item.price + .75 && Number.isInteger(c.prices[item.id] * 100)
-        ? c.prices[item.id] : item.price]));
+        c.prices[item.id] <= item.price + .95 &&
+        Math.abs(c.prices[item.id] * 100 - cents(c.prices[item.id])) < 1e-7
+        ? cents(c.prices[item.id]) / 100 : item.price]));
     const savedTotal = Object.entries(s.basket).reduce((n,[id,q]) => n+cents(savedPrices[id])*q,0)/100;
     if (
       s.step === "pay" &&
       (!Object.entries(c.want).every(([id, n]) => s.basket[id] === n) ||
         !Object.keys(s.basket).every((id) => c.want[id] !== undefined) ||
         !Number.isFinite(s.tendered) ||
-        s.tendered < savedTotal ||
+        cents(s.tendered) < cents(savedTotal) ||
         !Number.isFinite(s.change) ||
         s.change < 0)
     )
@@ -1389,7 +1445,8 @@
     }
     clean.basket = { ...s.basket };
     clean.step = s.step;
-    clean.change = Number.isFinite(s.change) && s.change >= 0 ? s.change : 0;
+    clean.change = Number.isFinite(s.change) && s.change >= 0 ? cents(s.change) / 100 : 0;
+    if (Number.isFinite(s.tendered)) clean.tendered = cents(s.tendered) / 100;
   }
   function savings(s) {
     return Math.max(0, (cents(s.cash) - cents(debtTotal(s))) / 100);
@@ -1569,6 +1626,9 @@
     lineSolved,
     nextMathLine,
     answerMathLine,
+    lineTotal,
+    changeDue,
+    addChange,
     ownsDream,
     acknowledgeGoal,
     purchaseDream,

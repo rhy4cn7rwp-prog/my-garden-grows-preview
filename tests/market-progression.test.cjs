@@ -26,7 +26,7 @@ test('all tiers mix review orders, respect stock, unlock fractions and cap payme
    solve(s);
    assert.throws(()=>G.ring(s,total+.01));assert.equal(s.step,'choose');G.ring(s,total);
    payments.add(s.tendered);assert.ok(s.tendered>=total);
-   assert.ok(s.tendered<=(count<8?20:count<10?50:100));
+   assert.ok(s.tendered<=(count<6?20:100));
    s.change=(Math.round(s.tendered*100)-Math.round(total*100))/100;
    const r=G.recover(JSON.stringify(s));assert.equal(r.step,'pay');assert.equal(G.totalOrder(r),total);
    const cash=r.cash;G.finish(r);assert.equal(r.cash, cash+total);assert.equal(r.bagCount,99);

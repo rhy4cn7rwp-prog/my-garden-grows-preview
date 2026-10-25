@@ -1,3 +1,51 @@
+## Phase 4: cents, varied payments and change-making support
+
+The original illustrated $1/$5/$10/$20 bill and penny/nickel/dime/quarter controls
+are preserved. Every mathematically correct combination is accepted, including
+extra coins instead of an optimal solution. Players still select and hand over
+change themselves. The existing numeric keypad and customer conversations remain.
+
+| Dream purchases | Prices and payment practice |
+| --- | --- |
+| 0–1 | Whole-dollar prices and change; small orders, $5/$10/$20 payments |
+| 2–3 | Halves and quarters, mixed with whole-dollar reviews |
+| 4–5 | Add .75 prices and more variation between $5/$10/$20 payments |
+| 6–7 | Add selected .05/.10 prices, larger orders, occasional $50/$100 payments |
+| 8–9 | Mix in .15/.20/.30/.40/.60/.80 prices |
+| 10+ | All fractional amounts from .00 through .95 in 5-cent steps |
+
+Every third arrival remains an easier review. Price pools and review intervals
+are deliberately not synchronized, so each introduced fraction can actually
+appear. Larger notes are used only at the appropriate effective difficulty and
+for substantial orders; payment always covers the total. The current Dream Shop
+has six objects: its six-purchase stage is playable, while 8+ stages remain ready
+for future catalog additions. No rewards, prices in other shops or purchases were
+added or removed.
+
+Change practice is saved separately from multiplication/addition practice. Two
+incorrect change confirmations lower future numerical difficulty by one tier.
+Three first-try successful change transactions gradually restore a tier. The
+more supportive of the two skill settings controls future prices, order size and
+payments. Correct item math cannot immediately erase change-making support.
+Adding extra coins or using a non-optimal solution is never treated as an error.
+Mistakes never spend cash, consume bags/produce, or erase dream ownership. An
+active customer's agreed prices/payment remain fixed while support changes.
+
+All money arithmetic converts to integer cents before addition, multiplication
+or subtraction, including the on-screen count-up amount. Existing dollar-valued
+save fields remain compatible. The loader now retains valid 5-cent prices such
+as $4.10 despite binary floating-point representation, as well as saved counted
+coins and optional practice data. Older saves default only the new support field;
+other progress and pending payments are preserved.
+
+QA includes all milestones, every 5-cent fraction, alternate quarter/dime/nickel/
+penny and bill combinations, incorrect/overcounted change, support recovery,
+$50/$100 payments, partial-change refresh, old saves, 120 fractional sales and
+repeat report/closing checks with deferred rental deductions. Mobile tests cover
+six phone layouts, all coin buttons, the original 44px touch targets and no new
+register scrolling. Actual iPhone Safari is unavailable here; verification uses
+Chromium touch emulation and Safari-sized safe areas, plus rendered screenshots.
+
 ## Phase 3: consistent personalities and welcoming greetings
 
 This phase builds on the existing **28 distinct illustrated neighbors**, retaining

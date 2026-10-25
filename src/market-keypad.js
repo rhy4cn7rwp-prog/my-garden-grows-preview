@@ -21,7 +21,7 @@ function marketTotalKeypad(feedback = "") {
     `<header class="total-keypad-header"><h2>${heading}</h2><button class="register-close" aria-label="Close ✕" onclick="closeDialog()">×</button></header><div class="total-keypad-order"><b>${state.customer.name}'s order:</b>${
       Object.entries(state.basket).filter(([,n])=>n>0).map(([id,n]) => {
         const solved = Game.lineSolved(state,id);
-        const result = !Game.requiresLineMath(state) ? money(n*Game.marketPrice(state,id)) :
+        const result = !Game.requiresLineMath(state) ? money(Game.lineTotal(state,id)) :
           solved ? money(state.customer.lineAnswers[id].answerCents/100) + " ✓" : "?";
         return `<div class="order-math-line ${activeLine === id ? "math-line-active" : ""}" ${activeLine === id ? 'aria-current="step"' : ""}><span>${crop(id).name}${crop(id).unit === "lb" ? " (lb)" : ""}:</span><span>${n} × ${money(Game.marketPrice(state,id))} = ${result}</span></div>`;
       }).join("") || "Your basket is empty."
