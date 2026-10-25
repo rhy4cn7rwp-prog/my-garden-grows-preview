@@ -338,6 +338,7 @@ function render() {
     y: window.scrollY,
     dialog: document.querySelector(".dialog")?.scrollTop || 0,
     seedBody: document.querySelector(".seed-detail-body")?.scrollTop || 0,
+    supplyBody: document.querySelector(".supply-detail-body")?.scrollTop || 0,
   };
   const sameView = renderedView === view,
     sameDialog =
@@ -365,6 +366,8 @@ function render() {
       if (dialog) dialog.scrollTop = position.dialog;
       const seedBody = document.querySelector(".seed-detail-body");
       if (seedBody) seedBody.scrollTop = position.seedBody;
+      const supplyBody = document.querySelector(".supply-detail-body");
+      if (supplyBody) supplyBody.scrollTop = position.supplyBody;
       if (focused)
         Array.from(dialog?.querySelectorAll("[onclick]") || [])
           .find((el) => el.getAttribute("onclick") === focused)

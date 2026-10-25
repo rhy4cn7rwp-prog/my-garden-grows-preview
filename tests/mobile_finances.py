@@ -26,7 +26,7 @@ try:
   page.get_by_role('button',name='Accept community help',exact=True).tap()
   page.get_by_role('button',name='Go plant carrots',exact=True).tap()
   page.locator('.plot').first.tap()
-  page.get_by_role('button',name='🥕 Carrots (3 available)',exact=True).tap()
+  page.get_by_role('button',name='🥕 Carrot Seeds (3 available)',exact=True).tap()
   page.get_by_role('button',name='🌱 Plant plan (1)',exact=True).tap()
   for _ in range(3):
    page.get_by_role('button',name='💧 Water all',exact=True).tap()

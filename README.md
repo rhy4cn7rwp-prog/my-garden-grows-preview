@@ -1,9 +1,86 @@
-# My Garden Grows 1.0 preview — Seed & Feed Interior
+# My Garden Grows 1.0 preview — Phase 3B: Market Supplies
 
 Changes and deployment are restricted to `my-garden-grows-preview`. The original
 `my-garden-grows` repository and website remain untouched. The illustrated
 storybook scenes and existing farming, shopping, customer and money gameplay
 are preserved.
+
+## Phase 3B: Market Supplies
+
+Enter **Market Supplies** from the village. The new storybook store has a friendly
+shopkeeper, a wooden plaque attached to the counter, and separate illustrated
+supplies on reusable shelf components. Tap real merchandise to compare options,
+choose quantities and review a basket before paying. The familiar navigation,
+money/calendar display, safe areas and short-screen shelf scrolling are retained.
+No other shop interior or existing artwork was redesigned.
+
+| Product | Provisional game price | Inventory type |
+| --- | --- | --- |
+| Paper produce bags | 5 for $1; 20 for $3 | Consumable; existing purchased bag pool |
+| Cardboard produce boxes | 5 for $3 | Consumable |
+| Price tags | 10 for $1 | Consumable |
+| Market sign | $8 each | Reusable |
+| Produce baskets | $5 each | Reusable |
+
+Bag choices show **20¢ each** versus **15¢ each**. Twenty bags bought as four
+small packs cost $4, versus $3 in bulk: $1 saved, with a larger upfront purchase
+than one $1 pack. These are simplified game prices. Short explanations distinguish
+buying from selling, supplies as a business expense, consumables and reusable items.
+There is no automated recommendation or customer/earnings boost.
+
+The new supply basket supports reviewed quantities, exact totals, affordability
+checks, receipts and pending-basket refresh. Purchases debit integer cents once
+and record upfront expenses; bags appear in the existing bag-purchase report
+line and other new supplies in **Other market expenses**. Closing never charges
+these purchases again. Paid-money reports and backup saves accept the additive
+expense category without resetting existing farms.
+
+### Compatibility and phase boundaries
+
+- Save version and storage keys remain unchanged. `marketSupplyStock` separates
+  `consumables: {boxes, priceTags}` from `reusable: {marketSigns, produceBaskets}`;
+  `marketSupplyCart` holds the reviewed new-product basket. Invalid optional
+  records are sanitized independently of otherwise valid farm progress.
+- **`bagCount` remains authoritative for purchased bags.** No second bag stock is
+  stored. Legacy `owned.bags` counts only old ten-packs for backward migration;
+  five/twenty-packs do not pretend to be ten-packs. Daily-use rental bags remain
+  separate and retain existing expiry/use rules. No old bag quantity is guessed.
+- Boxes, tags, signs and baskets are stored for future selling integration and
+  are optional. They are not consumed and never gate a sale or boost earnings.
+  The existing one-paper-bag-per-completed-sale rule is unchanged.
+- Existing table ($8), canopy ($10), scale ($5), their purchases and rentals remain
+  under **Equipment & rentals**, with their own preserved equipment basket.
+  A pending older ten-bag cart can still be reviewed and reduced there.
+- The existing in-market emergency refill remains **10 bags for $3**. Its price,
+  customer preservation and register flow were intentionally not rewritten in
+  this shop phase. New 5/$1 and 20/$3 packs are purchased in this store.
+- Seed & Feed, garden growth, market/customer/payment mechanics, clubhouse,
+  dream purchases, savings and seasons retain their existing rules. No upgrade
+  system, new supply-consumption requirement or other interior redesign began.
+
+### Validation and actual-device checks
+
+All **118 automated rule tests** pass. New tests cover prices, exact pack counts,
+bulk arithmetic, mixed checkout, stock types, atomic invalid/insufficient orders,
+normal/backup/pending-cart recovery, old bag migration, corrupt optional records,
+reusable persistence across seasons, expense accounting without duplicate cash
+charges, and sales with no new supplies.
+
+`tests/mobile_market_supplies.py` passes at 320×360, 320×440, 375×548, 390×664,
+428×746, 428×892 and 667×320 with simulated safe areas and Safari-style toolbar
+height changes. Actual touch checks buy a mixed basket for $27, leave $23 from
+$50, receive 25 bags/5 boxes/20 tags/1 sign/2 baskets, recover inventory after
+refresh and backup loading, preserve unrelated farm values, and reach existing
+equipment/rental options. Price labels are in front of rails and fit their cards.
+The existing **15 mobile suites** also pass (one old finance test's planting label
+was updated to the already-approved “Carrot Seeds” terminology).
+
+All automation is isolated Chromium. **Native physical iPhone Safari remains
+unverified**: no device is attached and WebKit installation is proxy-blocked.
+On the iPhone 12 Pro Max, check merchandise taps, quantity taps while scrolling,
+bulk comparison text, inventory, toolbar changes, equipment access and refresh
+without clearing website data. Very short portrait viewports scroll the shelf
+area while navigation and basket controls remain accessible.
 
 ## Strawberry plants terminology
 
@@ -18,7 +95,7 @@ are retained. Existing stock and saved purchases need no migration. Growing time
 yield, repeat harvests, produce price, seed/plant purchase arithmetic and all
 other rules remain unchanged. The harvested fruit is still “Strawberries.”
 
-All 108 automated tests pass, including adding two plants to existing legacy
+All 118 automated tests pass, including adding two plants to existing legacy
 stock, charging exactly $6 and recovering all five plants after saving. The full
 mobile seed-shop suite verifies purchasing, bundle quantities, receipt wording
 and refresh recovery at seven phone-sized layouts. Native Safari remains a
@@ -34,7 +111,7 @@ keeps its existing crop names. Crop IDs, saved `seeds` keys, all prices, quantit
 watered growing days, yields, repeat harvests and purchase rules are unchanged;
 no save migration or artwork change is needed.
 
-All 108 automated tests pass, including exact name checks in the shop, basket and
+All 118 automated tests pass, including exact name checks in the shop, basket and
 receipt, unchanged crop metadata and purchased inventory recovery. Mobile seed
 shopping covers all ten labels at seven phone layouts, including payment and
 refresh. Planting-inventory/reservation/recovery and existing storybook-sign
@@ -59,7 +136,7 @@ basket controls; the plaque and packet rows have separate physical space.
 `tests/mobile_storybook_signs.py` checks all four seasonal title variants, plaque
 attachment/visibility, non-overlap with touch targets, toolbar resizing and exact
 saved state at seven phone layouts. Seed-shop purchases/receipts/recovery and the
-three existing village suites pass, alongside all 108 rule/presentation tests.
+three existing village suites pass, alongside all 118 rule/presentation tests.
 Native physical iPhone Safari remains a manual check.
 
 ## Seed & Feed interior — current Phase 2D
@@ -93,7 +170,7 @@ unchanged. Original art remains intact; the two new generated PNGs are preserved
 under `assets/seed-shop/source/`, with WebP runtime art totaling about 875 KiB.
 Only this shop interior is redesigned.
 
-**Validation:** `npm test` passes 108 rule/presentation tests. Four new checks cover
+**Validation:** `npm test` passes 118 rule/presentation tests. Four new checks cover
 live catalog merchandise, mixed individual/bundle payments and receipt inventory,
 fixed assortment arithmetic/selling units, and empty/over-budget checkout.
 `tests/mobile_seed_shop.py` uses actual touch events at 320×360, 320×440, 375×548,
@@ -158,7 +235,7 @@ surface types at five phone/landscape sizes. It also compares the visible browse
 screenshot against the canvas throughout the unobstructed play area. It also checks a constant lens,
 refresh recovery, camera limits and unchanged farm/ownership/money. The existing
 actual-touch placement, customer/purchase and room-gesture suites remain in use.
-`npm test` passes **108 rule tests**. All mobile automation is isolated Chromium;
+`npm test` passes **118 rule tests**. All mobile automation is isolated Chromium;
 **native iPhone Safari remains unverified** because this environment has no
 physical iPhone and its WebKit browser download is blocked by the proxy.
 
@@ -295,7 +372,7 @@ congratulations/selection and existing market/farming rules are unchanged.
 
 ### Phase 2D validation and remaining manual checks
 
-`npm test` passes all **108 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
+`npm test` passes all **118 rule tests**, including `tests/clubhouse-room.test.cjs`: projection/inverse geometry,
 painted-edge bounds, valid defaults, owned-only moves, compatible surfaces,
 collision rejection, exact save recovery, old/malformed layouts, per-item/cascade
 and whole-room resets, and recovery when optional room code is unavailable.
@@ -697,7 +774,7 @@ day has complete accounting. Do not clear Safari data or restart to update.
   changes; saved rentals/seeds/goals/plots/bags and pending checkout recovery;
   readiness/open badges; keyboard/reduced motion; Safari visual-height, offset
   and safe-area simulations. Screenshots are written to `/tmp/phase2a-*.png`.
-- `npm test`: 108 rule tests covering clubhouse ownership/checkout, goal congratulations
+- `npm test`: 118 rule tests covering clubhouse ownership/checkout, goal congratulations
   without auto-purchase, explicit next-goal selection, prior features, order type/quantity validation,
   mistaken-basket recovery, greetings, preferences/alternatives, farewells,
   bag packs/consumption, active restocking, save migration/resumption,

@@ -33,7 +33,7 @@ function accountingMarkup(report) {
       ${row("Upfront table rental", upfront("table"))}
       ${row("Upfront scale rental", upfront("scale"))}
       ${row("Bag purchases / daily-use bag fees", upfront("bagPurchase") + upfront("bags"))}
-      ${row("Other market expenses", upfront("equipment") + upfront("legacy"))}
+      ${row("Other market expenses", upfront("equipment") + upfront("legacy") + upfront("marketSupplies"))}
       ${row(
         "Equipment charges paid manually",
         sum((e) => e.timing === "manual"),

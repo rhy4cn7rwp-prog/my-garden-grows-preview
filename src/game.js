@@ -5,6 +5,10 @@
     typeof module !== "undefined"
       ? require("./clubhouse-layout.js")
       : root.ClubhouseLayout;
+  const supplyShop =
+    typeof module !== "undefined"
+      ? require("./market-supplies-rules.js")
+      : root.MarketSupplyRules;
   const crops = [
     {
       id: "carrot",
@@ -143,6 +147,13 @@
   function initial() {
     return {
       version: 1,
+      marketSupplyStock: supplyShop
+        ? supplyShop.emptyStock()
+        : {
+            consumables: { boxes: 0, priceTags: 0 },
+            reusable: { marketSigns: 0, produceBaskets: 0 },
+          },
+      marketSupplyCart: {},
       cash: 50,
       day: 1,
       season: 1,
@@ -423,6 +434,7 @@
                 "bags",
                 "bagPurchase",
                 "equipment",
+                "marketSupplies",
                 "legacy",
               ].includes(e.category) &&
               ["upfront", "manual", "closing"].includes(e.timing) &&
@@ -439,6 +451,7 @@
           clean.inventory[id] || 0,
         );
       restoreCustomer(clean, s, ids);
+      if (supplyShop) Object.assign(clean, supplyShop.recover(s));
       return clean;
     } catch {
       return backup ? recover(backup) : initial();
@@ -592,6 +605,13 @@
       s.standMode = "owned";
     s[kind === "seeds" ? "cart" : "supcart"] = {};
     return total;
+  }
+  function purchaseMarketSupplies(s) {
+    requireRule(
+      !!supplyShop,
+      "Supply shop could not load. Refresh and try again.",
+    );
+    return supplyShop.purchase(s, recordExpense);
   }
   function plan(s, i, id) {
     requireRule(
@@ -1072,6 +1092,7 @@
             "bags",
             "bagPurchase",
             "equipment",
+            "marketSupplies",
             "legacy",
           ].includes(e.category) &&
           ["upfront", "manual", "closing"].includes(e.timing) &&
@@ -1378,6 +1399,7 @@
     chooseGoal,
     cartTotal,
     purchase,
+    purchaseMarketSupplies,
     plan,
     plantPlan,
     water,

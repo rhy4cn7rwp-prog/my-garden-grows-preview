@@ -60,10 +60,10 @@ try:
     assert page.locator('.hud').count()==1
     assert page.locator('[aria-label="Money balance"]').inner_text()=='$50.00'
     # Seed & Feed now has real merchandise, without the old baked-header crop.
-    if scene=='seeds':
-     assert page.locator('.seed-packet').count()==10
+    if scene in ['seeds','supplies']:
+     assert page.locator('.seed-packet' if scene=='seeds' else '.supply-packet').count()==(10 if scene=='seeds' else 5)
      assert page.locator('.spot').count()==0
-     assert page.locator('.seed-shop-interior').is_visible()
+     assert page.locator('.seed-shop-interior' if scene=='seeds' else '.supply-shop-interior').is_visible()
     else:
      trim=128 if scene in ['garden','supplies','market'] else 64
      geometry=page.locator('.interior-crop').evaluate('e=>({crop:e.getBoundingClientRect().toJSON(),stage:e.querySelector(".stage").getBoundingClientRect().toJSON()})')
@@ -72,7 +72,7 @@ try:
     if width==390:
      page.screenshot(path=f'/tmp/phase2a-{scene}.png')
      # Header cropping must not break any existing merchandise or garden target.
-     selector='.plot' if scene=='garden' else '.seed-packet' if scene=='seeds' else '.spot'
+     selector='.plot' if scene=='garden' else '.seed-packet' if scene=='seeds' else '.supply-packet' if scene=='supplies' else '.spot'
      for index in range(page.locator(selector).count()):
       target=page.locator(selector).nth(index)
       target.tap()

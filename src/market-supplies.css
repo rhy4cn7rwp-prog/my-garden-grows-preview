@@ -1,0 +1,534 @@
+/* Scoped to Seed & Feed. One illustrated environment; merchandise are real objects. */
+body[data-view="supplies"] {
+  overflow: hidden;
+  background: #b17b3b;
+}
+body[data-view="supplies"] #app {
+  position: fixed;
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  width: var(--visible-width, 100%);
+  height: var(--visible-height, 100svh);
+  padding: 0;
+  min-height: 0;
+}
+.supply-shop-game {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.supply-shop-world {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.supply-shop-interior {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.supply-shop-game .hud {
+  background: transparent;
+  border: 0;
+  padding: max(4px, var(--viewport-safe-top))
+    max(8px, var(--village-safe-right)) 2px max(8px, var(--village-safe-left));
+}
+.supply-shop-game .farm-status {
+  justify-self: center;
+  border-radius: 14px;
+  background: #fff7e7f2;
+  padding: 4px 12px;
+  box-shadow: 0 2px 8px #55331f30;
+}
+.supply-shop-heading {
+  text-align: center;
+  pointer-events: none;
+  padding: 0 8px;
+  color: #4d301c;
+  text-shadow: 0 1px 4px #fff8e6;
+}
+.supply-shop-heading h1 {
+  font:
+    800 26px/1.1 Georgia,
+    serif;
+  margin: 0;
+}
+.supply-shop-heading p {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 1.3;
+  margin: 3px 0;
+  padding: 3px 10px;
+  background: #fff5dfe8;
+  border-radius: 20px;
+}
+.supply-display {
+  position: absolute;
+  left: max(10px, var(--village-safe-left));
+  right: max(10px, var(--village-safe-right));
+  top: 45%;
+  bottom: calc(104px + var(--viewport-safe-bottom));
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 13px;
+  max-width: 650px;
+  margin: 0 auto;
+}
+.supply-shelf {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  padding: 0 8px 10px;
+  min-height: 0;
+}
+.supply-shelf::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  border-radius: 3px;
+  background: linear-gradient(#e1ad61 0 15%, #a0632c 19% 65%, #79431e 70%);
+  box-shadow: 0 6px 5px #3d200f66;
+  pointer-events: none;
+}
+.supply-packet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  max-height: 132px;
+  min-height: 80px;
+  padding: 6px 2px 4px;
+  border: 1px solid #a16c35;
+  border-radius: 5px 5px 2px 2px;
+  background: repeating-linear-gradient(4deg, #fff3d8 0 7px, #fbebca 8px 9px);
+  box-shadow:
+    2px 3px 4px #43250c66,
+    inset 0 0 0 3px #b7c57f66;
+  color: #3e4728;
+  touch-action: manipulation;
+  transform: rotate(-1deg);
+  font-family: Georgia, serif;
+  cursor: pointer;
+}
+.supply-packet:nth-child(even) {
+  transform: rotate(1deg);
+}
+.supply-packet:active {
+  transform: translateY(-3px);
+}
+.supply-packet:focus-visible {
+  outline: 3px solid #fff4a7;
+  outline-offset: 2px;
+}
+.supply-packet-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
+  overflow-wrap: normal;
+  hyphens: manual;
+  flex-shrink: 0;
+}
+.supply-produce-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.supply-packet .supply-produce-art {
+  flex: 1;
+  height: 0;
+}
+.supply-packet-price {
+  flex-shrink: 0;
+  font:
+    800 14px/1.1 system-ui,
+    sans-serif;
+  color: #46331c;
+}
+.supply-packet-count {
+  position: absolute;
+  right: -5px;
+  top: -8px;
+  padding: 1px 5px;
+  border-radius: 12px;
+  background: #377c52;
+  color: white;
+  font: 700 12px/1.4 system-ui;
+  box-shadow: 0 1px 3px #2d1e17;
+}
+.supply-packet-count[hidden] {
+  display: none;
+}
+.supply-shop-bottom.bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  padding: 9px max(8px, var(--village-safe-right))
+    max(9px, var(--viewport-safe-bottom)) max(8px, var(--village-safe-left));
+  background: linear-gradient(#fff3dbe0, #fff2d9f5);
+  border: 0;
+}
+.supply-shop-bottom .btn {
+  flex: 1;
+  min-height: 54px;
+  min-width: 0;
+  margin: 0;
+  padding: 7px 5px;
+  font-size: 14px;
+}
+.supply-shop-bottom small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 500;
+}
+.supply-shop-modal {
+  align-items: flex-end;
+  padding: 0;
+  background: #21170612;
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  width: var(--visible-width, 100%);
+  height: var(--visible-height, 100svh);
+}
+.supply-shop-modal .dialog {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 650px;
+  max-height: 61%;
+  margin: 0 auto;
+  padding: 12px max(12px, var(--village-safe-right))
+    max(7px, var(--viewport-safe-bottom)) max(12px, var(--village-safe-left));
+  border: 2px solid #b58950;
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background: #fff7e8;
+  overflow: hidden;
+}
+.supply-detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.supply-detail-heading .supply-produce-art {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.supply-shop-modal .dialog h2 {
+  font:
+    800 21px/1.1 Georgia,
+    serif;
+  margin: 0 0 4px;
+  color: #49321c;
+}
+.supply-detail-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.supply-shop-modal .dialog p,
+.supply-shop-modal .dialog li {
+  font-size: 15px;
+  line-height: 1.35;
+  margin: 7px 0;
+}
+.supply-shop-modal .dialog ul {
+  margin: 6px 0;
+  padding-left: 22px;
+}
+.supply-shop-modal .qty {
+  margin: 8px 0;
+}
+.supply-shop-modal .qty button,
+.supply-adjust {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+.supply-detail-actions {
+  flex-shrink: 0;
+}
+.supply-shop-modal .btn {
+  min-height: 44px;
+  margin: 3px 4px 3px 0;
+  padding: 7px 11px;
+  font-size: 15px;
+}
+.supply-shop-modal .dialog > div:last-child {
+  flex-shrink: 0;
+}
+.supply-basket-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid #ddc7a4;
+}
+.supply-basket-row span {
+  flex: 1;
+}
+.supply-basket-row small {
+  display: block;
+  font-size: 13px;
+}
+.supply-adjust {
+  border-radius: 12px;
+  background: #3f7b53;
+  color: white;
+  border: 0;
+  font-size: 22px;
+}
+.supply-shop-game button:disabled,
+.supply-shop-modal button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+@media (max-width: 360px) {
+  .supply-shelf {
+    gap: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .supply-packet-name {
+    font-size: 11px;
+  }
+  .supply-shop-bottom .btn {
+    font-size: 13px;
+  }
+  .supply-shop-bottom small {
+    font-size: 11px;
+  }
+}
+@media (max-height: 530px) {
+  .supply-display {
+    top: 33%;
+    bottom: calc(104px + var(--viewport-safe-bottom));
+    gap: 7px;
+  }
+  .supply-packet {
+    min-height: 52px;
+    padding-top: 3px;
+  }
+  .supply-packet-name {
+    min-height: 23px;
+    font-size: 11px;
+  }
+  .supply-packet-price {
+    font-size: 12px;
+  }
+  .supply-shop-heading p {
+    display: none;
+  }
+  .supply-shop-heading h1 {
+    font-size: 22px;
+  }
+  .supply-shop-bottom .btn {
+    min-height: 48px;
+  }
+  .supply-shop-modal .dialog {
+    max-height: 72%;
+  }
+  .supply-shop-modal .dialog p,
+  .supply-shop-modal .dialog li {
+    font-size: 14px;
+  }
+  .supply-shop-modal .dialog h2 {
+    font-size: 19px;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .supply-display {
+    left: 44%;
+    top: 24%;
+    bottom: calc(74px + var(--viewport-safe-bottom));
+  }
+  .supply-shop-interior {
+    object-position: left 29%;
+  }
+  .supply-shop-heading {
+    align-self: flex-start;
+    padding-left: 16px;
+  }
+  .supply-packet {
+    min-height: 65px;
+  }
+  .supply-shop-modal .dialog {
+    max-height: calc(100% - var(--viewport-safe-top) - 8px);
+    max-width: 480px;
+    margin: 0 0 0 auto;
+  }
+  .supply-shop-bottom {
+    justify-content: flex-end;
+  }
+  .supply-shop-bottom .btn {
+    flex: 0 1 220px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .supply-packet {
+    transition: none;
+  }
+}
+/* Keep the welcome sign on the window side, clear of the shopkeeper's face. */
+.supply-shop-heading {
+  align-self: flex-start;
+  width: 52%;
+  padding: 0 5px;
+}
+.supply-shop-heading h1 {
+  font-size: 22px;
+}
+.supply-shop-heading p {
+  max-width: 100%;
+  font-size: 12px;
+  padding: 3px 6px;
+}
+
+/* A source-space plaque fixed to the counter; it never receives touches. */
+.supply-counter-sign {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+}
+.supply-counter-sign svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* A full, proportional room needs a little scroll space on very short phones. */
+@media (orientation: portrait) {
+  body[data-view="supplies"] #app {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .supply-shop-game {
+    min-height: 548px;
+    overflow: visible;
+  }
+  .supply-display {
+    top: max(45%, calc(var(--supply-counter-bottom, 0px) + 12px));
+  }
+  .supply-shop-game .hud {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .supply-shop-bottom.bottom {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    z-index: 4;
+  }
+}
+.supply-shop-world {
+  overflow: hidden;
+}
+
+/* Real supplies sit on the rack, rather than being printed on product cards. */
+.supply-shelf {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.supply-shelf:nth-child(2) {
+  width: 78%;
+  justify-self: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.supply-packet,
+.supply-packet:nth-child(even) {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+  padding: 0 2px 6px;
+  min-height: 75px;
+}
+.supply-packet-name,
+.supply-packet-price {
+  background: #fff1d9ee;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-family: Georgia, serif;
+  font-size: 13px;
+  min-height: 0;
+}
+.supply-packet-name {
+  width: 100%;
+  line-height: 1.1;
+}
+.supply-shop-bottom .btn {
+  font-size: 13px;
+}
+.supply-option {
+  border-bottom: 1px solid #dcc7a3;
+  padding-bottom: 6px;
+}
+.supply-equipment.btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+.supply-equipment .supply-produce-art {
+  width: 64px;
+  height: 56px;
+  flex-shrink: 0;
+}
+.supply-detail-body h3 {
+  margin: 8px 0 0;
+  color: #4b3823;
+}
+
+.supply-shelf::after {
+  bottom: 48px;
+}
+.supply-packet-name {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Price cards hang on the front of each rail, with the lettering unobstructed. */
+.supply-packet {
+  z-index: 1;
+}
+@media (max-width: 360px) {
+  .supply-packet-name {
+    font-size: 12px;
+  }
+}

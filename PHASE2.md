@@ -229,3 +229,17 @@ outside Phase 1C.
 - Artwork, $3 cost, internal strawberry inventory key, saved stock, growing and
   harvesting behavior unchanged. No migration or gameplay rule changes.
 - 108 automated tests and seven mobile purchase/save layouts pass.
+
+## Phase 3B delivered: Market Supplies store
+
+- New illustrated interior, shopkeeper, attached counter plaque, real supply
+  objects, five initial products, and 5/$1 versus 20/$3 bag comparisons.
+- Reviewed cash checkout, exact quantities, separate consumable/reusable stock,
+  persistent inventory/pending cart, additive safe save recovery and expense
+  reporting without double deductions.
+- Bags use the existing purchased pool. No new sale requirements, supply
+  consumption rules, attraction bonuses or other interior changes.
+- Original equipment/rentals and earlier carts remain accessible separately.
+  In-market emergency refill intentionally retains its old 10/$3 price/flow.
+- 118 rule tests, seven new shop phone layouts and 15 existing mobile suites
+  pass. Physical iPhone Safari still requires user playtesting.

@@ -58,7 +58,7 @@ function closeDialog() {
 function show(html, key = null) {
   dialogKey = key;
   const register = key === "payment";
-  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${register ? "register-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : ""}">${html}${register ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
+  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${register ? "register-modal" : ""}" onclick="if(event.target===this)closeDialog()"><div class="dialog ${register ? "register-dialog" : ""}">${html}${register ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
   render();
 }
 function spot(x, y, w, h, action, title) {
@@ -96,19 +96,6 @@ function renderScene() {
         .join(" · ") || "none"
     }</p><p>Tap a plot to plant, inspect or harvest. ${state.plots.filter(Boolean).every((p) => p.watered) ? "💧 Plants watered today!" : "Plants need water to grow."}</p><div class="row"><button class="btn" onclick="water()">💧 Water all</button><button class="btn" onclick="plantPlanned()">🌱 Plant plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="cancelPlanting()" ${Object.keys(state.plan).length ? "" : "disabled"}>Cancel planting plan</button><button class="btn" onclick="harvestReady()">Harvest All Ready Crops</button><button class="btn alt" onclick="endDay()">☀️ End day</button><button class="btn alt" onclick="inventory()">🧺 Harvest basket</button></div>`;
   }
-  if (view === "supplies") {
-    SHOP_HOTSPOTS.supplies.forEach(([id, x, y, w, h]) => {
-      stage += spot(
-        x,
-        y,
-        w,
-        h,
-        `supply('${id}')`,
-        SUPPLIES.find((s) => s[0] === id)[2],
-      );
-    });
-    bottom = `<h2>🧺 Market Supplies</h2><p>Tap the table, canopy, paper bags, or scale on the shelves.</p><button class="btn" onclick="cart('supplies')">🛒 Basket (${Object.values(state.supcart).reduce((a, b) => a + b, 0)})</button>`;
-  }
   if (view === "market") {
     stage +=
       spot(3, 57, 31, 40, "marketItem('carrot')", "Carrots") +
@@ -145,12 +132,14 @@ function renderScene() {
   const content =
     view === "town"
       ? townScene()
-      : view === "seeds"
-        ? seedShopScene()
-        : view === "clubhouse"
-          ? clubhouseScene()
-          : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
-  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "seeds" ? "seed-shop-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
+      : view === "supplies"
+        ? marketSupplyScene()
+        : view === "seeds"
+          ? seedShopScene()
+          : view === "clubhouse"
+            ? clubhouseScene()
+            : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
+  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "seeds" ? "seed-shop-game" : view === "supplies" ? "supply-shop-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
   document.body.dataset.view = view;
 
   const app = $("#app"),
