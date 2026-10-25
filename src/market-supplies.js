@@ -103,7 +103,7 @@ function marketSupplyProduct(id) {
       })
       .join(
         "",
-      )}${id === "bags" ? "<p>Compare 20 bags: four small packs cost $4; one bulk pack costs $3. Save $1. Bulk costs more upfront than one $1 pack.</p>" : ""}<p class="small">Buying supplies is a business expense: money goes out now. Selling your harvest brings money in. These are simplified game prices.</p></div><div class="supply-detail-actions"><button class="btn" onclick="marketSupplyBasket()">View supply basket</button></div>`,
+      )}${id === "bags" ? "<p>Compare 20 bags: four small packs cost $4; one bulk pack costs $3. Save $1. Bulk costs more upfront than one $1 pack.</p>" : ""}</div><div class="supply-detail-actions"><button class="btn" onclick="marketSupplyBasket()">View supply basket</button></div>`,
     "ms-product-" + id,
   );
 }

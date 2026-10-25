@@ -494,9 +494,12 @@ body[data-view="supplies"] #app {
 .supply-shop-bottom .btn {
   font-size: 13px;
 }
-.supply-option {
-  border-bottom: 1px solid #dcc7a3;
-  padding-bottom: 6px;
+.supply-option + .supply-option {
+  border-top: 1px solid #dcc7a3;
+  padding-top: 6px;
+}
+.supply-detail-body > :last-child {
+  margin-bottom: 0;
 }
 .supply-equipment.btn {
   display: flex;
