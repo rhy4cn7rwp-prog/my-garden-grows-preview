@@ -103,6 +103,12 @@ function syncMarketSpeech() {
       .bottom -
     rect.top +
     6;
+  Object.assign(bubble.style, {
+    left: left + "px",
+    right: "max(7px, var(--village-safe-right))",
+    width: "auto",
+  });
+  const bubbleRight = bubble.getBoundingClientRect().right;
   const obstacles = [
     scene.querySelector(".market-register-prop"),
     scene.querySelector(".market-produce-tray"),
@@ -112,12 +118,11 @@ function syncMarketSpeech() {
     h - 8,
     ...obstacles
       .map((e) => e.getBoundingClientRect())
-      .filter((r) => r.right > rect.left + left && r.left < rect.right - 7)
+      .filter((r) => r.right > rect.left + left && r.left < bubbleRight)
       .map((r) => r.top - rect.top - 7),
   );
   Object.assign(bubble.style, {
     left: left + "px",
-    width: Math.max(75, w - left - 7) + "px",
     maxHeight: Math.max(60, bottomLimit - topLimit) + "px",
   });
   const bh = bubble.offsetHeight;

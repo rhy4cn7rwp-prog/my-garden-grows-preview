@@ -18,6 +18,7 @@ try:
    page=browser.new_page(viewport={'width':w,'height':h},is_mobile=True,has_touch=True,ignore_https_errors=bool(os.environ.get('PREVIEW_URL')))
    page.set_default_timeout(5000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
    page.add_init_script("document.addEventListener('DOMContentLoaded',()=>{document.documentElement.style.setProperty('--viewport-safe-top','"+str(t)+"px');document.documentElement.style.setProperty('--viewport-safe-bottom','"+str(b)+"px');syncGameViewport()})")
+   if w==667:page.add_init_script("document.addEventListener('DOMContentLoaded',()=>{document.documentElement.style.setProperty('--village-safe-right','47px');document.documentElement.style.setProperty('--village-safe-left','47px')})")
    page.goto(os.environ.get('PREVIEW_URL',f'http://127.0.0.1:{server.server_port}/'))
    for name in ['Maya','Noah','Ava','Oliver']:
     for step in ['greet','choose','pay','thanks']:
@@ -29,7 +30,7 @@ try:
      assert page.locator('.market-speech-tail path').get_attribute('d')
      geometry=page.locator('.market-conversation').evaluate("""e=>{const scene=e.closest('.market-tableau'),r=scene.getBoundingClientRect(),b=e.getBoundingClientRect(),k=Math.max(r.width/1536,r.height/1024);return {bubble:b.toJSON(),scene:r.toJSON(),headRight:r.left+(r.width-1536*k)/2+900*k,below:document.querySelector('.market-controls').getBoundingClientRect().toJSON(),obstacles:[...scene.querySelectorAll('.market-clock,.market-produce-tray,.market-register-prop,.market-tray-hint')].map(x=>x.getBoundingClientRect().toJSON()),copy:{scroll:e.querySelector('.market-speech-copy').scrollHeight,client:e.querySelector('.market-speech-copy').clientHeight}}}""")
      q=geometry['bubble'];s=geometry['scene']
-     assert q['left']>=s['left'] and q['right']<=s['right']+1 and q['top']>=s['top'] and q['bottom']<=s['bottom']+1,(w,h,name,step,geometry)
+     assert q['left']>=s['left'] and q['right']<=s['right']-(47 if w==667 else 0)+1 and q['top']>=s['top'] and q['bottom']<=s['bottom']+1,(w,h,name,step,geometry)
      assert q['left']>=geometry['headRight'],(w,h,name,step,geometry)
      for obstacle in geometry['obstacles']:
       overlap=min(q['right'],obstacle['right'])-max(q['left'],obstacle['left'])>1 and min(q['bottom'],obstacle['bottom'])-max(q['top'],obstacle['top'])>1
