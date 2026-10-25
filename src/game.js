@@ -554,7 +554,7 @@
     );
     requireRule(
       roomLayout.valid(id, position),
-      "Try the floor or a suitable display surface.",
+      roomLayout.placementHint(id),
     );
     requireRule(
       !roomLayout.blockers(id, position, s.clubhousePositions, s.dreamPurchases)

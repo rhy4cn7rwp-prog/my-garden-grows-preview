@@ -744,7 +744,7 @@ function startRoomGesture(e) {
       r.world.append(r.ghost);
       updateRoomDrag();
       roomAnnounce(
-        `Moving ${Game.dreams.find((d) => d.id === item.dataset.dream).name}. Drag to a glowing floor or display surface.`,
+        `Moving ${Game.dreams.find((d) => d.id === item.dataset.dream).name}. ${ClubhouseLayout.placementHint(item.dataset.dream)}`,
       );
       requestClubhousePaint();
     }, 420);
@@ -857,7 +857,7 @@ function finishRoomGesture(e) {
       }
     } else if (g.moved)
       roomAnnounce(
-        "Try a glowing floor or display surface with a little more space. Your treasure returned to its last spot.",
+        `${ClubhouseLayout.placementHint(g.id)} It returned to its last spot.`,
       );
   } else if (g.mode === "pan" && g.moved) {
     r.suppressClickUntil = Date.now() + 500;
@@ -881,7 +881,7 @@ function drawRoomSurfaces() {
   svg.setAttribute("viewBox", `0 0 ${r.geometry.width} ${r.geometry.height}`);
   svg.style.clipPath = `inset(${r.usable.top}px ${r.geometry.width - r.usable.right}px ${r.geometry.height - r.usable.bottom}px ${r.usable.left}px)`;
   svg.innerHTML = ClubhouseLayout.surfaces
-    .filter((s) => s.items.includes(id))
+    .filter((s) => ClubhouseLayout.canPlace(id,s))
     .map((surface) => {
       const points = roomProjectedPolygon(ClubhouseLayout.outline(surface));
       if (

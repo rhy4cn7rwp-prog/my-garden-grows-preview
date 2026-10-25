@@ -37,7 +37,7 @@ try:
      info=page.evaluate('''id=>{const r=clubhouseRoom,p=ClubhouseLayout.effective(state.clubhousePositions,id),m=ClubhouseLayout.metrics(id,p),a=roomItemPoint(id,p);return {expected:m.width*r.geometry.paintedHeight/724/Math.max(.4,Math.cos((p.angle-r.yaw)*Math.PI/180)),actual:a.visualWidth}}''',id)
      assert abs(info['expected']-info['actual'])<.001
      if w==428 and h==746:page.screenshot(path=f'/tmp/clubhouse-size-{id}-{offset}.png')
-    find(id);page.locator('[data-dream='+id+']').tap();assert page.locator('.dialog h2').inner_text()==page.evaluate('id=>Game.dreams.find(d=>d.id===id).name',id);tap('Close ✕')
+    find(id);page.locator('[data-dream='+id+']').tap();assert page.locator('.dialog h2').inner_text()==page.evaluate('id=>Game.dreams.find(d=>d.id===id).name',id);assert page.evaluate('id=>ClubhouseLayout.placementHint(id)',id) in page.locator('.dialog').inner_text();tap('Close ✕')
    # A real press/hold moves the enlarged bicycle horizontally, not the camera.
    find('bike')
    if h>=500 or w==320:
@@ -46,6 +46,17 @@ try:
     page.evaluate('a=>lookClubhouse(a)',(old['angle']+dest['angle'])/2);page.wait_for_timeout(25)
     q=page.locator('[data-dream=bike]').bounding_box();session=page.context.new_cdp_session(page)
     def touch(kind,x=0,y=0):session.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[] if kind in ['touchEnd','touchCancel'] else [{'x':x,'y':y}]})
+    touch('touchStart',q['x']+q['width']/2,q['y']+q['height']/2);page.wait_for_timeout(480)
+    assert page.locator('[data-moving]').count()==1
+    assert page.locator('.clubhouse-drop-surfaces polygon').evaluate_all("es=>es.length>0 && es.every(e=>e.dataset.surface==='floor')")
+    assert 'clear floor' in page.locator('.clubhouse-status').inner_text()
+    invalid=page.evaluate("()=>{const r=clubhouseRoom;return {x:(r.usable.left+r.usable.right)/2,y:Math.max(1,r.usable.top-5)}}")
+    touch('touchMove',invalid['x'],invalid['y']);page.wait_for_timeout(30)
+    assert page.evaluate('clubhouseRoom.drop') is None
+    touch('touchEnd');page.wait_for_timeout(40)
+    assert page.evaluate("ClubhouseLayout.effective(state.clubhousePositions,'bike')")==old
+    assert 'returned to its last spot' in page.locator('.clubhouse-status').inner_text()
+    q=page.locator('[data-dream=bike]').bounding_box()
     touch('touchStart',q['x']+q['width']/2,q['y']+q['height']/2);page.wait_for_timeout(480)
     assert page.locator('[data-moving]').count()==1
     target=page.evaluate('''p=>{const r=clubhouseRoom,q=ClubhouseLayout.project(p,r.yaw,r.geometry);return {x:q.x-r.gesture.grabDX,y:q.y-r.gesture.grabDY}}''',dest)

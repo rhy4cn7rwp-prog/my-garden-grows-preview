@@ -24,6 +24,13 @@ surface and nearby space. Explicit saved placements take priority over defaults;
 smaller chosen treasures are protected when a larger bicycle needs more room.
 The same clearance pass runs after purchasing a new reward. Ownership, purchase
 records, money, garden, customer history and math/cash practice are unchanged.
+Placement categories keep bicycles and the standing guitar on clear floor space.
+Smaller treasures use suitable shelves, cabinet tops, cushions, the chest or floor.
+Only valid surfaces glow during a drag; a short item-appropriate hint explains
+where to place it. Invalid releases return to the previous safe position. The
+wall-decoration category allows walls only, ready for future wall rewards (the
+current six-item catalog has none). There is no new decorating menu.
+
 The existing coordinate format and save keys remain compatible; no room or farm
 reset is required. Recovered positions are stable on subsequent refreshes.
 

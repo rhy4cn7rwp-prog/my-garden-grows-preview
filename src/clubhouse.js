@@ -30,7 +30,7 @@ function clubhouseItem(id) {
   const item = Game.dreams.find((d) => d.id === id),
     record = state.dreamPurchases[id];
   show(
-    `<h2>${item.name}</h2>${clubhouseRewardArt(id, "dream-preview-art")}<p>${CLUBHOUSE_DISPLAYS[id].area} · Yours to keep!</p><p>${record.season && record.day ? `Purchased in Season ${record.season}, Day ${record.day}.` : "Purchase date was not recorded."}</p>${record.price !== null && record.price !== undefined ? `<p>Saved and purchased for ${money(record.price)}.</p>` : ""}${id === "puppy" ? "<p>Your puppy-fund keepsake celebrates saving for a future furry friend.</p>" : ""}${view === "clubhouse" ? '<button class="btn" onclick="restoreClubhouseItem(\'' + id + "')\">Restore default position</button>" : '<button class="btn" onclick="go(\'clubhouse\')">See it in my Clubhouse</button>'}`,
+    `<h2>${item.name}</h2>${clubhouseRewardArt(id, "dream-preview-art")}<p>${CLUBHOUSE_DISPLAYS[id].area} · Yours to keep!<br><small>${ClubhouseLayout.placementHint(id)}</small></p><p>${record.season && record.day ? `Purchased in Season ${record.season}, Day ${record.day}.` : "Purchase date was not recorded."}</p>${record.price !== null && record.price !== undefined ? `<p>Saved and purchased for ${money(record.price)}.</p>` : ""}${id === "puppy" ? "<p>Your puppy-fund keepsake celebrates saving for a future furry friend.</p>" : ""}${view === "clubhouse" ? '<button class="btn" onclick="restoreClubhouseItem(\'' + id + "')\">Restore default position</button>" : '<button class="btn" onclick="go(\'clubhouse\')">See it in my Clubhouse</button>'}`,
     "clubhouse-" + id,
   );
 }

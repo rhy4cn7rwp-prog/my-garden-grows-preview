@@ -62,3 +62,22 @@ test('a newly crowded bench keeps the camera and finds a nearby same-wall surfac
  assert.ok(Math.abs(L.pixelAt(r.clubhousePositions.tablet.angle)-480)<100);assert.deepEqual(otherState(r),before);
  assert.deepEqual(G.recover(JSON.stringify(r)).clubhousePositions,r.clubhousePositions);
 });
+test('placement categories keep large objects on floors and small treasures on appropriate existing surfaces',()=>{
+ const s=farm();
+ for(const id of ['bike','guitar']){
+  assert.equal(L.itemSizes[id].placement,'floor-object');
+  assert.ok(L.canPlace(id,'floor'));
+  for(const surface of L.surfaces.filter(p=>p.kind!=='floor')){
+   assert.equal(L.canPlace(id,surface),false);assert.equal(L.canonical(id,surface.id,(surface.pixels[0]+surface.pixels[1])/2),null);
+  }
+  const before=structuredClone(s);assert.throws(()=>G.moveClubhouseItem(s,id,L.point('shelf-nook-middle',1280,240)),/floor/);assert.deepEqual(s,before);
+ }
+ for(const id of ['ball','camera','tablet','puppy'])for(const surface of ['floor','window-seat','chest','side-cabinet','shelf-nook-middle'])assert.ok(L.canPlace(id,surface),id+surface);
+});
+test('wall-decoration eligibility is wall-only without adding new or unowned rewards',()=>{
+ assert.deepEqual(L.placementCategories['wall-decoration'],['wall']);
+ assert.ok(L.acceptsSurface('wall-decoration','wall'));
+ for(const kind of ['floor','shelf','table','seat','chest'])assert.equal(L.acceptsSurface('wall-decoration',kind),false);
+ assert.equal(L.acceptsSurface('floor-object','wall'),false);assert.equal(L.acceptsSurface('small-treasure','wall'),false);
+ assert.equal(G.dreams.length,6);assert.deepEqual(G.initial().dreamPurchases,{});
+});

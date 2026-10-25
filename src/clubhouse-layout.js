@@ -204,13 +204,31 @@
   // These are approximate storybook proportions, not a change to the room lens.
   const sizeReference = { pixelsPerCm:64/22, ballDiameterCm:22, benchSeatHeightPx:108, windowSeatWidthPx:300 };
   const itemSizes = {
-    ball: { widthCm:22, aspect:1, contactInset:17/380, reference:"22cm soccer ball" },
-    bike: { widthCm:110, aspect:575/452, contactInset:18/452, reference:"110cm child bicycle, about 86cm tall" },
-    guitar: { heightCm:70, aspect:276/492, contactInset:28/492, reference:"70cm learner guitar" },
-    tablet: { widthCm:20, aspect:430/388, contactInset:12/388, reference:"20cm tablet in its protective case" },
-    camera: { widthCm:12, aspect:442/365, contactInset:.18, reference:"12cm compact camera; strap hangs below its body" },
-    puppy: { widthCm:14.5, aspect:455/442, contactInset:20/442, reference:"Small 14.5cm keepsake bank" },
+    ball: { placement:"small-treasure", widthCm:22, aspect:1, contactInset:17/380, reference:"22cm soccer ball" },
+    bike: { placement:"floor-object", widthCm:110, aspect:575/452, contactInset:18/452, reference:"110cm child bicycle, about 86cm tall" },
+    guitar: { placement:"floor-object", heightCm:70, aspect:276/492, contactInset:28/492, reference:"70cm learner guitar" },
+    tablet: { placement:"small-treasure", widthCm:20, aspect:430/388, contactInset:12/388, reference:"20cm tablet in its protective case" },
+    camera: { placement:"small-treasure", widthCm:12, aspect:442/365, contactInset:.18, reference:"12cm compact camera; strap hangs below its body" },
+    puppy: { placement:"small-treasure", widthCm:14.5, aspect:455/442, contactInset:20/442, reference:"Small 14.5cm keepsake bank" },
   };
+  const placementCategories = {
+    "floor-object": ["floor"],
+    "small-treasure": ["floor","shelf","table","seat","chest"],
+    "wall-decoration": ["wall"],
+  };
+  function acceptsSurface(category, kind) {
+    return !!placementCategories[category]?.includes(kind);
+  }
+  function canPlace(id, surface) {
+    const s=typeof surface==="string"?getSurface(surface):surface;
+    return !!s && s.items.includes(id) && acceptsSurface(itemSizes[id]?.placement,s.kind);
+  }
+  function placementHint(id) {
+    const category=itemSizes[id]?.placement;
+    return category==="floor-object" ? "Keep it on clear floor space." :
+      category==="wall-decoration" ? "Hang it in a clear wall area." :
+      "Try a shelf, cabinet, seat, chest or floor.";
+  }
   function baseSize(id) {
     const m=itemSizes[id];
     if (!m) return {width:32,height:32,contactInset:0};
@@ -262,7 +280,7 @@
   }
   function canonical(id, surface, x, y) {
     const s = getSurface(surface);
-    if (!s || !s.items.includes(id)) return null;
+    if (!canPlace(id,s)) return null;
     const p = point(surface, x, y ?? contactY(s, x)),
       m = metrics(id, p),
       margin = m.width / 2 + 3;
@@ -315,7 +333,7 @@
     )
       return null;
     const s = getSurface(aliases[p.surface] || p.surface);
-    if (!s || !s.items.includes(id)) return null;
+    if (!canPlace(id,s)) return null;
     const estimate = point(s.id, pixelAt(p.angle), p.y * 724),
       m = metrics(id, estimate),
       margin = m.width / 2 + 4;
@@ -372,7 +390,7 @@
   function nearestFree(id, origin, accepted) {
     const ox=pixelAt(origin.angle),oy=origin.y*724;
     const surfaceDistance=s=>{const x=clamp(ox,...s.pixels);return (x-ox)**2+((contactY(s,x)-oy)*1.4)**2;};
-    const choices=surfaces.filter(s=>s.items.includes(id)).sort((a,b)=>
+    const choices=surfaces.filter(s=>canPlace(id,s)).sort((a,b)=>
       Number(b.id===origin.surface)-Number(a.id===origin.surface) ||
       Number(a.kind==="floor")-Number(b.kind==="floor") ||
       surfaceDistance(a)-surfaceDistance(b));
@@ -423,7 +441,7 @@
     const x = pixelAt(angle),
       choices = [];
     for (const s of surfaces) {
-      if (!s.items.includes(id)) continue;
+      if (!canPlace(id,s)) continue;
       const estimate = point(s.id, x, y * 724),
         m = metrics(id, estimate),
         margin = m.width / 2 + 3,
@@ -523,6 +541,10 @@
     point,
     contactY,
     getSurface,
+    placementCategories,
+    acceptsSurface,
+    canPlace,
+    placementHint,
     sizeReference,
     itemSizes,
     baseSize,
