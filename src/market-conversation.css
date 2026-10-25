@@ -137,7 +137,7 @@
 .total-keypad-dialog .total-keypad-order {
   margin: 0;
   flex-shrink: 0;
-  max-height: 54px;
+  max-height: 72px;
   overflow-y: auto;
   font-size: 13px;
   line-height: 1.25;
@@ -215,7 +215,7 @@
   outline: 3px solid #fff;
   outline-offset: -4px;
 }
-@media (max-height: 440px) and (orientation: portrait) {
+@media (max-height: 400px) and (orientation: portrait) {
   .total-keypad-dialog.dialog {
     padding: 5px;
     gap: 3px;
@@ -267,7 +267,7 @@
     animation: none;
   }
 }
-@media (max-height: 440px) and (orientation: portrait) {
+@media (max-height: 400px) and (orientation: portrait) {
   .total-keypad-dialog .total-keypad-order {
     max-height: 20px;
   }
