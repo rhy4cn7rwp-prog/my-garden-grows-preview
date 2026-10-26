@@ -71,7 +71,8 @@ function show(html, key = null) {
   const register = key === "payment";
   const keypad = key === "total-keypad";
   const guide = key === "guidebook";
-  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${guide ? "guidebook-modal" : ""} ${register ? "register-modal" : keypad ? "total-keypad-modal" : ""}" onclick="if(event.target===this)${guide ? "closeGuidebook()" : "closeDialog()"}"><div ${guide ? 'role="dialog" aria-modal="true" aria-labelledby="guidebook-title"' : ""} class="dialog ${guide ? "guidebook-dialog" : ""} ${register ? "register-dialog" : keypad ? "total-keypad-dialog" : ""}">${html}${register || keypad || guide ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
+  const gardenDialog = key?.startsWith("garden-") ? ` ${key}` : "";
+  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${guide ? "guidebook-modal" : ""}${gardenDialog} ${register ? "register-modal" : keypad ? "total-keypad-modal" : ""}" onclick="if(event.target===this)${guide ? "closeGuidebook()" : "closeDialog()"}"><div ${guide ? 'role="dialog" aria-modal="true" aria-labelledby="guidebook-title"' : gardenDialog ? 'role="dialog" aria-modal="true" aria-label="Garden activity"' : ""} class="dialog ${guide ? "guidebook-dialog" : ""} ${register ? "register-dialog" : keypad ? "total-keypad-dialog" : ""}">${html}${register || keypad || guide || key === "garden-weeding" ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
   render();
 }
 function spot(x, y, w, h, action, title) {
@@ -214,15 +215,9 @@ function plotDialog(i) {
     );
     return;
   }
-  let c = crop(p.id);
-  if (p.age >= c.days) {
-    show(
-      `<h2>${c.icon} ${c.name} ready!</h2><p>Harvest ${Game.harvestAmount(state, i)} ${c.unit} of ${c.name}.</p><button class="btn" onclick="harvest(${i})">🧺 Harvest</button>`,
-    );
-  } else
-    show(
-      `<h2>${c.icon} Growing ${c.name}</h2><p>Day ${p.age} of ${c.days} watered days.</p><p>${p.watered ? "Watered today." : "Needs water today."}</p>${view === "garden" ? `<button class="btn" onclick="waterGardenPlot(${i})" ${p.watered ? "disabled" : ""}>Water this plant</button>` : ""}<p>${c.repeat ? "This crop can produce several harvests." : "This crop produces one harvest."}</p><p>Estimated market value ${money(c.price)} per ${c.unit}.</p>`,
-    );
+  const c = crop(p.id), ready = p.age >= c.days,
+    stage = GardenCrops.stage(c, p);
+  show(`<h2>${c.name}${ready ? ' ready!' : ''}</h2>${GardenCrops.closeup(c,p)}<p>${stage.regrowing ? 'Regrowing' : 'Growth'}: ${p.age} of ${c.days} watered days.</p><p>${p.watered ? 'Watered today.' : ready ? 'Ready to harvest; no more water needed for this harvest.' : 'Needs water today.'}</p>${ready ? `<p>Harvest ${Game.harvestAmount(state,i)} ${c.unit} of ${c.name}.</p><button class="btn" onclick="harvest(${i})">🧺 Harvest</button>` : view === 'garden' ? `<button class="btn" onclick="waterGardenPlot(${i})" ${p.watered ? 'disabled' : ''}>Water this plant</button>` : ''}<p>${c.repeat ? `Multiple harvests: ${p.left + 1} remaining, including this one.` : 'This crop produces one harvest.'}</p><p>Estimated market value ${money(c.price)} per ${c.unit}.</p>${p.weedingBonus ? '<p>Eligible for the next-harvest care bonus.</p>' : ''}<details class="garden-growth-guide"><summary>See all four growth stages</summary><div>${[1,2,3,4].map(n=>`<figure><img src="assets/garden-growth/${c.id}-${n}.svg" alt="${c.name}: ${['Newly planted','Small sprout','Growing plant','Harvest ready'][n-1]}"/><figcaption>${n}. ${['Newly planted','Small sprout','Growing plant','Harvest ready'][n-1]}</figcaption></figure>`).join('')}</div><p>Some fast-growing crops move through stages between your farming days. Repeat producers keep their leaves as a new harvest grows.</p></details>`, 'garden-crop');
 }
 
 function inventory() {

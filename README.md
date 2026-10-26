@@ -1,3 +1,11 @@
+## In review: Phase 8 Garden learning improvements
+
+The `phase-8/educational-weeding-and-crop-closeups` branch adds optional five-day
+math/spelling challenges, a one-activity harvest bonus and forty crop-specific
+growth illustrations. It preserves established Garden tools and save keys.
+See [review notes and mobile screenshots](docs/garden-learning-review.md).
+This branch is not published to the permanent playtesting website yet.
+
 ## Permanent public playtest
 
 Use https://rhy4cn7rwp-prog.github.io/my-garden-grows-preview/ for ongoing playtesting.

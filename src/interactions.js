@@ -81,9 +81,9 @@ function endDay() {
       '<h2>Your customer is waiting</h2><p>Finish helping your customer before ending the day.</p><button class="btn" onclick="go(\'market\')">Resume Market</button>',
     );
   const dry = Game.plantsNeedingWater(state).length;
-  if (dry || state.marketOpen)
+  if (dry || state.marketOpen || state.weedingHarvest)
     return show(
-      `<h2>${dry ? "Some plants need water!" : "End your farming day?"}</h2><p>${dry ? `${dry} growing ${dry === 1 ? "plant still needs" : "plants still need"} water. Dry plants won't grow tonight.` : "Your open market will close for today."}</p>${state.marketOpen && dry ? "<p>Your open market will also close.</p>" : ""}${dry ? '<button class="btn" onclick="advanceGardenDay(true)">Water All and End Day</button>' : ""}<button class="btn alt" onclick="advanceGardenDay(false)">${dry ? "End day anyway" : "Close market and end day"}</button><button class="btn" onclick="closeDialog()">Keep gardening</button>`,
+      `<h2>${dry ? "Some plants need water!" : "End your farming day?"}</h2><p>${dry ? `${dry} growing ${dry === 1 ? "plant still needs" : "plants still need"} water. Dry plants won't grow tonight.` : state.marketOpen ? "Your open market will close for today." : "Ready to finish your bonus harvest activity and begin a new day?"}</p>${state.marketOpen && dry ? "<p>Your open market will also close.</p>" : ""}${state.weedingHarvest ? "<p>End Day will finish your bonus harvest activity. Pick the remaining ripe eligible crops first to include their bonuses.</p>" : ""}${dry ? '<button class="btn" onclick="advanceGardenDay(true)">Water All and End Day</button>' : ""}<button class="btn alt" onclick="advanceGardenDay(false)">${dry ? "End day anyway" : state.marketOpen ? "Close market and end day" : "Finish harvest and end day"}</button><button class="btn" onclick="closeDialog()">Keep gardening</button>`,
       "garden-end-day",
     );
   advanceGardenDay();

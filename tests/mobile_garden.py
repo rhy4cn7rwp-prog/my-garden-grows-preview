@@ -32,6 +32,7 @@ try:
     q=page.get_by_role('button',name=label,exact=True).bounding_box();assert q['height']>=44 and q['y']+q['height']<=h-bottom+1,(w,h,label,q)
    if w==428:page.screenshot(path='/tmp/phase8-garden.png')
    # Real watering-can drag to a growing plant. Capture the same data object.
+   page.evaluate("()=>{const p=document.querySelector('[data-garden-plot=\"1\"]'),a=document.querySelector('#app'),tools=document.querySelector('.garden-tools').getBoundingClientRect(),footer=document.querySelector('.garden-controls').getBoundingClientRect();a.scrollTop+=p.getBoundingClientRect().y+p.getBoundingClientRect().height/2-(tools.bottom+footer.top)/2}")
    can=page.get_by_role('button',name='Watering can',exact=True).bounding_box();plant=page.locator('[data-garden-plot="1"]').bounding_box()
    session=page.context.new_cdp_session(page)
    def touch(kind,x=0,y=0):session.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[] if kind in ['touchEnd','touchCancel'] else [{'x':x,'y':y}]})

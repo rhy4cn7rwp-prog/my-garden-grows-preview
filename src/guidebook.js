@@ -10,28 +10,28 @@ const GUIDEBOOK_PAGES = [
   {
     heading: "Shop for Your Garden!",
     text: [
-      "Visit Seed & Feed for planting supplies. Choose individual crops or a mixed bundle. Check your basket total before paying, and leave money for market supplies.",
+      "Start with $50. Buy planting supplies at Seed & Feed. Save money for bags and a scale for produce sold by the pound. A blanket is free, or rent a table. Sell harvests to earn more!",
     ],
     illustration: "shopping",
   },
   {
     heading: "Plant, Water, Harvest!",
     text: [
-      "Tap a garden plot to plan your crops, then choose Plant Plan. Drag the can or tap it and a plant to water. Water All works too! Choose End Day to help watered plants grow.",
+      "Tap a plot, choose a crop, then Plant Plan. Water with the can or Water All. Only End Day advances farming days and grows watered plants. Tap plants for growth pictures. Farming never ends!",
     ],
     illustration: "grow",
   },
   {
     heading: "Harvest and Keep Growing!",
     text: [
-      "Ripe crops are ready! Drag them to the basket, or tap them and choose Harvest. Harvest All Ready Crops works too. Some plants grow another harvest. Optional: pull weeds for a next-harvest bonus! Choose End Day to keep farming as long as you like!",
+      "Pick ripe crops or use Harvest All. Every five days, optional Math or Spelling Weeding earns 20% extra on your next harvest. Weed out wrong answers! Pick eligible ripe crops together before End Day.",
     ],
     illustration: "harvest",
   },
   {
     heading: "Help Your Customers!",
     text: [
-      "Say hello, then read the customer's order. Match the produce and the amounts: some are counted, others are measured in pounds. Check the basket before working out the price.",
+      "Say hello, then read the order. Match produce and amounts; some are counted, others weighed. Check the basket before calculating prices. Every completed sale uses one paper bag.",
     ],
     illustration: "market",
   },
