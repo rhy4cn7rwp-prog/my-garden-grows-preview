@@ -69,23 +69,52 @@ function plantPlanned() {
   });
 }
 function water() {
+  const newlyDry = state.plots.flatMap((p, i) => (p && !p.watered ? [i] : []));
   Game.water(state);
+  if (view === "garden") newlyDry.forEach((i) => gardenPlotEffect(i, "water"));
+  state.notice = "All plants are watered. They grow when you choose End Day.";
   render();
 }
 function endDay() {
+  if (state.customer)
+    return show(
+      '<h2>Your customer is waiting</h2><p>Finish helping your customer before ending the day.</p><button class="btn" onclick="go(\'market\')">Resume Market</button>',
+    );
+  const dry = Game.plantsNeedingWater(state).length;
+  if (dry || state.marketOpen)
+    return show(
+      `<h2>${dry ? "Some plants need water!" : "End your farming day?"}</h2><p>${dry ? `${dry} growing ${dry === 1 ? "plant still needs" : "plants still need"} water. Dry plants won't grow tonight.` : "Your open market will close for today."}</p>${state.marketOpen && dry ? "<p>Your open market will also close.</p>" : ""}${dry ? '<button class="btn" onclick="advanceGardenDay(true)">Water All and End Day</button>' : ""}<button class="btn alt" onclick="advanceGardenDay(false)">${dry ? "End day anyway" : "Close market and end day"}</button><button class="btn" onclick="closeDialog()">Keep gardening</button>`,
+      "garden-end-day",
+    );
+  advanceGardenDay();
+}
+function advanceGardenDay(waterFirst = false) {
+  if (state.customer) return endDay();
+  if (waterFirst) Game.water(state);
   const paid = Game.settleMarket(state);
   Game.endDay(state);
-  state.notice = `A new farming day. Equipment charges paid from market earnings: ${money(paid)}. Still owed: ${money(Game.debtTotal(state))}.`;
+  state.notice = `Day ${Game.farmDay(state)}! Watered plants grew overnight. ${paid ? `Equipment charges paid: ${money(paid)}.` : "Keep planting, growing and harvesting!"}`;
   popup = "";
+  dialogKey = null;
   render();
 }
 function harvest(i) {
+  const p = state.plots[i],
+    id = p?.id,
+    amount = Game.harvestAmount(state, i),
+    from =
+      view === "garden"
+        ? document
+            .querySelector(`[data-garden-plot="${i}"]`)
+            ?.getBoundingClientRect()
+        : null;
   act(() => {
     const message = Game.harvest(state, i);
     state.notice = message;
     popup = "";
     dialogKey = null;
     render();
+    if (from) gardenHarvestAnimation(id, amount, from);
   });
 }
 function marketStand() {
@@ -315,6 +344,7 @@ function harvestReady() {
       ` from ${result.plots} ready plots.`
     : "No crops are ready yet.";
   render();
+  if (result.plots && view === "garden") gardenBasketPulse();
 }
 function cancelPlanting() {
   Game.cancelAllPlans(state);

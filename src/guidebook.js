@@ -17,14 +17,14 @@ const GUIDEBOOK_PAGES = [
   {
     heading: "Plant, Water, Harvest!",
     text: [
-      "Go to your garden, choose a plot and plant. Water each day so your crops can grow! When they're ready, harvest them for your market stand.",
+      "Tap a garden plot to plan your crops, then choose Plant Plan. Drag the can or tap it and a plant to water. Water All works too! Choose End Day to help watered plants grow.",
     ],
     illustration: "grow",
   },
   {
-    heading: "Get Ready for Market!",
+    heading: "Harvest and Keep Growing!",
     text: [
-      "Visit Market Supplies for bags and equipment. Choose your selling space and arrange your harvest. A scale lets you sell produce by the pound. Every completed purchase uses one paper bag.",
+      "Ripe crops are ready! Drag them to the basket, or tap them and choose Harvest. Harvest All Ready Crops works too. Some plants grow another harvest. Farming days keep going as long as you like!",
     ],
     illustration: "harvest",
   },

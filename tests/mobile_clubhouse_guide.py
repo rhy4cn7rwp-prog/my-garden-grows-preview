@@ -37,7 +37,7 @@ try:
    if w>=375 and h>=500:
     page.locator('.clubhouse-guidebook').tap()
    else:tap('How to Play')
-   titles=['Choose Your Dream!',"Shop for Your Garden!",'Plant, Water, Harvest!','Get Ready for Market!',"Help Your Customers!",'Count, Save, Dream!']
+   titles=['Choose Your Dream!',"Shop for Your Garden!",'Plant, Water, Harvest!','Harvest and Keep Growing!',"Help Your Customers!",'Count, Save, Dream!']
    for i,title in enumerate(titles):
     assert page.locator('#guidebook-title').inner_text()==title
     assert page.locator('.guidebook-pages output').inner_text()==f'{i+1} of 6'

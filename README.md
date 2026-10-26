@@ -1,3 +1,17 @@
+## Phase 8 — Interactive Garden (separate review branch)
+
+The 25-plot Garden now supports a draggable/tappable can, visibly watered soil,
+ripe-crop dragging into the harvest basket, and the existing planting/info/bulk
+shortcuts. Farming advances only through End Day, with a warning for dry plants.
+The HUD shows continuous farming days while the season/local-day save calendar
+remains compatible. Seeds, yields, prices, repeat harvests, inventory and existing
+purchases are preserved.
+
+See [Phase 8 implementation, calendar and testing notes](docs/phase-8-garden.md).
+This branch builds on PR #1 without merging it. The playable review build uses a
+separate path and save namespace; neither public game nor PR #1's root playtest
+is overwritten.
+
 ## Issue #1 — first review increment (branch only; not deployed)
 
 Customer atlas fragments are isolated with source-space silhouette clips. The

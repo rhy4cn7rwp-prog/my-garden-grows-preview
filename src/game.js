@@ -746,8 +746,35 @@
     }
     return { added, skipped };
   }
+  function farmDay(date) {
+    return (date.season - 1) * 20 + date.day;
+  }
+  function waterPlot(s, i) {
+    requireRule(
+      quantity(i) && i < 25 && s.plots[i],
+      "Choose a planted plot to water.",
+    );
+    const fresh = !s.plots[i].watered;
+    s.plots[i].watered = true;
+    return fresh;
+  }
+  function plantsNeedingWater(s) {
+    return s.plots.flatMap((p, i) =>
+      p && !p.watered && p.age < get(p.id).days ? [i] : [],
+    );
+  }
   function water(s) {
-    for (const p of s.plots) if (p) p.watered = true;
+    let watered = 0;
+    s.plots.forEach((p, i) => {
+      if (p && waterPlot(s, i)) watered++;
+    });
+    return watered;
+  }
+  function harvestAmount(s, i) {
+    const p = s.plots[i];
+    if (!p) return 0;
+    const c = get(p.id);
+    return p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
   }
   function endDay(s) {
     settleMarket(s);
@@ -760,10 +787,12 @@
     }
     s.weather = s.day % 7 === 0 ? "hot" : "sunny";
     for (const p of s.plots) {
-      if (!p || p.age >= get(p.id).days) continue;
-      if (p.watered) p.age++;
-      else
-        p.quality = Math.max(30, p.quality - (s.weather === "hot" ? 25 : 12));
+      if (!p) continue;
+      if (p.age < get(p.id).days) {
+        if (p.watered) p.age++;
+        else p.quality = Math.max(30, p.quality - (s.weather === "hot" ? 25 : 12));
+      }
+      // The badge means watered on this day, including plants already ripe.
       p.watered = false;
     }
     s.hour = 9;
@@ -794,7 +823,7 @@
     const p = s.plots[i];
     requireRule(p && p.age >= get(p.id).days, "This crop is still growing.");
     const c = get(p.id),
-      n = p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
+      n = harvestAmount(s, i);
     s.inventory[c.id] = (s.inventory[c.id] || 0) + n;
     const again = p.left > 0;
     if (again) {
@@ -1683,6 +1712,10 @@
     plan,
     plantPlan,
     water,
+    waterPlot,
+    plantsNeedingWater,
+    harvestAmount,
+    farmDay,
     endDay,
     harvest,
     openMarket,

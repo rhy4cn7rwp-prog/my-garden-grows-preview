@@ -40,10 +40,14 @@ function go(v) {
   dialogKey = null;
   render();
   if (changed) {
+    const app = document.querySelector("#app");
+    if (app) app.scrollTop = 0;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document
-        .querySelector(".interior-crop, .town-world, .clubhouse-world")
+        .querySelector(
+          ".interior-crop, .town-world, .clubhouse-world, .garden-world",
+        )
         ?.animate(
           [
             {
@@ -92,20 +96,6 @@ function renderScene() {
           );
     bottom = `<h2>🎯 Dream Shop</h2><p>Tap an available item on the shelves to choose a goal or buy it with your savings.</p>${Game.dreams.every((d) => Game.ownsDream(state, d.id)) ? "<p>Your dream collection is complete!</p>" : Game.ownsDream(state, DREAMS[state.goal][0]) ? "<p>Your reward is in your clubhouse. Tap another item to choose your next savings goal.</p>" : `<div class="progress"><span style="width:${Math.min(100, (100 * Game.savings(state)) / DREAMS[state.goal][3])}%"></span></div><p>${money(Game.savings(state))} saved after equipment charges toward ${DREAMS[state.goal][2]} (${money(DREAMS[state.goal][3])})</p>`}<button class="btn" onclick="go('clubhouse')">My Clubhouse</button>`;
   }
-  if (view === "garden") {
-    stage += `<div class="plantgrid">${state.plots
-      .map((p, i) => {
-        let c = p && crop(p.id),
-          ready = p && p.age >= c.days;
-        return `<button class="plot ${ready ? "ready" : ""}" onclick="plot(${i})" title="${p ? c.name : state.plan[i] ? crop(state.plan[i]).name + " planned · tap to cancel" : "Empty plot"}">${!p ? (state.plan[i] ? crop(state.plan[i]).icon : "") : ready ? c.icon : p.age === 0 ? "🌰" : p.age / c.days < 0.5 ? "🌱" : "🌿"}</button>`;
-      })
-      .join("")}</div>`;
-    bottom = `<h2>🌿 My Garden · 5 × 5</h2>${state.notice ? `<p role="status">${state.notice}</p>` : ""}<p>Available planting supplies: ${
-      CROPS.filter((c) => state.seeds[c.id])
-        .map((c) => `${seedName(c.id)}: ${Game.availableSeeds(state, c.id)}`)
-        .join(" · ") || "none"
-    }</p><p>Tap a plot to plant, inspect or harvest. ${state.plots.filter(Boolean).every((p) => p.watered) ? "💧 Plants watered today!" : "Plants need water to grow."}</p><div class="row"><button class="btn" onclick="water()">💧 Water all</button><button class="btn" onclick="plantPlanned()">🌱 Plant plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="cancelPlanting()" ${Object.keys(state.plan).length ? "" : "disabled"}>Cancel planting plan</button><button class="btn" onclick="harvestReady()">Harvest All Ready Crops</button><button class="btn alt" onclick="endDay()">☀️ End day</button><button class="btn alt" onclick="inventory()">🧺 Harvest basket</button></div>`;
-  }
   if (view === "market") {
     let c = state.customer;
     if (state.marketPlayed && !state.marketOpen && !c)
@@ -145,8 +135,10 @@ function renderScene() {
             ? farmersMarketScene(bottom)
             : view === "clubhouse"
               ? clubhouseScene()
-              : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
-  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "seeds" ? "seed-shop-game" : view === "supplies" ? "supply-shop-game" : view === "market" ? "farmers-market-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
+              : view === "garden"
+                ? gardenScene()
+                : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
+  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "garden" ? "garden-game" : view === "seeds" ? "seed-shop-game" : view === "supplies" ? "supply-shop-game" : view === "market" ? "farmers-market-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
   document.body.dataset.view = view;
 
   const app = $("#app"),
@@ -225,11 +217,11 @@ function plotDialog(i) {
   let c = crop(p.id);
   if (p.age >= c.days) {
     show(
-      `<h2>${c.icon} ${c.name} ready!</h2><p>Harvest ${c.yield} ${c.unit} of ${c.name}.</p><button class="btn" onclick="harvest(${i})">🧺 Harvest</button>`,
+      `<h2>${c.icon} ${c.name} ready!</h2><p>Harvest ${Game.harvestAmount(state, i)} ${c.unit} of ${c.name}.</p><button class="btn" onclick="harvest(${i})">🧺 Harvest</button>`,
     );
   } else
     show(
-      `<h2>${c.icon} Growing ${c.name}</h2><p>Day ${p.age} of ${c.days} watered days.</p><p>${c.repeat ? "This crop can produce several harvests." : "This crop produces one harvest."}</p><p>Estimated market value ${money(c.price)} per ${c.unit}.</p>`,
+      `<h2>${c.icon} Growing ${c.name}</h2><p>Day ${p.age} of ${c.days} watered days.</p><p>${p.watered ? "Watered today." : "Needs water today."}</p>${view === "garden" ? `<button class="btn" onclick="waterGardenPlot(${i})" ${p.watered ? "disabled" : ""}>Water this plant</button>` : ""}<p>${c.repeat ? "This crop can produce several harvests." : "This crop produces one harvest."}</p><p>Estimated market value ${money(c.price)} per ${c.unit}.</p>`,
     );
 }
 
