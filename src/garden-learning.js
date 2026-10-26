@@ -81,7 +81,7 @@
       a &&
       a.cycle === current &&
       current > out.completedCycle &&
-      ["math", "spelling"].includes(a.type) &&
+      ["math", "spelling", "nature"].includes(a.type) &&
       Number.isInteger(a.seed) &&
       a.seed > 0 &&
       a.seed <= 0xffffffff &&
@@ -114,6 +114,15 @@
             ? Math.min(a.mistakes, 999)
             : 0,
       };
+      if (
+        a.type === "nature" &&
+        Array.isArray(a.natureChoices) &&
+        a.natureChoices.length === 4 &&
+        a.natureChoices.every((v) => typeof v === "boolean") &&
+        a.natureChoices.some(Boolean) &&
+        a.natureChoices.some((v) => !v)
+      )
+        out.session.natureChoices = a.natureChoices.slice();
       const items = questions(out.session);
       out.session.removed = out.session.removed.filter(
         (i) => !items[i].correct,
@@ -161,10 +170,11 @@
     const n = count(s);
     r.session = {
       cycle: c,
-      type: r.nextType,
+      type: s.learningExperience === "little" ? "nature" : r.nextType,
       seed: seed >>> 0 || 1,
-      level: level(s),
-      roundCount: n < 2 ? 1 : n < 4 ? 2 : 3,
+      level: s.learningExperience === "little" ? 0 : level(s),
+      roundCount:
+        s.learningExperience === "little" ? 1 : n < 2 ? 1 : n < 4 ? 2 : 3,
       round: 0,
       removed: [],
       mistakes: 0,
@@ -184,7 +194,24 @@
     }
     return list;
   }
+  function adaptExperience(s) {
+    const a = s.weedingLesson?.session;
+    if (s.learningExperience !== "little" || !a || a.type === "nature") return;
+    // Keep completed rounds, cleared answer positions and the earned reward
+    // opportunity. Only replace the current academic task with picture sorting.
+    a.natureChoices = questions(a).map((q) => q.correct);
+    a.type = "nature";
+    a.level = 0;
+    a.roundCount = a.round + 1;
+  }
   function questions(a) {
+    if (a.type === "nature" && a.natureChoices)
+      return a.natureChoices.map((correct) => ({
+        correct,
+        original: correct ? "Healthy plant" : "Unwanted weed",
+        correction: "Pull only jagged red weeds",
+        explanation: "This healthy round-leaf plant belongs here. Let it grow!",
+      }));
     const r = random(a.seed),
       integer = (lo, hi) => lo + Math.floor(r() * (hi - lo + 1));
     let result;
@@ -200,6 +227,14 @@
         r,
       );
       result = flags.map((correct, i) => {
+        if (a.type === "nature")
+          return {
+            correct,
+            original: correct ? "Healthy plant" : "Unwanted weed",
+            correction: "Pull only jagged red weeds",
+            explanation:
+              "This healthy round-leaf plant belongs here. Let it grow!",
+          };
         if (a.type === "spelling") {
           const [good, bad] = pool[i];
           return {
@@ -274,7 +309,8 @@
       return { kind: "round", message: "Lovely work! A new patch is ready." };
     }
     r.completedCycle = a.cycle;
-    r.nextType = a.type === "math" ? "spelling" : "math";
+    if (a.type !== "nature")
+      r.nextType = a.type === "math" ? "spelling" : "math";
     r.session = null;
     return {
       kind: "complete",
@@ -291,6 +327,7 @@
     select,
     count,
     claimInvitation,
+    adaptExperience,
   };
   if (typeof module !== "undefined") module.exports = api;
   root.GardenLearning = api;

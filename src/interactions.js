@@ -207,6 +207,7 @@ function standLabel() {
       : "Free blanket";
 }
 function standOptions() {
+  if(state.newEconomy)return `<p>Your market uses an owned table, scale, cash register and paper bags. Supplies stay yours. Job Board activities are always another way to earn.</p><button class="btn alt" onclick="marketSetupDialog()">Review market equipment</button>`;
   if (state.marketPlayed || state.marketOpen)
     return `<p>${standLabel()} · Welcome customers until 1:00 PM while produce is available.</p>`;
   return `<fieldset><legend>Choose today's stand</legend>
@@ -225,14 +226,10 @@ function selectStand(mode) {
     marketStand();
   });
 }
-function jobBoard() {
-  show(
-    '<h2>📋 Town Job Board</h2><p>Coming soon: earn money by helping your neighbors with educational challenges.</p><p>No jobs or math challenges are available yet. You do not need to restart your farm if money runs low.</p><button class="btn alt" onclick="seedHelp()">Visit community seed help</button>',
-  );
-}
+function jobBoard() { go("jobs"); }
 function seedHelp() {
   show(`<h2>🌱 Community seed help</h2><p>If you have less than $1 and cannot keep selling, your neighbors can share starter seeds or bags. No fee, debt, or farm reset.</p>
-    ${Game.canReceiveSeedHelp(state) ? '<button class="btn" onclick="claimSeedHelp()">Accept community help</button>' : "<p>You have a way forward: buy a seed packet, plant your seeds, water your crops, or sell your harvest. Selling from a blanket is always free.</p>"}`);
+    ${Game.canReceiveSeedHelp(state) ? '<button class="btn" onclick="claimSeedHelp()">Accept community help</button>' : "<p>You have a way forward: buy a seed packet, plant your seeds, water your crops, or sell your harvest.</p>"}${state.newEconomy ? '<p>Neighborhood jobs always offer a way to earn. Save for your reusable market setup.</p><button class="btn" onclick="go(\'jobs\')">Visit Job Board</button>' : '<p>Selling from a blanket is always free.</p>'}`);
 }
 function claimSeedHelp() {
   act(() => {
@@ -408,5 +405,8 @@ function render() {
   renderedDialogKey = dialogKey;
   syncGameViewport();
   if (typeof paintMarketClock === "function") paintMarketClock();
+  if (typeof Neighborhood !== "undefined") Neighborhood.sync();
 }
 render();
+
+if(!state.experienceChosen)queueMicrotask(()=>chooseExperienceScreen());

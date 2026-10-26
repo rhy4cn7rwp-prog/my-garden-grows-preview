@@ -1,3 +1,13 @@
+## Phase 9: neighborhood jobs and learning experiences
+
+Visit the Job Board in Town for ten repeatable activities. Completed jobs pay $1,
+with an independent five-minute cooldown for each neighbor. Choose Little or
+Growing Gardener in Play & Sound Settings; narration and effects are optional.
+New farms start with $0, free starter planting supplies at Seed & Feed, and a
+$20 first-market setup. Existing farms keep their balances, equipment and access.
+
+See [Phase 9 features, save compatibility, test results and screenshots](docs/phase-9-draft-status.md).
+
 ## Current Garden weeding reward
 
 Complete optional math/spelling weeding during a five-day window to save one

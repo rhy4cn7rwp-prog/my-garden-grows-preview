@@ -149,7 +149,7 @@ function marketSupplyInventory() {
 }
 function marketSupplyEquipment() {
   show(
-    `<header class="supply-detail-heading"><h2>Equipment &amp; rentals</h2></header><div class="supply-detail-body"><p>Your familiar equipment and rental choices are still here. Review these purchases in the equipment basket.</p>${state.supcart.bags ? `<button class="btn alt" onclick="supply('bags')">Review earlier 10-bag pack (${state.supcart.bags} in basket)</button>` : ""}${[
+    `<header class="supply-detail-heading"><h2>Equipment &amp; rentals</h2></header><div class="supply-detail-body">${state.newEconomy ? `<p>Before selling: a table holds your harvest, a scale weighs it, a register keeps payments, and bags help carry it home.</p><button class="btn" onclick="marketSetupDialog()">Starter equipment · ${money(Game.marketSetupTotal(state))} remaining</button>` : '<p>Your familiar equipment and rental choices are still here.' } Review these purchases in the equipment basket.</p>${state.supcart.bags ? `<button class="btn alt" onclick="supply('bags')">Review earlier 10-bag pack (${state.supcart.bags} in basket)</button>` : ""}${[
       ["table", 5],
       ["canopy", 6],
       ["scale", 7],
