@@ -72,7 +72,7 @@ const Neighborhood = (() => {
       d = a.data,
       timed = J.duration[a.id];
     if (a.ended)
-      return `<section class="job-results">${jobArt(a.id)}<h1>${a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}<p>${a.score} ${a.id === "catch" ? "points" : "score"} · Personal best ${Math.max(a.score, state.jobs.best[a.id] || 0)}</p><p>${a.won ? "Your neighbor has $1 ready for you." : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? "Collect $1" : "Try again"}</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? "Thank you for helping! Here is a dollar." : "That was good practice. You can try again."}')">Read to Me</button></section>`;
+      return `<section class="job-results">${jobArt(a.id)}<h1>${a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}<p>${a.score} ${a.id === "catch" ? "points" : "score"} · Personal best ${Math.max(a.score, state.jobs.best[a.id] || 0)}</p><p>${a.won ? "Your neighbor has $1 ready for you." : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onpointerup="Neighborhood.touchResult(event,'${a.won ? "collect" : "retry"}')" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? "Collect $1" : "Try again"}</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? "Thank you for helping! Here is a dollar." : "That was good practice. You can try again."}')">Read to Me</button></section>`;
     let body = "";
     if (a.id === "words")
       body = `<ul class="job-word-list">${d.words.map((w) => `<li class="${d.found.includes(w) ? "found" : ""}">${a.mode === "little" ? icon(w.toLowerCase()) : ""}<button onclick="Neighborhood.read('${w}')">${w}${d.found.includes(w) ? " ✓" : ""}</button></li>`).join("")}</ul><div class="job-word-grid" style="--size:${d.size}">${d.grid.map((v, i) => `<button data-letter="${i}" onclick="Neighborhood.letterCell(${i})" class="${d.found.some((w) => d.paths[w].includes(i)) ? "found" : ""}" aria-label="Letter ${v}, row ${Math.floor(i / d.size) + 1}, column ${(i % d.size) + 1}">${v}</button>`).join("")}</div>`;
@@ -334,12 +334,25 @@ const Neighborhood = (() => {
     ui.feedback = "";
     go("jobs");
   }
+  function touchResult(event, action) {
+    if (event.pointerType !== "touch") return;
+    // The same gesture's compatibility click can be missing or retargeted to
+    // the replacement dialog. Consume only that click, never the next real tap.
+    ui.resultTouchUntil = Date.now() + 600;
+    event.preventDefault();
+    if (action === "collect") collect();
+    else if (action === "retry") retry();
+  }
   function retry() {
+    if (!state.jobs.active?.ended || state.jobs.active.won) return;
     const id = state.jobs.active.id;
     J.quit(state);
     start(id);
   }
   function collect() {
+    // Mobile browsers may suppress the compatibility click after an arcade
+    // gesture. Touch releases activate directly; a subsequent click is a no-op.
+    if (!state.jobs.active?.won || !state.jobs.active.ended) return;
     try {
       const r = J.claim(state);
       ui.paused = true;
@@ -465,6 +478,20 @@ const Neighborhood = (() => {
   function settings() {
     learningSettings();
   }
+  document.addEventListener(
+    "pointerdown",
+    () => {
+      ui.resultTouchUntil = 0;
+    },
+    true,
+  );
+  document.addEventListener(
+    "keydown",
+    () => {
+      ui.resultTouchUntil = 0;
+    },
+    true,
+  );
   // Shared pointer capture: drag cards into crates/baskets; tap alternatives stay available.
   document.addEventListener("pointerdown", (e) => {
     if (view !== "jobs" || ui.paused || !e.isPrimary) return;
@@ -579,6 +606,12 @@ const Neighborhood = (() => {
   document.addEventListener(
     "click",
     (e) => {
+      if (Date.now() < (ui.resultTouchUntil || 0)) {
+        ui.resultTouchUntil = 0;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+      }
       if (
         Date.now() < ui.suppress &&
         e.target.closest("[data-job-drag],[data-letter]")
@@ -620,6 +653,7 @@ const Neighborhood = (() => {
     leave,
     retry,
     collect,
+    touchResult,
     read,
     readInstruction,
     settings,

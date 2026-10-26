@@ -102,7 +102,7 @@ try:
        if job=='tidy':
         k=page.evaluate('i=>state.jobs.active.data.items[i].kind',i);page.locator(f'[data-job-drop="{k}"]').tap()
      assert page.locator('.job-results').count()==1,(mode,job)
-     tap('Collect $1');page.wait_for_function('state.cash===1');assert page.evaluate('state.cash')==1,(mode,job,page.evaluate('[state.cash,state.jobs.active,popup]'),errors)
+     tap('Collect $1');page.wait_for_function('state.cash===1');page.evaluate('Neighborhood.collect()');assert page.evaluate('state.cash')==1,(mode,job,page.evaluate('[state.cash,state.jobs.active,popup]'),errors)
      tap('Back to Job Board');assert page.locator(f'[data-job-card="{job}"]').is_disabled()
      assert 'Available in' in page.locator(f'[data-job-cooldown="{job}"]').inner_text()
      page.reload();assert page.evaluate('state.cash')==1;page.evaluate("go('jobs')");assert page.locator(f'[data-job-card="{job}"]').is_disabled()
