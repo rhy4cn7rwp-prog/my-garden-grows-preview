@@ -1,0 +1,876 @@
+/* Illustrated job worlds. Hit areas stay generous on narrow phones. */
+.learning-current {
+  display: block;
+  padding: 10px;
+  border-radius: 12px;
+  background: #e1f0c9;
+  color: #294b28;
+  font-weight: 800;
+  text-align: center;
+}
+.learning-choices [aria-pressed="true"] {
+  outline: 4px solid #eac564;
+  outline-offset: 2px;
+  box-shadow: inset 0 0 0 2px #fff4c7;
+}
+.learning-choices [aria-pressed="true"]::before {
+  content: "✓ ";
+  font-weight: 900;
+}
+.job-stack [data-stack-unit],
+.job-stack .empty-slot {
+  display: block;
+  width: 100%;
+  height: 44px;
+  position: relative;
+}
+.job-stack [data-stack-unit] svg {
+  width: 100%;
+  height: 100%;
+}
+.job-stack.selected [data-stack-top] {
+  border-radius: 50%;
+  background: #fff0a3;
+  outline: 3px solid #c68c35;
+  filter: drop-shadow(0 0 5px #f4cd72);
+}
+.job-stack {
+  touch-action: none;
+  min-width: 0;
+}
+.job-three-belts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: clamp(225px, 38svh, 330px);
+  gap: 6px;
+  background: linear-gradient(#a4b981 0%, #e1ce9f 25%, #a7784b);
+  padding: 8px;
+  border-radius: 16px;
+  border: 3px solid #947147;
+  overflow: hidden;
+  box-shadow: inset 0 8px 15px #574e3926;
+}
+.job-lane {
+  position: relative;
+  min-width: 0;
+}
+.job-belt-surface {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    #7e887c 0 17px,
+    #465a51 18px 21px,
+    #a1aaa0 22px 24px
+  );
+  border: 5px solid #b49263;
+  border-bottom: 10px solid #84623e;
+  clip-path: polygon(16% 0, 84% 0, 100% 100%, 0 100%);
+  animation: job-belt-toward 1.5s linear infinite;
+}
+.job-lane-number {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 12px);
+  border-radius: 50%;
+  background: #fff0c7;
+  width: 24px;
+  color: #655035;
+  font-weight: 900;
+  text-align: center;
+}
+.job-lane .belt-produce {
+  position: absolute;
+  left: 8%;
+  top: 14%;
+  width: 84%;
+  height: 72px;
+  min-height: 60px;
+  transform: scale(var(--produce-scale, 0.78));
+  border: 0;
+  background: radial-gradient(ellipse at 50% 80%, #2a3c3a59, transparent 65%);
+  touch-action: none;
+  z-index: 2;
+  transition: none;
+}
+.job-lane .belt-produce svg {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(2px 4px 1px #3d40384d);
+}
+.job-lane .belt-produce.selected {
+  outline: 4px solid #f3cb6e;
+  border-radius: 20px;
+}
+.job-next-produce {
+  position: absolute;
+  left: 23%;
+  top: 5%;
+  width: 54%;
+  height: 48px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+.job-next-produce svg {
+  width: 100%;
+  height: 100%;
+}
+.job-pickup {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: #f6d581;
+  color: #5f4a31;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 0;
+  border-radius: 5px;
+}
+.job-lane-empty {
+  position: absolute;
+  top: 45%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 12px;
+  background: #edf1cd;
+  padding: 5px 0;
+}
+.job-bushels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+.job-bushels button {
+  position: relative;
+  min-height: 100px;
+  background: transparent;
+  border: 0;
+  touch-action: manipulation;
+  padding: 0 0 24px;
+  color: #5d422d;
+  font: inherit;
+}
+.job-bushels button > svg {
+  display: block;
+  width: 100%;
+  height: 82px;
+  filter: drop-shadow(0 3px 2px #513e382f);
+}
+.job-bushels .bushel-sample {
+  position: absolute;
+  top: 3px;
+  left: 33%;
+  width: 34%;
+  height: 37px;
+  pointer-events: none;
+}
+.bushel-sample svg {
+  height: 100%;
+  width: 100%;
+}
+.job-bushels b {
+  display: block;
+  background: #fff0cf;
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+.job-row-window {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  max-width: 100%;
+  height: clamp(220px, 37svh, 310px);
+  border: 3px solid #9c7e50;
+  border-radius: 15px;
+  background: linear-gradient(
+    #c7e5e3 0 18%,
+    #9ab37a 19% 35%,
+    #b79463 36% 66%,
+    #9b713f 67% 100%
+  );
+  touch-action: pan-x;
+  scrollbar-width: thin;
+  scrollbar-color: #a57c4d #e7d0a5;
+  isolation: isolate;
+}
+.job-row-landscape {
+  display: flex;
+  position: relative;
+  height: 100%;
+  width: max-content;
+  background: repeating-linear-gradient(
+      0deg,
+      transparent 0 34px,
+      #ead0a36b 35px 38px,
+      transparent 39px 45px
+    )
+    0 22%/100% 20% no-repeat;
+}
+.job-row-start,
+.job-row-end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 105px;
+  flex-shrink: 0;
+  font-weight: 800;
+  color: #694a30;
+  text-align: center;
+  position: relative;
+  font-size: 16px;
+}
+.job-row-start::before,
+.job-row-end::before {
+  content: "";
+  position: absolute;
+  top: 29%;
+  height: 38%;
+  width: 85%;
+  background: #f0d6a2;
+  border: 3px solid #9f7749;
+  box-shadow: 0 10px 0 -7px #856343;
+  border-radius: 9px;
+  z-index: -1;
+  transform: rotate(-3deg);
+}
+.job-row-end span {
+  color: #b78338;
+  font-size: 24px;
+}
+.job-row-station {
+  width: 200px;
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  background: radial-gradient(
+    ellipse at 50% 93%,
+    #61442b66 0 18%,
+    transparent 25%
+  );
+}
+.job-crop-stalk {
+  position: absolute;
+  inset: 4% 3% 0;
+  pointer-events: none;
+}
+.job-crop-stalk svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(4px 2px 0 #556d3726);
+}
+.job-row-pick {
+  position: absolute;
+  border: 0;
+  background: none;
+  padding: 0;
+  touch-action: none;
+  min-width: 52px;
+  min-height: 52px;
+  color: #693e2c;
+}
+.job-row-pick svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(2px 4px 1px #4e462b38);
+}
+.row-weed {
+  width: 78px;
+  height: 105px;
+  left: calc(50% - 39px);
+  bottom: 0;
+}
+.row-tomato {
+  width: 57px;
+  height: 65px;
+  left: calc(var(--fruit-x) - 28px);
+  top: calc(var(--fruit-y) - 28px);
+}
+.row-tomato small {
+  display: block;
+  position: absolute;
+  bottom: -7px;
+  left: 0;
+  right: 0;
+  border-radius: 7px;
+  background: #fff0d8;
+  font: 700 11px system-ui;
+  color: #653d2b;
+}
+.row-tomato.unripe small {
+  background: #edf2d7;
+  color: #355936;
+}
+.job-row-pick.picked svg {
+  opacity: 0;
+}
+.job-row-pick.picked small {
+  display: none;
+}
+.job-picked-mark {
+  display: block;
+  position: absolute;
+  left: 30%;
+  top: 20%;
+  color: #f7e6ab;
+  text-shadow: 0 1px 2px #37522d;
+  font-size: 28px;
+}
+.job-row-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+.job-row-footer .job-drop-basket {
+  width: 95px;
+  height: 92px;
+  margin: 0;
+  flex-shrink: 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  position: relative;
+}
+.job-row-footer .job-drop-basket svg {
+  width: 100%;
+  height: 70px;
+}
+.job-row-footer .job-drop-basket span {
+  display: block;
+  font-size: 12px;
+  background: #f6e9c9;
+  border-radius: 6px;
+  padding: 2px;
+  text-align: center;
+}
+.job-row-footer > div:last-child {
+  flex: 1;
+  min-width: 0;
+}
+.job-row-footer progress {
+  width: 100%;
+  accent-color: #6b923e;
+  display: block;
+  height: 18px;
+  margin: 5px 0;
+}
+.job-row-footer small {
+  font-size: 12px;
+  display: block;
+}
+.job-picked-ghost {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  animation: job-pull-out 0.6s ease-out both;
+}
+.job-picked-ghost svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 2px #65472e55);
+}
+.job-picked-ghost small {
+  display: none;
+}
+.job-picked-ghost i {
+  position: absolute;
+  width: 7px;
+  height: 6px;
+  border-radius: 45%;
+  background: #89603e;
+  bottom: 12%;
+  left: 40%;
+  animation: job-soil-puff 0.5s ease-out both;
+}
+.job-picked-ghost i:nth-last-child(2) {
+  left: 60%;
+  animation-delay: 0.06s;
+}
+.job-picked-ghost i:last-child {
+  left: 20%;
+  animation-delay: 0.1s;
+}
+.job-picked-ghost.pick-fruit {
+  animation: job-pick-basket 0.6s ease-in-out both;
+}
+.job-flower-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: calc(var(--jobs-hud-height, 65px) + 46px);
+  z-index: 4;
+  background: #f5edcfeb;
+  border-radius: 12px;
+  padding: 4px 8px;
+  margin-bottom: 7px;
+  box-shadow: 0 3px 7px #5f543320;
+}
+.job-flower-tools .job-can {
+  width: 68px;
+  height: 55px;
+  min-height: 48px;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  touch-action: none;
+}
+.job-flower-tools .job-can svg {
+  height: 100%;
+  width: 100%;
+}
+.job-flower-tools span {
+  font-size: 13px;
+  color: #59452f;
+}
+.job-flower-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  border: 3px solid #957c50;
+  padding: 4px;
+  background: #a6bd76;
+  border-radius: 15px;
+  max-width: 100%;
+  overflow: hidden;
+}
+.job-flower-bed,
+.job-flower-ground {
+  min-width: 0;
+  min-height: 49px;
+  height: auto;
+  aspect-ratio: 1 / 1.06;
+  padding: 0;
+  position: relative;
+  border: 0;
+  border-radius: 7px;
+  background: #c9ae7a;
+  overflow: hidden;
+}
+.job-flower-bed {
+  touch-action: none;
+  cursor: pointer;
+  background: radial-gradient(ellipse at 50% 85%, #ba9767, #d9bf8d);
+}
+.job-flower-bed svg,
+.job-flower-ground svg {
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+.job-flower-ground.grass {
+  background: #a9c47b;
+}
+.job-flower-ground.path {
+  background: #b8ab7c;
+}
+.job-flower-bed.blooming {
+  background: #a2bb75;
+  opacity: 1;
+}
+.job-flower-bed.blooming svg {
+  animation: job-bloom 0.45s ease-out;
+}
+.job-flower-bed > span {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-radius: 6px;
+  background: #edf4d4;
+  color: #3f6b30;
+  font-size: 12px;
+  font-weight: 900;
+}
+.job-catch-world.living-catch {
+  height: clamp(260px, 42svh, 400px);
+  aspect-ratio: auto;
+  isolation: isolate;
+  background: #b8d59d;
+  border: 3px solid #b09b66;
+}
+.living-catch::before {
+  display: none;
+}
+.living-catch > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.living-catch .job-jones {
+  position: absolute;
+  left: 3%;
+  top: 1%;
+  width: 35%;
+  height: 55%;
+  bottom: auto;
+  z-index: 2;
+  transform: none;
+}
+.living-catch .job-jones svg {
+  width: 100%;
+  height: 100%;
+}
+.jones-body {
+  transform-origin: 105px 205px;
+  animation: jones-pull-toss var(--toss-time, 2300ms) ease-in-out infinite;
+}
+.jones-arm {
+  transform-origin: 145px 135px;
+  animation: jones-throw var(--toss-time, 2300ms) ease-in-out infinite;
+}
+.jones-eyes {
+  transform-origin: 100px 80px;
+  animation: job-blink 5s infinite;
+}
+.living-catch .job-jones-bubble {
+  position: absolute;
+  top: 5%;
+  left: 39%;
+  width: 54%;
+  padding: 8px;
+  background: #fff1d3;
+  border: 2px solid #aa8657;
+  border-radius: 16px;
+  color: #62472c;
+  font-size: clamp(12px, 3.5vw, 15px);
+  z-index: 2;
+  line-height: 1.3;
+}
+.living-catch .job-jones-bubble::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  bottom: 7px;
+  border: 7px solid transparent;
+  border-right-color: #aa8657;
+  transform: rotate(-15deg);
+}
+.living-catch .job-carrots {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.living-catch .flying-carrot {
+  position: absolute;
+  width: 7%;
+  height: 14%;
+  display: block;
+  pointer-events: none;
+}
+.living-catch .flying-carrot.big {
+  width: 10%;
+  height: 20%;
+}
+.living-catch .flying-carrot svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(2px 3px 1px #493b2e45);
+}
+.living-catch .job-catching-basket {
+  position: absolute;
+  top: 78%;
+  bottom: auto;
+  aspect-ratio: 200 / 130;
+  transform: translate(-50%, -26.923%);
+  height: auto;
+  z-index: 4;
+  pointer-events: none;
+}
+.living-catch .job-catching-basket > svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 5px 2px #634b3d44);
+}
+.job-catch-glow {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 7%;
+  height: 31%;
+  z-index: 3;
+  overflow: visible;
+  pointer-events: none;
+}
+.job-catch-glow > span {
+  display: block;
+  position: absolute;
+  left: 20%;
+  top: 0;
+  width: 60%;
+  height: 75%;
+  overflow: hidden;
+  clip-path: ellipse(50% 45% at 50% 50%);
+}
+.job-catch-glow svg {
+  height: 100%;
+  width: 100%;
+  animation: job-basket-catch 0.34s ease-out both;
+}
+.job-catch-glow > b {
+  position: absolute;
+  top: -26px;
+  right: 0;
+  font-size: 19px;
+  color: #fff7bf;
+  text-shadow: 0 1px 3px #715031;
+}
+.job-catching-basket.caught::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 0 13px #ffe17b;
+  border-radius: 40%;
+  animation: job-catch-ring 0.34s ease-out both;
+}
+.job-match-grid {
+  position: relative;
+}
+.job-match-burst {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  color: #fff1a5;
+  font-size: 22px;
+  font-weight: 900;
+  text-shadow: 0 2px 2px #77543a;
+  animation: job-points 0.5s ease-out both;
+  white-space: nowrap;
+}
+.job-match-burst::before,
+.job-match-burst::after {
+  content: "✦";
+  position: absolute;
+  font-size: 19px;
+  color: #f6c56f;
+  left: -20px;
+  top: 10px;
+  animation: job-spark 0.5s ease-out both;
+}
+.job-match-burst::after {
+  left: 100%;
+  top: -12px;
+  color: #8abf62;
+}
+.job-match-grid.job-fall button:not(.job-pop) {
+  animation: job-produce-drop 0.22s ease-out;
+}
+@keyframes job-belt-toward {
+  to {
+    background-position: 0 48px;
+  }
+}
+@keyframes jones-pull-toss {
+  0%,
+  12% {
+    transform: rotate(-5deg);
+  }
+  35%,
+  58% {
+    transform: rotate(17deg) translateY(5px);
+  }
+  85% {
+    transform: rotate(-7deg);
+  }
+  100% {
+    transform: rotate(-5deg);
+  }
+}
+@keyframes jones-throw {
+  0%,
+  12% {
+    transform: rotate(-80deg);
+  }
+  50% {
+    transform: rotate(28deg);
+  }
+  85% {
+    transform: rotate(-110deg);
+  }
+  100% {
+    transform: rotate(-80deg);
+  }
+}
+@keyframes job-blink {
+  0%,
+  43%,
+  47%,
+  100% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(0.12);
+  }
+}
+@keyframes job-pull-out {
+  25% {
+    transform: translateY(-35px) rotate(-12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-80px) rotate(13deg);
+    opacity: 0;
+  }
+}
+@keyframes job-soil-puff {
+  to {
+    transform: translate(30px, 25px) scale(0.4);
+    opacity: 0;
+  }
+}
+@keyframes job-pick-basket {
+  20% {
+    transform: translateY(-15px);
+  }
+  100% {
+    transform: translate(var(--pick-x, 0), var(--pick-y, 80px)) scale(0.4);
+    opacity: 0;
+  }
+}
+@keyframes job-bloom {
+  from {
+    transform: scale(0.8) rotate(-7deg);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes job-basket-catch {
+  from {
+    transform: translateY(-10px);
+  }
+  to {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+}
+@keyframes job-catch-ring {
+  to {
+    transform: scale(1.14);
+    opacity: 0;
+  }
+}
+@keyframes job-points {
+  to {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+@keyframes job-spark {
+  to {
+    transform: translate(-15px, 20px) rotate(70deg) scale(0.4);
+    opacity: 0;
+  }
+}
+@keyframes job-produce-drop {
+  from {
+    transform: translateY(-32px);
+    opacity: 0.35;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .job-belt-surface,
+  .jones-body,
+  .jones-arm,
+  .jones-eyes,
+  .job-picked-ghost,
+  .job-flower-bed.blooming svg,
+  .job-catch-glow svg,
+  .job-catching-basket.caught::after,
+  .job-match-burst,
+  .job-match-burst::before,
+  .job-match-burst::after,
+  .job-match-grid.job-fall button:not(.job-pop) {
+    animation: none;
+  }
+  .job-picked-ghost {
+    display: none;
+  }
+  .job-match-burst {
+    opacity: 1;
+  }
+  .job-match-grid .job-pop {
+    animation: none;
+    outline: 3px solid #e5b653;
+  }
+}
+.job-play.is-paused * {
+  animation-play-state: paused !important;
+}
+.jones-body,
+.jones-arm {
+  animation-delay: var(--toss-offset, 0ms);
+}
+.jones-held-carrot {
+  animation: jones-held var(--toss-time, 2300ms) linear infinite;
+  animation-delay: var(--toss-offset, 0ms);
+}
+@keyframes jones-held {
+  0%,
+  16%,
+  88%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  78% {
+    opacity: 1;
+  }
+}
+.job-flower-bed.blooming svg > g:last-child {
+  animation: job-water-drops 0.5s ease-out;
+}
+@keyframes job-water-drops {
+  from {
+    transform: translateY(-35px);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jones-held-carrot,
+  .job-flower-bed.blooming svg > g:last-child {
+    animation: none;
+  }
+}
+.jones-proud-smile {
+  opacity: 0;
+}
+.catch-smile .jones-proud-smile {
+  opacity: 1;
+}
+.catch-smile .jones-eyes {
+  transform: scaleY(0.7);
+  animation: none;
+}
+
+.job-catch-world .jones-body {
+  transform-box: view-box;
+}
+/* The scene carries its own short instructions; keep phone space for play. */
+.illustrated-chore .job-instructions {
+  display: none;
+}
+.job-row-footer .job-drop-basket {
+  display: block;
+}

@@ -1,24 +1,29 @@
 function chooseExperienceScreen() {
   show(
-    `<h2>A garden for you!</h2><button class="btn alt" onclick="Narration.speak('You can choose Little Gardener for pictures and simple helping, or Growing Gardener for words and money challenges. Both earn the same rewards. You can change later in Settings.','guide',true)">Read to Me</button><p>Choose how you like to play. Both earn the same rewards. You can change this any time in Play &amp; Sound Settings.</p><div class="learning-choices"><button class="btn" onclick="selectExperience('little')">I'm still learning to read!<small>Little Gardener · pictures, counting and helping</small></button><button class="btn" onclick="selectExperience('growing')">I'm ready for a challenge!<small>Growing Gardener · words, numbers and money</small></button></div>`,
+    `<h2>A garden for you!</h2><button class="btn alt" onclick="Narration.speak('You can choose Little Gardener for pictures and simple helping, or Growing Gardener for words and money challenges. Both earn the same rewards. You can change later in Settings.','guide',true)">Read to Me</button><p>Choose how you like to play. Both earn the same rewards. You can change this any time in Play &amp; Sound Settings.</p><div class="learning-choices"><button class="btn" onpointerup="selectExperience('little',event)" onclick="selectExperience('little',event)">I'm still learning to read!<small>Little Gardener · pictures, counting and helping</small></button><button class="btn" onpointerup="selectExperience('growing',event)" onclick="selectExperience('growing',event)">I'm ready for a challenge!<small>Growing Gardener · words, numbers and money</small></button></div>`,
     "experience-choice",
   );
 }
-function selectExperience(mode) {
-  Game.chooseExperience(state, mode);
-  save();
-  closeDialog();
+function selectExperience(mode, event) {
+  TouchActions.run(event, () => {
+    Game.chooseExperience(state, mode);
+    save();
+    closeDialog();
+  });
 }
+
 function learningSettingsMarkup() {
-  return `<h2>Play &amp; Sound Settings</h2><p>Progress stays with you. An unfinished job keeps its current puzzle; you can leave it and start fresh in your new experience. Little Gardener changes Garden weeding to pictures without losing your progress.</p><div class="learning-choices"><button class="btn" aria-pressed="${state.learningExperience === "little"}" onclick="setLearningPreference('little')">I'm still learning to read! · Little Gardener</button><button class="btn" aria-pressed="${state.learningExperience === "growing"}" onclick="setLearningPreference('growing')">I'm ready for a challenge! · Growing Gardener</button></div><div class="learning-settings"><label><input type="checkbox" ${state.narrationEnabled ? "checked" : ""} onchange="setAudioPreference('narrationEnabled',this.checked)"/>Character narration</label><label><input type="checkbox" ${state.effectsEnabled ? "checked" : ""} onchange="setAudioPreference('effectsEnabled',this.checked)"/>Sound effects</label></div><button class="btn alt" onclick="Narration.speak('Choose the gardening experience you enjoy. Both earn the same rewards. You can turn voices and sound effects on or off separately.','guide',true)">Read to Me</button><p>${typeof Narration !== "undefined" ? Narration.status : ""}</p><button class="btn alt" onclick="reset()">Start a new farm</button>`;
+  return `<h2>Play &amp; Sound Settings</h2><output class="learning-current" role="status" aria-live="polite">Playing as ${state.learningExperience === "little" ? "Little Gardener" : "Growing Gardener"}</output><p>Progress stays with you. An unfinished job keeps its current puzzle; you can leave it and start fresh in your new experience. Little Gardener changes Garden weeding to pictures without losing your progress.</p><div class="learning-choices"><button class="btn" aria-pressed="${state.learningExperience === "little"}" data-learning-choice="little" onpointerup="setLearningPreference('little',event)" onclick="setLearningPreference('little',event)">I'm still learning to read! · Little Gardener</button><button class="btn" aria-pressed="${state.learningExperience === "growing"}" data-learning-choice="growing" onpointerup="setLearningPreference('growing',event)" onclick="setLearningPreference('growing',event)">I'm ready for a challenge! · Growing Gardener</button></div><div class="learning-settings"><label><input type="checkbox" ${state.narrationEnabled ? "checked" : ""} onchange="setAudioPreference('narrationEnabled',this.checked)"/>Character narration</label><label><input type="checkbox" ${state.effectsEnabled ? "checked" : ""} onchange="setAudioPreference('effectsEnabled',this.checked)"/>Sound effects</label></div><button class="btn alt" onclick="Narration.speak('Choose the gardening experience you enjoy. Both earn the same rewards. You can turn voices and sound effects on or off separately.','guide',true)">Read to Me</button><p>${typeof Narration !== "undefined" ? Narration.status : ""}</p><button class="btn alt" onclick="reset()">Start a new farm</button>`;
 }
 function learningSettings() {
   show(learningSettingsMarkup(), "learning-settings");
 }
-function setLearningPreference(mode) {
-  Game.chooseExperience(state, mode);
-  save();
-  learningSettings();
+function setLearningPreference(mode, event) {
+  TouchActions.run(event, () => {
+    Game.chooseExperience(state, mode);
+    save();
+    learningSettings();
+  });
 }
 function setAudioPreference(key, value) {
   if (!["narrationEnabled", "effectsEnabled"].includes(key)) return;
