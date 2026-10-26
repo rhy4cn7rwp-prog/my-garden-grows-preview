@@ -1,3 +1,11 @@
+## Permanent public playtest
+
+Use https://rhy4cn7rwp-prog.github.io/my-garden-grows-preview/ for ongoing playtesting.
+Consolidates the approved PR #1 and Phase 8 improvements, including optional
+whole-garden weeding. Keeps existing public save keys; no temporary-save import.
+See [consolidation and save notes](docs/preview-consolidation.md).
+Future work uses branches and pull requests here, not new hosting repositories.
+
 ## Phase 8 — Interactive Garden (separate review branch)
 
 The 25-plot Garden now supports a draggable/tappable can, visibly watered soil,

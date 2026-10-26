@@ -62,7 +62,7 @@ try:
      assert page.locator('.register-count strong').inner_text()==f'Change counted: ${counted/100:.2f}'
      if i==2:
       partial=page.evaluate('[state.customer,state.change,state.changePractice,state.cash,state.inventory,state.bagCount]')
-      page.reload();assert page.evaluate('[state.customer,state.change,state.changePractice,state.cash,state.inventory,state.bagCount]')==partial
+      page.reload();tap('Resume Market');assert page.evaluate('[state.customer,state.change,state.changePractice,state.cash,state.inventory,state.bagCount]')==partial
       assert page.evaluate('state.customer.prices')==prices
       tap('💵 Count change');fit()
     assert counted==due

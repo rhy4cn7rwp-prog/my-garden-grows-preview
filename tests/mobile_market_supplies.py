@@ -20,7 +20,7 @@ try:
    page.add_init_script("document.addEventListener('DOMContentLoaded',()=>{document.documentElement.style.setProperty('--viewport-safe-top','"+str(t)+"px');document.documentElement.style.setProperty('--viewport-safe-bottom','"+str(b)+"px');syncGameViewport();});")
    page.goto(os.environ.get('PREVIEW_URL',f'http://127.0.0.1:{server.server_port}/'))
    def tap(name):page.get_by_role('button',name=name,exact=True).tap()
-   tap('Market Supplies');page.wait_for_function("document.querySelector('.supply-shop-interior')?.naturalWidth>0")
+   tap('Go to Town');tap('Market Supplies');page.wait_for_function("document.querySelector('.supply-shop-interior')?.naturalWidth>0")
    def baseline():return page.evaluate("Object.fromEntries(Object.entries(state).filter(([k])=>!['cash','marketSupplyCart','marketSupplyStock','marketExpenses','bagCount'].includes(k)).map(([k,v])=>[k,k==='display'?Object.fromEntries(Object.entries(v).filter(([,n])=>n>0)):v]))")
    before=baseline()
    def fit():
@@ -46,7 +46,7 @@ try:
     loc.tap()
    product('bags');assert '20¢ each' in page.locator('.dialog').inner_text() and '15¢ each' in page.locator('.dialog').inner_text()
    tap('Add 5 paper produce bags');assert page.evaluate('state.marketSupplyCart.bags5')==1
-   tap('Close ✕');pending=page.evaluate('state.marketSupplyCart');page.reload();tap('Market Supplies');assert page.evaluate('state.marketSupplyCart')==pending
+   tap('Close ✕');pending=page.evaluate('state.marketSupplyCart');page.reload();tap('Go to Town');tap('Market Supplies');assert page.evaluate('state.marketSupplyCart')==pending
    product('bags');add=page.get_by_role('button',name='Add 20 paper produce bags',exact=True);add.scroll_into_view_if_needed();scroll=page.locator('.supply-detail-body').evaluate('e=>e.scrollTop');page.locator('.dialog').evaluate("e=>e.dataset.kept='yes'");add.tap()
    assert page.locator('.dialog').get_attribute('data-kept')=='yes'
    assert abs(page.locator('.supply-detail-body').evaluate('e=>e.scrollTop')-scroll)<2
@@ -64,7 +64,7 @@ try:
    assert page.evaluate('state.marketExpenses.reduce((n,e)=>n+e.cents,0)')==2700
    assert baseline()==before
    tap('See my supplies');text=page.locator('.dialog').inner_text();assert all(v in text for v in ['Consumables','Reusable supplies','25','20','2','optional for selling'])
-   tap('Close ✕');page.reload();tap('Market Supplies');fit()
+   tap('Close ✕');page.reload();tap('Go to Town');tap('Market Supplies');fit()
    assert page.evaluate('state.marketSupplyStock')==expected and page.evaluate('[state.bagCount,state.cash]')==[25,23]
    # Original supply/equipment checkout and rentals remain accessible.
    tap('Equipment & rentals');tap('Wooden market table · $8.00');assert '$8.00' in page.locator('.dialog').inner_text();tap('Close ✕')
@@ -79,7 +79,7 @@ try:
    # Paid costs appear once in the accounting report and leave balances alone.
    page.evaluate('showMarketReport()');assert '$23.00' in page.locator('.accounting-report').inner_text();assert '$4.00' in page.locator('.accounting-report').inner_text();tap('Close ✕')
    assert page.evaluate('state.cash')==23
-   page.evaluate("()=>{state.marketSupplyCart={};save();localStorage.setItem('mgg10','{bad')}");page.reload();tap('Market Supplies')
+   page.evaluate("()=>{state.marketSupplyCart={};save();localStorage.setItem('mgg10','{bad')}");page.reload();tap('Go to Town');tap('Market Supplies')
    assert page.evaluate('state.marketSupplyStock')==expected and page.evaluate('[state.bagCount,state.cash]')==[25,23]
    # Toolbar change, return navigation and all other saved farm values are stable.
    page.evaluate("()=>{Object.defineProperty(visualViewport,'height',{configurable:true,get:()=>innerHeight-35});visualViewport.dispatchEvent(new Event('resize'))}");fit()

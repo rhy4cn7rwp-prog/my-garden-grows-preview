@@ -50,7 +50,7 @@ try:
     assert f"${c['price']:.2f}" in page.locator('.dialog').inner_text()
     tap('+');assert page.evaluate('id=>state.cart[id]',c['id'])==1;tap('Close ✕')
     if c['id']=='beans':
-     pending=page.evaluate('state.cart');page.reload();tap('Seed & Feed');assert page.evaluate('state.cart')==pending
+     pending=page.evaluate('state.cart');page.reload();tap('Go to Town');tap('Seed & Feed');assert page.evaluate('state.cart')==pending
    assert page.evaluate('state.cash')==50 and page.evaluate('state.seeds')=={}
    tap('Variety bundle · $11.00 Fixed assortment · save $1.00')
    assert 'Carrot Seeds × 3, Onion Seeds × 2, Green Bean Seeds × 2, Strawberry Plants × 1' in page.locator('.dialog').inner_text()
@@ -72,7 +72,7 @@ try:
    assert page.evaluate('state.cart')=={}
    tap('Back to the shelves');fit()
    if width==428 and height==746:page.screenshot(path='/tmp/seed-shop-final.png')
-   page.reload();tap('Seed & Feed');fit();assert page.evaluate('state.seeds')==expected and page.evaluate('state.cash')==21
+   page.reload();tap('Go to Town');tap('Seed & Feed');fit();assert page.evaluate('state.seeds')==expected and page.evaluate('state.cash')==21
    after=page.evaluate("({...state,cart:null,seeds:null,cash:null,display:Object.fromEntries(Object.entries(state.display).filter(([,n])=>n>0))})")
    assert after==before,(width,height,'other gameplay changed')
    # Over-budget and empty checkout are visibly disabled, inventory unchanged.
@@ -82,7 +82,7 @@ try:
    tap('Close ✕');assert page.evaluate('state.cash')==21 and page.evaluate('state.seeds')==expected
    page.evaluate("()=>{state.cart={};cart('seeds')}");assert page.get_by_role('button',name='Pay at checkout',exact=True).is_disabled();tap('Close ✕')
    # Same-origin backups recover the existing farm; opening/closing shops preserves it.
-   page.evaluate("()=>{localStorage.setItem('mgg10','{bad')}");page.reload();tap('Seed & Feed')
+   page.evaluate("()=>{localStorage.setItem('mgg10','{bad')}");page.reload();tap('Go to Town');tap('Seed & Feed')
    assert page.evaluate('state.seeds')==expected and page.evaluate('state.cash')==21
    page.evaluate("()=>{Object.defineProperty(visualViewport,'height',{configurable:true,get:()=>innerHeight-35});visualViewport.dispatchEvent(new Event('resize'))}");fit()
    assert not errors,errors

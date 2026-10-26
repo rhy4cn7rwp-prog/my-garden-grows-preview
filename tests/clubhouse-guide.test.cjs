@@ -49,7 +49,7 @@ test("six-page guide teaches currently playable shopping, growing, bagging and m
       "Visit the Dream Shop and choose something you'd love to save for. Choosing a dream does not spend your money. When you've saved enough, visit the shop again to buy it.",
       "Visit Seed & Feed for planting supplies. Choose individual crops or a mixed bundle. Check your basket total before paying, and leave money for market supplies.",
       "Tap a garden plot to plan your crops, then choose Plant Plan. Drag the can or tap it and a plant to water. Water All works too! Choose End Day to help watered plants grow.",
-      "Ripe crops are ready! Drag them to the basket, or tap them and choose Harvest. Harvest All Ready Crops works too. Some plants grow another harvest. Farming days keep going as long as you like!",
+      "Ripe crops are ready! Drag them to the basket, or tap them and choose Harvest. Harvest All Ready Crops works too. Some plants grow another harvest. Optional: pull weeds for a next-harvest bonus! Choose End Day to keep farming as long as you like!",
       "Say hello, then read the customer's order. Match the produce and the amounts: some are counted, others are measured in pounds. Check the basket before working out the price.",
       "Work out the prices shown, then enter the total. Count back change with bills and coins. Save your earnings, visit the Dream Shop to buy your reward, and find it in your Clubhouse!\n\nThen choose another dream and keep growing!",
     ],

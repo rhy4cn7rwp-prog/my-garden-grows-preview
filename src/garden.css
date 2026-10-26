@@ -403,3 +403,14 @@ body[data-view="garden"] #app {
     animation: none;
   }
 }
+
+.garden-weeding { text-align:center; padding: 4px 12px; }
+.garden-weeding .btn { min-height:44px; }
+.garden-weed-patch { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;background:#9b7047;border-radius:18px; }
+.garden-weed { position:relative;height:80px;min-width:44px;border:2px solid #805431;border-radius:12px;background:#b38a58;cursor:pointer;color:#3a281a;font-weight:bold; }
+.garden-weed svg { height:70px;width:70px;position:static; }
+.garden-weed:active svg { transform:translateY(-12px) rotate(-8deg);transition:transform .15s; }
+.garden-weed:disabled { opacity:.7;cursor:default;background:#c6a575; }
+@media(prefers-reduced-motion:reduce){.garden-weed:active svg{transform:none;transition:none}}
+
+.garden-heading > .btn {min-height:44px;font-size:13px;padding:5px 8px;}

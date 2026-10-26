@@ -148,6 +148,8 @@
   function initial() {
     return {
       version: 1,
+      gardenWeeding: { day: 0, pulled: [] },
+      weedingCredits: {},
       marketSupplyStock: supplyShop
         ? supplyShop.emptyStock()
         : {
@@ -286,6 +288,17 @@
         plan: {},
         notice: "",
       };
+      clean.weedingCredits = {};
+      for (const id of ids) {
+        const n = s.weedingCredits?.[id];
+        if (Number.isInteger(n) && n > 0 && n < 5) clean.weedingCredits[id] = n;
+      }
+      const weeds = s.gardenWeeding;
+      clean.gardenWeeding = {
+        day: Number.isSafeInteger(weeds?.day) && weeds.day >= 0 && weeds.day <= farmDay(clean) ? weeds.day : 0,
+        pulled: Array.isArray(weeds?.pulled) ? [...new Set(weeds.pulled.filter(i => Number.isInteger(i) && i >= 0 && i < 6))] : [],
+      };
+      for (const p of clean.plots) if (p && p.weedingBonus !== true) delete p.weedingBonus;
       // Optional reward records migrate independently: an unknown/malformed
       // record must never reset an otherwise valid farm. A goal or `won` flag
       // is not evidence of a purchase. Never invent historical dates.
@@ -774,7 +787,23 @@
     const p = s.plots[i];
     if (!p) return 0;
     const c = get(p.id);
-    return p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
+    const base = p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
+    return base + (p.weedingBonus === true ? Math.floor((base + (s.weedingCredits?.[p.id] || 0)) / 5) : 0);
+  }
+  function weedingAvailable(s) {
+    return s.plots.some(Boolean) && !s.plots.some(p => p?.weedingBonus === true) &&
+      (s.gardenWeeding?.day !== farmDay(s) || s.gardenWeeding.pulled.length < 6);
+  }
+  function pullWeed(s, index) {
+    requireRule(weedingAvailable(s), "Your garden already has its weeding bonus. Enjoy your next harvest!");
+    requireRule(Number.isInteger(index) && index >= 0 && index < 6, "Choose a weed to pull.");
+    if (!s.gardenWeeding || s.gardenWeeding.day !== farmDay(s))
+      s.gardenWeeding = { day: farmDay(s), pulled: [] };
+    if (s.gardenWeeding.pulled.includes(index)) return false;
+    s.gardenWeeding.pulled.push(index);
+    if (s.gardenWeeding.pulled.length === 6)
+      for (const p of s.plots) if (p) p.weedingBonus = true;
+    return true;
   }
   function endDay(s) {
     settleMarket(s);
@@ -825,6 +854,12 @@
     const c = get(p.id),
       n = harvestAmount(s, i);
     s.inventory[c.id] = (s.inventory[c.id] || 0) + n;
+    if (p.weedingBonus === true) {
+      const base = p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
+      s.weedingCredits ||= {};
+      s.weedingCredits[c.id] = (base + (s.weedingCredits[c.id] || 0)) % 5;
+    }
+    delete p.weedingBonus; // One bonus per plant harvest, including repeat producers.
     const again = p.left > 0;
     if (again) {
       p.left--;
@@ -1715,6 +1750,8 @@
     waterPlot,
     plantsNeedingWater,
     harvestAmount,
+    weedingAvailable,
+    pullWeed,
     farmDay,
     endDay,
     harvest,

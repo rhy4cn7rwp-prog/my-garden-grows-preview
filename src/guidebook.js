@@ -24,7 +24,7 @@ const GUIDEBOOK_PAGES = [
   {
     heading: "Harvest and Keep Growing!",
     text: [
-      "Ripe crops are ready! Drag them to the basket, or tap them and choose Harvest. Harvest All Ready Crops works too. Some plants grow another harvest. Farming days keep going as long as you like!",
+      "Ripe crops are ready! Drag them to the basket, or tap them and choose Harvest. Harvest All Ready Crops works too. Some plants grow another harvest. Optional: pull weeds for a next-harvest bonus! Choose End Day to keep farming as long as you like!",
     ],
     illustration: "harvest",
   },
