@@ -49,7 +49,7 @@ test("six-page guide teaches currently playable shopping, growing, bagging and m
       "Visit the Dream Shop and choose something you'd love to save for. Choosing a dream does not spend your money. When you've saved enough, visit the shop again to buy it.",
       "Start with $50. Buy planting supplies at Seed & Feed. Save money for bags and a scale for produce sold by the pound. A blanket is free, or rent a table. Sell harvests to earn more!",
       "Tap a plot, choose a crop, then Plant Plan. Water with the can or Water All. Only End Day advances farming days and grows watered plants. Tap plants for growth pictures. Farming never ends!",
-      "Pick ripe crops or use Harvest All. Every five days, optional Math or Spelling Weeding earns 20% extra on your next harvest. Weed out wrong answers! Pick eligible ripe crops together before End Day.",
+      "Pick ripe crops or use Harvest All. Every five days, optional Math or Spelling Weeding rewards each planted crop with 1 extra item or pound. Weed out wrong answers! Each plant keeps its bonus until harvested.",
       "Say hello, then read the order. Match produce and amounts; some are counted, others weighed. Check the basket before calculating prices. Every completed sale uses one paper bag.",
       "Work out the prices shown, then enter the total. Count back change with bills and coins. Save your earnings, visit the Dream Shop to buy your reward, and find it in your Clubhouse!\n\nThen choose another dream and keep growing!",
     ],

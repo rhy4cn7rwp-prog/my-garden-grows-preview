@@ -76,17 +76,20 @@ try:
    assert page.locator('.garden-answer-correction').count()==0
    assert page.evaluate('state.plots.every(p=>!p.weedingBonus)')
    page.reload();page.evaluate("go('garden')");open_round();assert page.locator('.garden-round-label').inner_text()=='Round 2 of 3'
-   solve();assert page.locator('.dialog h2').inner_text()=='Wonderful weeding!'
+   solve();assert page.locator('.dialog h2').inner_text()=='Wonderful Weeding!'
+   assert page.locator('.dialog button').all_text_contents()==['Back to the Garden.']
    assert page.evaluate('state.plots.every(p=>p.weedingBonus)')
-   tap('Back to the Garden');assert page.get_by_role('button',name='Pull weeds',exact=True).is_disabled()
+   tap('Back to the Garden.');assert page.get_by_role('button',name='Pull weeds',exact=True).is_disabled()
    assert 'bonus' in page.locator('.garden-bonus-status').inner_text().lower()
-   # Individual gathering persists; all remaining ripe eligible plants participate.
-   page.evaluate('harvest(0)');pending=page.evaluate('state.weedingHarvest');assert len(pending['remaining'])==24
-   page.reload();page.evaluate("go('garden')");assert page.evaluate('state.weedingHarvest')==pending
-   tap('End Day');assert 'finish your bonus harvest' in page.locator('.dialog').inner_text();tap('Keep gardening');assert page.evaluate('state.weedingHarvest')==pending
-   tap('Harvest All Ready Crops');assert page.evaluate('state.inventory.carrot')==60
+   assert page.locator('.modal').count()==0
+   # Individual picking never consumes another plant's bonus; reload and End Day preserve it.
+   page.evaluate('harvest(0)');assert page.evaluate('state.inventory.carrot')==3
+   page.reload();page.evaluate("go('garden')");assert page.evaluate('state.plots.filter(p=>p?.weedingBonus).length')==24
+   tap('End Day');assert page.locator('.modal').count()==0
+   assert page.evaluate('state.plots.filter(p=>p?.weedingBonus).length')==24
+   tap('Harvest All Ready Crops');assert page.evaluate('state.inventory.carrot')==75
    assert page.evaluate('state.weedingHarvest') is None
-   page.reload();page.evaluate("go('garden')");assert page.evaluate('state.inventory.carrot')==60
+   page.reload();page.evaluate("go('garden')");assert page.evaluate('state.inventory.carrot')==75
    assert page.evaluate('[state.cash,state.seeds.carrot]')==[123.45,7]
    assert page.get_by_role('button',name='Pull weeds',exact=True).is_disabled()
    # Next window alternates to spelling. Two hints retain original wrong spellings.

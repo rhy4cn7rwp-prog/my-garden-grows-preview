@@ -219,61 +219,68 @@ test("pending bonus blocks later cycles without overwriting or stacking", () => 
   s.plots = farm().plots;
   a.equal(G.weedingAvailable(s), true);
 });
-test("all eligible ripe crops in Harvest All get exactly 20 percent with integer fifth credits once", () => {
+test("Harvest All awards one extra unit per eligible plot exactly once", () => {
   const s = farm();
   complete(s);
   a.equal(G.harvestAll(s).plots, 25);
-  a.equal(s.inventory.carrot, 60);
-  a.equal(s.weedingCredits.carrot, 0);
-  a.equal(s.weedingHarvest, null);
+  a.equal(s.inventory.carrot, 75);
   a.equal(G.harvestAll(s).plots, 0);
-  a.equal(s.inventory.carrot, 60);
+  a.equal(s.inventory.carrot, 75);
+  a.deepEqual(s.weedingCredits, {});
   a.ok(s.plots.every((p) => !p));
 });
-test("individual harvest activity includes all originally ripe plants, survives refresh and excludes new/unripe crops", () => {
+test("individual picks preserve other ripe and growing bonuses and new planting gets none", () => {
   const s = farm();
   s.plots[24].age = 0;
   complete(s);
-  s.plots[23] = null;
-  s.seeds.carrot = 1;
-  G.plan(s, 23, "carrot");
-  G.plantPlan(s);
-  s.plots[23].age = 3;
   G.harvest(s, 0);
-  a.equal(s.weedingHarvest.remaining.length, 22);
-  a.equal(s.plots[24].weedingBonus, undefined);
-  a.equal(s.plots[23].weedingBonus, undefined);
+  a.equal(s.inventory.carrot, 3);
+  a.equal(s.plots[24].weedingBonus, true);
+  a.equal(s.plots[1].weedingBonus, true);
+  s.seeds.carrot = 1;
+  G.plan(s, 0, "carrot");
+  G.plantPlan(s);
+  a.equal(s.plots[0].weedingBonus, undefined);
+  s.plots[0].age = 3;
   const r = G.recover(JSON.stringify(s));
-  a.deepEqual(r.weedingHarvest, s.weedingHarvest);
-  for (let i = 1; i < 23; i++) G.harvest(r, i);
-  a.equal(r.weedingHarvest, null);
-  a.equal(r.inventory.carrot, 46 + Math.floor(46 * 0.2));
-  a.equal(r.weedingCredits.carrot, 1);
+  G.harvest(r, 1);
+  a.equal(r.inventory.carrot, 6);
+  a.equal(r.plots[24].weedingBonus, true);
+  G.harvest(r, 0);
+  a.equal(r.inventory.carrot, 8);
+  a.equal(G.harvestAll(r).plots, 22);
+  a.equal(r.inventory.carrot, 74);
+  a.equal(r.plots[24].weedingBonus, true);
   r.plots[24].age = 3;
   G.harvest(r, 24);
-  G.harvest(r, 23);
-  a.equal(r.inventory.carrot, 59);
-  a.equal(r.weedingCredits.carrot, 1);
+  a.equal(r.inventory.carrot, 77);
+  a.throws(() => G.harvest(r, 24));
 });
-test("finish and End Day consume only unused event bonus, not normal crops or fractional credits", () => {
-  for (const finish of [(s) => G.finishBonusHarvest(s), (s) => G.endDay(s)]) {
-    const s = farm();
-    complete(s);
-    G.harvest(s, 0);
-    const cash = s.cash,
-      inv = structuredClone(s.inventory),
-      credit = structuredClone(s.weedingCredits);
-    finish(s);
-    a.equal(s.weedingHarvest, null);
-    a.ok(s.plots.filter(Boolean).every((p) => !p.weedingBonus));
-    a.equal(s.cash, cash);
-    a.deepEqual(s.inventory, inv);
-    a.deepEqual(s.weedingCredits, credit);
+test("bonus survives more than five End Days, season transition, staggered ripening and backup recovery", () => {
+  const s = farm(20);
+  s.plots.fill(null);
+  s.plots[0] = { id: "carrot", age: 3, left: 0, quality: 100, watered: false };
+  s.plots[1] = { id: "corn", age: 0, left: 0, quality: 100, watered: false };
+  complete(s);
+  G.harvest(s, 0);
+  a.equal(s.inventory.carrot, 3);
+  for (let i = 0; i < 7; i++) {
+    G.water(s);
+    G.endDay(s);
+    a.equal(s.plots[1].weedingBonus, true);
   }
+  a.equal(G.farmDay(s), 27);
+  a.equal(s.season, 2);
+  a.equal(G.weedingAvailable(s), false);
+  const r = G.recover("{bad", JSON.stringify(s));
+  a.equal(r.plots[1].weedingBonus, true);
+  G.harvest(r, 1);
+  a.equal(r.inventory.corn, 3);
+  a.equal(G.weedingStatus(r).bonus, false);
 });
-test("repeat crops consume one bonus, normal repeat yields and fractional credits remain intact", () => {
+test("repeat crops award exactly one extra pound, then return to normal yield; credits are inactive", () => {
   const s = farm();
-  s.plots = Array(25).fill(null);
+  s.plots.fill(null);
   s.plots[0] = { id: "beans", age: 3, left: 2, watered: false, quality: 100 };
   s.weedingCredits.beans = 4;
   complete(s);
@@ -281,11 +288,68 @@ test("repeat crops consume one bonus, normal repeat yields and fractional credit
   G.harvest(s, 0);
   a.equal(s.inventory.beans, 2);
   a.equal(s.plots[0].weedingBonus, undefined);
-  a.equal(s.weedingCredits.beans, 0);
+  a.equal(s.weedingCredits.beans, 4);
   s.plots[0].age = 3;
   G.harvest(s, 0);
   a.equal(s.inventory.beans, 3);
   a.equal(s.plots[0].left, 0);
+});
+test("all crop varieties add exactly one item or pound without changing normal quality/yield", () => {
+  for (const c of G.crops)
+    for (const quality of [30, 100]) {
+      const s = farm();
+      s.plots.fill(null);
+      s.plots[0] = {
+        id: c.id,
+        age: c.days,
+        left: c.repeat,
+        quality,
+        watered: false,
+      };
+      const base = G.harvestAmount(s, 0);
+      complete(s);
+      a.equal(G.harvestAmount(s, 0), base + 1);
+      G.harvestAll(s);
+      a.equal(s.inventory[c.id], base + 1);
+      a.equal(s.cash, 50);
+      if (s.plots[0]) {
+        a.equal(s.plots[0].weedingBonus, undefined);
+        s.plots[0].age = c.days;
+        G.harvest(s, 0);
+        a.equal(s.inventory[c.id], base * 2 + 1);
+      }
+    }
+});
+test("legacy event migration preserves unpicked bonuses even for old dates and empty/malformed remaining lists", () => {
+  for (const event of [
+    { day: 4, remaining: [0] },
+    { day: 5, remaining: [] },
+    { day: 5, remaining: "bad" },
+    null,
+  ]) {
+    const s = farm();
+    s.cash = 123.45;
+    s.inventory.carrot = 7;
+    s.weedingCredits = { carrot: 3, beans: 4 };
+    s.plots[0].weedingBonus = true;
+    s.plots[1].weedingBonus = true;
+    s.plots[1].age = 0;
+    s.weedingHarvest = event;
+    const r = G.recover(JSON.stringify(s));
+    a.equal(r.cash, 123.45);
+    a.equal(r.inventory.carrot, 7);
+    a.equal(r.weedingHarvest, null);
+    a.equal(r.plots[0].weedingBonus, true);
+    a.equal(r.plots[1].weedingBonus, true);
+    a.equal(r.plots[2].weedingBonus, undefined);
+    G.harvest(r, 0);
+    a.equal(r.inventory.carrot, 10);
+    a.equal(r.plots[1].weedingBonus, true);
+    const again = G.recover(JSON.stringify(r));
+    a.equal(again.plots[0], null);
+    a.equal(again.plots[1].weedingBonus, true);
+    a.deepEqual(again.weedingCredits, { carrot: 3, beans: 4 });
+  }
 });
 test("old farms, earned legacy bonus and malformed optional lesson recover without resetting progress", () => {
   const s = farm(12);
@@ -349,7 +413,7 @@ test("an opportunity stays open through its five-day window, interrupted session
   a.equal(G.weedingStatus(r).cycle, 4);
   a.equal(G.startWeeding(r, 53).seed, 52);
 });
-test("multiple completed rounds and active harvest survive primary or backup save recovery without changing market money/history", () => {
+test("multiple completed rounds and per-plot bonuses survive primary or backup save recovery without changing market money/history", () => {
   const s = farm(15, 4);
   s.cash = 87.25;
   s.customerHistory = {};
@@ -372,20 +436,20 @@ test("multiple completed rounds and active harvest survive primary or backup sav
   a.equal(b.cash, s.cash);
   a.equal(b.marketElapsedMs, 45000);
 });
-test("fractional bonus credits survive unbonused harvests and future cycles until whole produce is earned", () => {
+test("old fractional credits remain archived across future cycles without affecting new guaranteed rewards", () => {
   const s = farm();
-  s.plots = Array(25).fill(null);
-  s.plots[0] = { id: "beans", age: 3, left: 2, quality: 100, watered: false };
+  s.weedingCredits.beans = 3;
   for (let cycle = 1; cycle <= 5; cycle++) {
     const day = cycle * 5;
     s.season = Math.floor((day - 1) / 20) + 1;
     s.day = ((day - 1) % 20) + 1;
+    s.plots.fill(null);
     s.plots[0] = { id: "beans", age: 3, left: 2, quality: 100, watered: false };
     complete(s, cycle + 5);
     G.harvest(s, 0);
     const copy = G.recover(JSON.stringify(s));
-    a.equal(copy.weedingCredits.beans || 0, cycle % 5);
-    a.equal(s.inventory.beans, cycle + Math.floor(cycle / 5));
+    a.equal(copy.weedingCredits.beans, 3);
+    a.equal(s.inventory.beans, cycle * 2);
   }
 });
 test("advanced math includes decimal multiplication only after a whole-number multiplication milestone", () => {
