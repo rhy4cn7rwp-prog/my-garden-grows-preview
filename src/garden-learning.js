@@ -81,7 +81,7 @@
       a &&
       a.cycle === current &&
       current > out.completedCycle &&
-      ["math", "spelling"].includes(a.type) &&
+      ["math", "spelling", "nature"].includes(a.type) &&
       Number.isInteger(a.seed) &&
       a.seed > 0 &&
       a.seed <= 0xffffffff &&
@@ -161,7 +161,7 @@
     const n = count(s);
     r.session = {
       cycle: c,
-      type: r.nextType,
+      type: s.learningExperience === "little" ? "nature" : r.nextType,
       seed: seed >>> 0 || 1,
       level: level(s),
       roundCount: n < 2 ? 1 : n < 4 ? 2 : 3,
@@ -200,6 +200,7 @@
         r,
       );
       result = flags.map((correct, i) => {
+        if (a.type === "nature") return {correct, original:correct?"Healthy plant":"Unwanted weed",correction:"Pull only jagged red weeds",explanation:"This healthy round-leaf plant belongs here. Let it grow!"};
         if (a.type === "spelling") {
           const [good, bad] = pool[i];
           return {
@@ -274,7 +275,7 @@
       return { kind: "round", message: "Lovely work! A new patch is ready." };
     }
     r.completedCycle = a.cycle;
-    r.nextType = a.type === "math" ? "spelling" : "math";
+    if(a.type !== "nature") r.nextType = a.type === "math" ? "spelling" : "math";
     r.session = null;
     return {
       kind: "complete",

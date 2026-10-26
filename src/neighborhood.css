@@ -1,0 +1,653 @@
+/* Original wooden notices, growing beds and tactile play surfaces. */
+body[data-view="jobs"] {
+  background: #c7d6ad;
+  overflow: hidden;
+}
+body[data-view="jobs"] #app {
+  position: fixed;
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  height: var(--visible-height, 100svh);
+  width: var(--visible-width, 100%);
+  overflow-y: auto;
+  padding: 0;
+  display: block;
+}
+.jobs-game {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  border: 0;
+  border-radius: 0;
+  background: #f7edcf;
+  min-height: 100%;
+  overflow: visible;
+}
+.jobs-game .hud {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #fff4dcf5;
+  padding-top: max(4px, var(--viewport-safe-top));
+}
+.job-board,
+.job-play,
+.job-results {
+  padding: 12px max(12px, var(--village-safe-right))
+    max(14px, var(--viewport-safe-bottom)) max(12px, var(--village-safe-left));
+  color: #4e3826;
+}
+.jobs-game h1 {
+  font:
+    800 clamp(21px, 5vw, 30px) Georgia,
+    serif;
+  margin: 4px 0 8px;
+  text-align: center;
+}
+.jobs-game p {
+  font-size: 15px;
+  line-height: 1.35;
+  margin: 6px 0;
+}
+.jobs-game .btn {
+  min-height: 44px;
+  font-size: 15px;
+  margin: 3px;
+  padding: 7px 10px;
+}
+.job-board > header {
+  text-align: center;
+  background: #fcf2d8;
+  border: 3px solid #b48852;
+  border-radius: 16px;
+  padding: 10px;
+}
+.job-notices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 8px;
+  background: repeating-linear-gradient(
+    0deg,
+    #b4804e 0,
+    #c6935d 55px,
+    #a37144 58px,
+    #c08d59 60px
+  );
+  border: 6px solid #946438;
+  border-radius: 16px;
+  margin: 12px 0;
+  box-shadow: inset 0 0 12px #5f3c2c55;
+}
+.job-notice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff1d3;
+  border: 2px solid #9a7048;
+  border-radius: 8px 13px 8px 16px;
+  padding: 10px 5px;
+  color: #4a3220;
+  min-height: 180px;
+  box-shadow: 0 5px 4px #593b2344;
+  cursor: pointer;
+  font: inherit;
+}
+.job-notice:nth-child(3n) {
+  background: #e4edcf;
+}
+.job-notice:nth-child(3n + 1) {
+  background: #f7dfc3;
+}
+.job-notice::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  width: 9px;
+  height: 9px;
+  background: #a96a4e;
+  border: 1px solid #7b4d35;
+  border-radius: 50%;
+}
+.job-notice > svg {
+  width: 78px;
+  height: 80px;
+  margin: 5px;
+}
+.job-notice strong {
+  font-size: 16px;
+  line-height: 1.15;
+}
+.job-notice span,
+.job-notice small {
+  font-size: 13px;
+  margin-top: 5px;
+}
+.job-notice:disabled {
+  opacity: 0.65;
+  filter: saturate(0.65);
+  cursor: default;
+}
+.job-symbol {
+  width: 70px;
+  height: 70px;
+}
+.job-neighbor {
+  width: 100px;
+  height: 116px;
+}
+.job-picture-clue {
+  width: 78px;
+  height: 70px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.job-picture-clue svg {
+  width: 100%;
+  height: 100%;
+}
+.job-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.job-status {
+  display: flex;
+  justify-content: space-around;
+  font-size: 14px;
+  padding: 5px;
+  background: #e4eacb;
+  border-radius: 10px;
+}
+.job-play > header {
+  border-bottom: 2px solid #d0b58c;
+  padding-bottom: 5px;
+}
+.job-feedback {
+  min-height: 35px;
+  padding: 8px;
+  background: #fff3d6;
+  border-radius: 10px;
+}
+.job-word-list {
+  display: flex;
+  list-style: none;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0;
+  gap: 7px;
+  margin: 6px 0;
+}
+.job-word-list li {
+  display: flex;
+  align-items: center;
+}
+.job-word-list svg {
+  width: 35px;
+  height: 35px;
+}
+.job-word-list button {
+  font-weight: bold;
+  font-size: 15px;
+  min-height: 44px;
+  border: 1px solid #b89a68;
+  border-radius: 7px;
+  background: #fff7dc;
+}
+.job-word-list .found {
+  text-decoration: line-through;
+}
+.job-word-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--size), 1fr);
+  gap: 2px;
+  background: #b58d5e;
+  border: 4px solid #a0784e;
+  border-radius: 12px;
+  padding: 3px;
+  touch-action: none;
+}
+.job-word-grid button {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 4px;
+  background: #fff5db;
+  color: #503927;
+  font: 800 clamp(15px, 4.5vw, 23px) Georgia;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.job-word-grid .found,
+.job-word-grid .job-trail,
+.job-word-grid .selected {
+  background: #a4c77d;
+  outline: 2px solid #527a3e;
+  outline-offset: -2px;
+}
+.job-conveyor {
+  height: 130px;
+  position: relative;
+  overflow: hidden;
+  margin: 12px 0;
+  background: repeating-linear-gradient(
+    90deg,
+    #8e9c8b 0,
+    #a4ad9c 28px,
+    #6f8378 30px,
+    #a4ad9c 33px
+  );
+  border: 8px solid #b98b54;
+  border-radius: 40px;
+  box-shadow: inset 0 3px 8px #26382a88;
+}
+.belt-produce {
+  position: absolute;
+  top: 16px;
+  width: 65px;
+  height: 78px;
+  padding: 3px;
+  border: 2px solid #81623b;
+  border-radius: 12px;
+  background: #fff2d5;
+  touch-action: none;
+}
+.belt-produce svg {
+  width: 100%;
+  height: 100%;
+}
+.job-crates {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.job-crates button {
+  flex: 1;
+  min-width: 60px;
+  max-width: 150px;
+  min-height: 88px;
+  background: repeating-linear-gradient(
+    0deg,
+    #dab07a 0,
+    #c99b61 22px,
+    #ae7f4c 24px
+  );
+  border: 3px solid #8e643d;
+  border-radius: 8px;
+  color: #4c3521;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  font-weight: bold;
+  font-size: 14px;
+}
+.job-crates svg {
+  width: 56px;
+  height: 56px;
+}
+.job-stacks {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  padding: 16px 0;
+}
+.job-stack {
+  flex: 1;
+  min-width: 0;
+  max-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(90deg, #cea777, #f0d7a3, #cea777);
+  border: 3px solid #956b40;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  padding: 5px 0;
+  color: #47341f;
+}
+.job-stack svg,
+.job-stack .empty-slot {
+  width: 100%;
+  height: 44px;
+}
+.job-stack b {
+  padding: 4px;
+}
+.selected,
+.job-swap-hint {
+  outline: 3px solid #2e7396 !important;
+  outline-offset: -3px;
+}
+.job-magee-intro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.job-magee-intro svg {
+  width: 70px;
+  height: 82px;
+}
+.job-letter-slots,
+.job-letter-tiles,
+.job-phonics {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+.job-letter-slots button,
+.job-letter-tiles button {
+  min-width: 40px;
+  min-height: 48px;
+  border: 2px solid #a77b48;
+  background: linear-gradient(130deg, #fbdfad, #dfb983);
+  border-radius: 7px;
+  color: #49331e;
+  font: 800 24px Georgia;
+  box-shadow: 0 3px 2px #805d3c55;
+  touch-action: none;
+}
+.job-letter-tiles button:disabled {
+  opacity: 0.3;
+}
+.job-letter-slots button {
+  background: #faf2dc;
+  border-style: dashed;
+}
+.job-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.job-hint svg {
+  width: 65px;
+  height: 65px;
+}
+.job-match-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  padding: 4px;
+  background: #bd9662;
+  border: 3px solid #9e7547;
+  border-radius: 12px;
+  margin: 10px 0;
+  touch-action: none;
+}
+.job-match-grid button {
+  aspect-ratio: 1;
+  min-height: 44px;
+  min-width: 0;
+  padding: 1px;
+  border: 1px solid #cba86b;
+  border-radius: 8px;
+  background: #fff4d6;
+  touch-action: none;
+}
+.job-match-grid svg {
+  width: 100%;
+  height: 100%;
+}
+.job-fall button {
+  animation: job-drop 0.26s ease-out;
+}
+@keyframes job-drop {
+  from {
+    transform: translateY(-12px);
+    opacity: 0.5;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.job-catch-world {
+  height: clamp(210px, 38svh, 380px);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    #c6e3d7 0,
+    #f7e8b3 58%,
+    #9cb56c 59%,
+    #8f9e5b 75%,
+    #b18c60 76%
+  );
+  border: 4px solid #a98454;
+  border-radius: 16px;
+  touch-action: none;
+  margin: 10px 0;
+}
+.job-catch-world::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 25%;
+  height: 20%;
+  width: 34%;
+  background: repeating-linear-gradient(
+    0deg,
+    #a77c4e 0,
+    #a77c4e 12px,
+    #86623e 15px
+  );
+  border-radius: 30%;
+}
+.job-jones {
+  position: absolute;
+  left: 3%;
+  top: 24%;
+  transform-origin: bottom;
+  animation: job-jones-pull 2.3s ease-in-out infinite;
+}
+.job-jones svg {
+  width: 80px;
+  height: 100px;
+}
+@keyframes job-jones-pull {
+  0%,
+  60%,
+  100% {
+    transform: rotate(-16deg);
+  }
+  30% {
+    transform: rotate(4deg);
+  }
+}
+.flying-carrot {
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  pointer-events: none;
+}
+.flying-carrot.big {
+  width: 55px;
+  height: 75px;
+}
+.flying-carrot svg {
+  width: 100%;
+  height: 100%;
+}
+.job-catching-basket {
+  position: absolute;
+  bottom: 5%;
+  height: 60px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.job-catching-basket svg {
+  width: 100%;
+  height: 100%;
+}
+.job-yard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  background: radial-gradient(ellipse at center, #a6bb75, #829c60);
+  border: 5px solid #a97c4a;
+  border-radius: 20px;
+  padding: 10px;
+  margin: 8px 0;
+}
+.yard-item {
+  min-width: 0;
+  min-height: 68px;
+  background: #c9d79c;
+  border: 2px solid #78944b;
+  border-radius: 40%;
+  padding: 2px;
+  touch-action: none;
+}
+.yard-item svg {
+  width: 100%;
+  height: 60px;
+}
+.yard-item span {
+  display: block;
+  font-size: 12px;
+}
+.yard-item.done {
+  opacity: 0.3;
+  background: #d4dcad;
+}
+.job-yard-flowers {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.job-yard-flowers .yard-item {
+  border-radius: 12px;
+  background: linear-gradient(#dfd8a5 70%, #bc8956 71%);
+}
+.job-yard-flowers .done {
+  opacity: 1;
+  filter: saturate(1.6);
+  transform: translateY(-3px);
+}
+.yard-item.unripe svg {
+  filter: hue-rotate(70deg) saturate(0.7);
+}
+.job-can {
+  width: 95px;
+  height: 75px;
+  border: 2px solid #7b8c62;
+  border-radius: 14px;
+  background: #eef2d4;
+  touch-action: none;
+}
+.job-can svg {
+  width: 100%;
+  height: 100%;
+}
+.job-drop-basket {
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #b38d56;
+  border-radius: 14px;
+}
+.job-drop-basket svg {
+  width: 70px;
+  height: 55px;
+}
+.job-results {
+  text-align: center;
+}
+.job-results > svg {
+  width: 130px;
+  height: 150px;
+}
+.job-results .btn {
+  display: block;
+  width: 90%;
+  margin: 10px auto;
+}
+.job-drag-ghost {
+  position: fixed;
+  width: 65px;
+  height: 65px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10000;
+  background: #fff1cce8;
+  border: 2px solid #9b7949;
+  border-radius: 15px;
+  padding: 4px;
+}
+.job-drag-ghost svg {
+  width: 100%;
+  height: 100%;
+}
+.learning-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.learning-choices .btn {
+  min-height: 60px;
+  font-size: 17px;
+}
+.learning-settings label {
+  display: block;
+  margin: 12px 0;
+  font-size: 16px;
+}
+.learning-settings input {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+.little-weed svg {
+  filter: sepia(0.4) saturate(2);
+}
+.little-weed[data-good="true"] svg {
+  filter: none;
+}
+@media (min-width: 650px) {
+  .job-notices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .job-word-grid,
+  .job-match-grid {
+    max-width: 450px;
+    margin: auto;
+  }
+  .job-yard {
+    max-width: 500px;
+    margin: 10px auto;
+  }
+}
+@media (max-height: 550px) {
+  .jobs-game h1 {
+    font-size: 20px;
+  }
+  .job-instructions {
+    font-size: 14px !important;
+  }
+  .job-play > header {
+    position: static;
+  }
+  .job-play {
+    padding-top: 6px;
+  }
+  .job-yard {
+    gap: 5px;
+  }
+  .yard-item svg {
+    height: 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .job-fall button,
+  .job-jones {
+    animation: none;
+  }
+  .neighbor-blink {
+    animation: none;
+  }
+}

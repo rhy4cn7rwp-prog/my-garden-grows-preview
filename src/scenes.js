@@ -1,14 +1,12 @@
 function loadGame() {
   try {
-    return Game.recover(
-      localStorage.getItem("mgg10"),
-      localStorage.getItem("mgg10-backup"),
-    );
+    const raw=localStorage.getItem("mgg10"), backup=localStorage.getItem("mgg10-backup");
+    return raw === null && backup === null ? Game.newGame() : Game.recover(raw,backup);
   } catch {
     return Game.initial();
   }
 }
-const initial = () => Game.initial();
+const initial = () => Game.newGame();
 let state = loadGame();
 // Reopening is a visit home, never a charge for time away or reading the guide.
 let marketAwaitingResume = !!state.marketOpen;
@@ -29,6 +27,8 @@ const $ = (s) => document.querySelector(s),
     }
   };
 function go(v) {
+  if(typeof Narration !== "undefined") Narration.stop();
+  if(view === "jobs" && v !== "jobs" && typeof Neighborhood !== "undefined") Neighborhood.stop();
   if (v === "market" && marketAwaitingResume) {
     marketAwaitingResume = false;
     if (!document.hidden) Game.resumeMarketClock(state);
@@ -62,6 +62,7 @@ function go(v) {
   }
 }
 function closeDialog() {
+  if(typeof Narration !== "undefined")Narration.stop();
   popup = "";
   dialogKey = null;
   render();
@@ -72,7 +73,7 @@ function show(html, key = null) {
   const keypad = key === "total-keypad";
   const guide = key === "guidebook";
   const gardenDialog = key?.startsWith("garden-") ? ` ${key}` : "";
-  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${guide ? "guidebook-modal" : ""}${gardenDialog} ${register ? "register-modal" : keypad ? "total-keypad-modal" : ""}" onclick="if(event.target===this)${guide ? "closeGuidebook()" : "closeDialog()"}"><div ${guide ? 'role="dialog" aria-modal="true" aria-labelledby="guidebook-title"' : gardenDialog ? 'role="dialog" aria-modal="true" aria-label="Garden activity"' : ""} class="dialog ${guide ? "guidebook-dialog" : ""} ${register ? "register-dialog" : keypad ? "total-keypad-dialog" : ""}">${html}${register || keypad || guide || key === "garden-weeding" || key === "garden-weeding-confirm" || key === "garden-weeding-complete" ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
+  popup = `<div class="modal ${view === "seeds" ? "seed-shop-modal" : ""} ${view === "supplies" && key?.startsWith("ms-") ? "supply-shop-modal" : ""} ${guide ? "guidebook-modal" : ""}${gardenDialog} ${register ? "register-modal" : keypad ? "total-keypad-modal" : ""}" onclick="if(event.target===this)${guide ? "closeGuidebook()" : "closeDialog()"}"><div ${guide ? 'role="dialog" aria-modal="true" aria-labelledby="guidebook-title"' : gardenDialog ? 'role="dialog" aria-modal="true" aria-label="Garden activity"' : ""} class="dialog ${guide ? "guidebook-dialog" : ""} ${register ? "register-dialog" : keypad ? "total-keypad-dialog" : ""}">${html}${register || keypad || guide || key === "garden-weeding" || key === "garden-weeding-confirm" || key === "garden-weeding-complete" || key === "experience-choice" ? "" : '<div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>'}</div></div>`;
   render();
 }
 function spot(x, y, w, h, action, title) {
@@ -110,7 +111,7 @@ function renderScene() {
         const choosing = Game.missingProduce(state).length
           ? `<button class="btn" onclick="customerService()">Help with sold-out produce</button>`
           : `<button class="btn" onclick="order()">🧺 Fill customer basket</button><button class="btn alt" onclick="customerService()">Talk about the order</button>`;
-        bottom = `<h2>🍎 Market Day</h2><div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `<button class="btn" onclick="payment()">💵 Count change</button>` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()}</p>`;
+        bottom = `<h2>🍎 Market Day</h2><div class="row customer-actions">${state.step === "greet" ? greetings : state.step === "choose" ? choosing : state.step === "pay" ? `${state.learningExperience === 'little' || state.customer.learningExperience === 'little' ? '<button class="btn" onclick="littleMarketCheckout()">Bag order &amp; collect payment</button>' : '<button class="btn" onclick="payment()">💵 Count change</button>'}` : farewells}</div><p class="small">${state.visitors} customers · ${money(state.sales)} in sales · ${standLabel()}</p>`;
       }
     }
   }
@@ -126,6 +127,7 @@ function renderScene() {
   // Only the baked header region is hidden. Source art and interaction coordinates stay intact.
   const trim = ["garden", "supplies", "market"].includes(view) ? 128 : 64;
   const content =
+    view === "jobs" ? Neighborhood.scene() :
     view === "town"
       ? townScene()
       : view === "supplies"
@@ -139,7 +141,7 @@ function renderScene() {
               : view === "garden"
                 ? gardenScene()
                 : `<div class="interior-crop" style="aspect-ratio:512/${512 - trim};--scene-offset:${(-100 * trim) / (512 - trim)}%"><div class="stage interior-stage ${view === "market" ? "market-scene" : ""}" style="background-image:url('${ART[view]}')">${stage}</div></div><div class="bottom">${bottom}</div><div class="footer">My Garden Grows · 1.0 playtest</div>`;
-  const gameHTML = `<div class="game ${view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "garden" ? "garden-game" : view === "seeds" ? "seed-shop-game" : view === "supplies" ? "supply-shop-game" : view === "market" ? "farmers-market-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
+  const gameHTML = `<div class="game ${view === "jobs" ? "jobs-game" : view === "town" ? "town-game" : view === "clubhouse" ? "clubhouse-game" : view === "garden" ? "garden-game" : view === "seeds" ? "seed-shop-game" : view === "supplies" ? "supply-shop-game" : view === "market" ? "farmers-market-game" : "interior-game"}" data-scene="${view}">${header()}${content}</div>`;
   document.body.dataset.view = view;
 
   const app = $("#app"),
@@ -270,7 +272,7 @@ function order(feedback = "") {
         .join(", ") || "Empty"
     }</p>
     <button class="btn alt" onclick="checkBasket()">Check basket</button>
-    <button class="btn" onclick="marketTotalKeypad()">Calculate total</button>${Object.keys(c.want).some((id) => crop(id).unit === "lb") && !Game.hasEquipment(state, "scale") ? '<button class="btn alt" onclick="rentalOffer(\'scale\')">Need a scale? Review rental</button>' : ""}`,
+    ${state.learningExperience === 'little' || state.customer.learningExperience === 'little' ? '<button class="btn" onclick="littleMarketCheckout()">Bag order &amp; collect payment</button>' : '<button class="btn" onclick="marketTotalKeypad()">Calculate total</button>'}${Object.keys(c.want).some((id) => crop(id).unit === "lb") && !Game.hasEquipment(state, "scale") ? '<button class="btn alt" onclick="rentalOffer(\'scale\')">Need a scale? Review rental</button>' : ""}`,
     "order",
   );
 }
@@ -286,7 +288,7 @@ function checkBasket() {
   try {
     Game.checkBasket(state);
     order(
-      Game.requiresLineMath(state)
+      state.learningExperience === "little" ? "That matches! Bag the produce and your customer will pay." : Game.requiresLineMath(state)
         ? "That matches the order! Multiply each quantity by its price, then add to find the total."
         : "That matches the order! The keypad will show the item amounts for you to add.",
     );
@@ -362,11 +364,11 @@ function skip() {
 }
 function settings() {
   show(
-    `<h2>⚙️ Farm Settings</h2><p>Progress is saved in this browser.</p><button class="btn alt" onclick="reset()">Start a new farm</button>`,
+    learningSettingsMarkup(),
   );
 }
 function reset() {
-  if (confirm("Erase this farm and start again with $50?")) {
+  if (confirm("Erase this farm and start a new garden with $0 and free starter planting supplies?")) {
     state = initial();
     marketAwaitingResume = false;
     go("clubhouse");

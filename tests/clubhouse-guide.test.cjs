@@ -46,12 +46,12 @@ test("six-page guide teaches currently playable shopping, growing, bagging and m
   assert.deepEqual(
     guide.pages.map((p) => p.text.join("\n\n")),
     [
-      "Visit the Dream Shop and choose something you'd love to save for. Choosing a dream does not spend your money. When you've saved enough, visit the shop again to buy it.",
-      "Start with $50. Buy planting supplies at Seed & Feed. Save money for bags and a scale for produce sold by the pound. A blanket is free, or rent a table. Sell harvests to earn more!",
+      "Choose Little or Growing Gardener in Settings. Both share your farm and rewards! Visit the Dream Shop to pick a savings goal. Buying your dream later puts it in your Clubhouse.",
+      "New farms start with $0. Collect free starter planting supplies at Seed & Feed. Help neighbors at the Job Board to earn $1 per job. Each neighbor rests for five minutes after paying you.",
       "Tap a plot, choose a crop, then Plant Plan. Water with the can or Water All. Only End Day advances farming days and grows watered plants. Tap plants for growth pictures. Farming never ends!",
-      "Pick ripe crops or use Harvest All. Every five days, optional Math or Spelling Weeding rewards each planted crop with 1 extra item or pound. Weed out wrong answers! Each plant keeps its bonus until harvested.",
-      "Say hello, then read the order. Match produce and amounts; some are counted, others weighed. Check the basket before calculating prices. Every completed sale uses one paper bag.",
-      "Work out the prices shown, then enter the total. Count back change with bills and coins. Save your earnings, visit the Dream Shop to buy your reward, and find it in your Clubhouse!\n\nThen choose another dream and keep growing!",
+      "Pick ripe crops or use Harvest All. Optional weeding every five days gives each planted crop 1 extra item or pound. Little Gardeners pull unwanted weeds; Growing Gardeners find wrong answers.",
+      "New farmers save $20 for a table, scale, cash register and bags at Market Supplies. Then arrange your harvest. Selling is optional; neighborhood jobs can fund your dreams too!",
+      "Greet customers and fill their baskets. Little Gardener handles payment for you; Growing Gardener lets you calculate and count change. Save up, buy your dream and find it in your Clubhouse!\n\nThen choose another dream and keep growing!",
     ],
   );
   assert.equal(new Set(guide.pages.map((p) => p.illustration)).size, 6);

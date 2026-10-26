@@ -11,6 +11,7 @@
       : root.MarketSupplyRules;
   const marketCustomers = typeof module !== "undefined" ? require("./market-customers.js") : root.MarketCustomers;
   const gardenLearning = typeof module !== "undefined" ? require("./garden-learning.js") : root.GardenLearning;
+  const neighborhood = typeof module !== "undefined" ? require("./neighborhood-jobs.js") : root.NeighborhoodJobs;
   const crops = [
     {
       id: "carrot",
@@ -149,6 +150,14 @@
   function initial() {
     return {
       version: 1,
+      learningExperience: "growing",
+      experienceChosen: true,
+      narrationEnabled: false,
+      effectsEnabled: false,
+      newEconomy: false,
+      starterClaimed: true,
+      cashRegister: false,
+      jobs: neighborhood ? neighborhood.empty() : {version:1,sequence:0,cooldowns:{},best:{},active:null},
       gardenWeeding: { day: 0, pulled: [] },
       weedingCredits: {},
       weedingLesson: gardenLearning?.empty() || { version: 1, completedCycle: 0, nextType: "math", session: null },
@@ -208,6 +217,42 @@
       legacyAccounting: false,
       lastMarketReport: null,
     };
+  }
+  // The legacy factory stays stable for migration/rule fixtures. Only truly
+  // absent saves and an explicitly confirmed restart use the new economy.
+  function newGame() {
+    return {...initial(), cash:0, newEconomy:true, starterClaimed:false, experienceChosen:false};
+  }
+  function chooseExperience(s, mode) {
+    requireRule(["little","growing"].includes(mode), "Choose a gardening experience.");
+    s.learningExperience=mode; s.experienceChosen=true;
+    // Keep active jobs, lessons and customers exactly as saved. They finish in
+    // their original format; subsequent activities use the new preference.
+  }
+  function claimStarter(s) {
+    requireRule(s.newEconomy && !s.starterClaimed, "Your starter planting supplies have already been collected.");
+    for(const [id,n] of Object.entries({carrot:3,beans:2,lettuce:2}))s.seeds[id]=(s.seeds[id]||0)+n;
+    s.starterClaimed=true;
+  }
+  function marketSetupTotal(s) {
+    return (s.owned.table?0:8)+(s.owned.scale?0:5)+(s.cashRegister?0:4)+(s.bagCount?0:3);
+  }
+  function purchaseMarketSetup(s) {
+    const total=marketSetupTotal(s);
+    requireRule(total>0 && s.cash>=total, "Save enough for your remaining equipment first. Neighborhood jobs always pay $1.");
+    const cart={};if(!s.owned.table)cart.table=1;if(!s.owned.scale)cart.scale=1;if(!s.bagCount)cart.bags=1;
+    const savedCart=s.supcart;
+    if(Object.keys(cart).length){s.supcart=cart;purchase(s,"supplies");s.supcart=savedCart;}
+    if(!s.cashRegister){s.cash=(cents(s.cash)-400)/100;s.cashRegister=true;recordExpense(s,"equipment",400,"upfront");}
+    return total;
+  }
+  function autoPayLittle(s) {
+    requireRule(s.customer && (s.customer.learningExperience === "little" || s.learningExperience === "little"), "Use the cash register in Growing Gardener.");
+    const practice={...s.mathPractice},change={...s.changePractice};
+    if(s.step !== "pay")checkBasket(s);
+    requireRule(bagsRemaining(s)>0,"This purchase needs one paper bag. Buy more bags without losing the basket.");
+    for(const id of Object.keys(s.basket))if(s.basket[id])s.customer.lineAnswers[id]={quantity:s.basket[id],priceCents:cents(marketPrice(s,id)),answerCents:s.basket[id]*cents(marketPrice(s,id))};
+    if(s.step !== "pay")ring(s,totalOrder(s));s.change=changeDue(s);finish(s);s.mathPractice=practice;s.changePractice=change;
   }
   function dictionary(value, ids) {
     return (
@@ -291,6 +336,14 @@
         plan: {},
         notice: "",
       };
+      clean.learningExperience = s.learningExperience === "little" ? "little" : "growing";
+      clean.experienceChosen = s.experienceChosen !== false;
+      clean.newEconomy = s.newEconomy === true;
+      clean.starterClaimed = !clean.newEconomy || s.starterClaimed === true;
+      clean.cashRegister = s.cashRegister === true;
+      clean.narrationEnabled = s.narrationEnabled === true;
+      clean.effectsEnabled = s.effectsEnabled === true;
+      clean.jobs = neighborhood ? neighborhood.recover(s.jobs) : (s.jobs || initial().jobs);
       clean.weedingCredits = {};
       for (const id of ids) {
         const n = s.weedingCredits?.[id];
@@ -939,6 +992,7 @@
     return false;
   }
   function openMarket(s, now = Date.now()) {
+    requireRule(!s.newEconomy || (s.owned.table && s.owned.scale && s.cashRegister && bagsRemaining(s)>0), "Collect your table, scale, cash register and bags at Market Supplies before opening. Neighborhood jobs can help you save $20.");
     requireRule(
       !s.marketPlayed && !s.marketOpen,
       "Your market has already opened today. End the farming day before opening again.",
@@ -1014,12 +1068,12 @@
     requireRule(!s.customer, "Finish serving this customer first.");
     const stock = crops.filter((c) => marketStock(s, c.id) > 0);
     requireRule(stock.length, "Your display is sold out.");
-    const level = orderDifficulty(s), prices = Object.fromEntries(
+    const level = s.learningExperience === "little" ? 0 : orderDifficulty(s), prices = Object.fromEntries(
       crops.map(c => [c.id, priceForLevel(c.id, level, s.visitors)]));
     const a = stock[s.visitors % stock.length], want = {};
     const supportedBeginner = level === 0 && (s.changePractice?.support || 0) > 0;
-    const products = Math.min(stock.length, supportedBeginner ? 1 : level >= 3 ? 3 : level >= 2 ? 2 + s.visitors % 2 : 1 + s.visitors % 2);
-    const maxQuantity = supportedBeginner ? 1 : [2, 2, 3, 4, 5, 8][level];
+    const products = s.learningExperience === "little" ? 1 : Math.min(stock.length, supportedBeginner ? 1 : level >= 3 ? 3 : level >= 2 ? 2 + s.visitors % 2 : 1 + s.visitors % 2);
+    const maxQuantity = s.learningExperience === "little" ? 3 : supportedBeginner ? 1 : [2, 2, 3, 4, 5, 8][level];
     const budget = marketOrderBudgets[level];
     let subtotal = 0;
     for (let i = 0; i < products; i++) {
@@ -1031,7 +1085,7 @@
     }
     // Some shoppers come looking for a crop we do not stock today.
     const unavailable = crops.filter((c) => !marketStock(s, c.id));
-    if ((s.day + s.visitors) % 4 === 0 && unavailable.length) {
+    if (s.learningExperience !== "little" && (s.day + s.visitors) % 4 === 0 && unavailable.length) {
       const requested = unavailable[(s.day + s.visitors) % unavailable.length];
       delete want[a.id];
       want[requested.id] = 1;
@@ -1039,6 +1093,7 @@
     name = name || (marketCustomers ? marketCustomers.pick(s) : "Maya");
     s.customer = {
       name,
+      learningExperience: s.learningExperience,
       want,
       prices,
       mathLevel: level,
@@ -1478,6 +1533,7 @@
       return;
     clean.customer = {
       name: c.name,
+      learningExperience: c.learningExperience === "little" ? "little" : "growing",
       historyRecorded: c.historyRecorded === true,
       returning: c.returning === true,
       rememberVisit: c.rememberVisit === true,
@@ -1759,6 +1815,12 @@
     bundle,
     supplies,
     initial,
+    newGame,
+    chooseExperience,
+    claimStarter,
+    marketSetupTotal,
+    purchaseMarketSetup,
+    autoPayLittle,
     recover,
     chooseGoal,
     cartTotal,
