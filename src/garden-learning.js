@@ -279,7 +279,7 @@
     return {
       kind: "complete",
       message:
-        "Wonderful weeding! Your planted garden has a next-harvest bonus.",
+        "Wonderful weeding! Every planted crop has a saved one-time extra harvest unit.",
     };
   }
   const api = {

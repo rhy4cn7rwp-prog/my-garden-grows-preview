@@ -258,28 +258,13 @@ function syncInteractiveGarden() {
 
 function gardenWeedingButton() {
   const w = Game.weedingStatus(state);
-  return `<span class="garden-weeding-entry"><button class="btn" onclick="openGardenWeeding()" ${w.available ? "" : "disabled"}>Pull weeds</button>${!w.available ? `<small>${w.bonus ? "Harvest bonus ready" : !state.plots.some(Boolean) && w.cycle > 0 && !w.complete ? "Plant crops to weed" : `In ${w.days} game ${w.days === 1 ? "day" : "days"}`}</small>` : ""}</span>`;
+  return `<span class="garden-weeding-entry"><button class="btn" onclick="openGardenWeeding()" ${w.available ? "" : "disabled"}>Pull weeds</button>${!w.available ? `<small>${w.bonus ? "Crop bonuses saved" : !state.plots.some(Boolean) && w.cycle > 0 && !w.complete ? "Plant crops to weed" : `In ${w.days} game ${w.days === 1 ? "day" : "days"}`}</small>` : ""}</span>`;
 }
 function gardenBonusStatus() {
-  const a = state.weedingHarvest,
-    count = a?.remaining.length;
-  if (a)
-    return `<div class="garden-bonus-status" role="status">Bonus harvest: ${count} ripe ${count === 1 ? "plant" : "plants"} still to pick. Pick them individually or use Harvest All before End Day. <button class="btn alt" onclick="confirmFinishBonusHarvest()">Finish bonus harvest</button></div>`;
-  return Game.weedingStatus(state).bonus
-    ? '<div class="garden-bonus-status">20% care bonus saved! Your next harvest includes eligible crops ripe when you begin picking.</div>'
+  const count = state.plots.filter((p) => p?.weedingBonus === true).length;
+  return count
+    ? `<div class="garden-bonus-status" role="status">${count} planted ${count === 1 ? "crop has" : "crops have"} a saved bonus: 1 extra item or 1 extra pound when each is ready. Growing crops keep their bonus through End Day.</div>`
     : "";
-}
-function confirmFinishBonusHarvest() {
-  show(
-    `<h2>Finish gathering?</h2><p>Your remaining ripe plants will keep their normal produce, but this harvest activity’s unused bonuses will end.</p><button class="btn" onclick="finishGardenBonusHarvest()">Finish gathering</button><button class="btn alt" onclick="closeDialog()">Keep picking</button>`,
-    "garden-bonus-finish",
-  );
-}
-function finishGardenBonusHarvest() {
-  Game.finishBonusHarvest(state);
-  state.notice =
-    "Harvest activity finished. Your normal crops and produce are unchanged.";
-  closeDialog();
 }
 // Let the new day paint first. A changed scene, dialog, gesture, hidden tab or
 // newer day cancels the invitation instead of interrupting a child's activity.
@@ -312,7 +297,7 @@ function scheduleGardenWeedingInvitation(previousDay) {
 function openGardenWeeding() {
   if (!Game.weedingAvailable(state)) return;
   show(
-    `<h2>Time to Weed!</h2><p>Your garden needs a little extra care!</p><p>Find the incorrect answers hiding among the weeds to help your garden grow.</p><p>Complete the challenge to earn 20% more produce on your next harvest!</p><p>Weeding is optional. Your crops will grow normally if you skip it.</p><button class="btn" onclick="startGardenWeeding()">Let's Weed!</button><button class="btn alt" onclick="closeDialog()">Not Now</button>`,
+    `<h2>Time to Weed!</h2><p>Your garden needs a little extra care!</p><p>Find the incorrect answers hiding among the weeds to help your garden grow.</p><p>Complete the challenge to give each planted crop 1 extra item or 1 extra pound when it's ready, even if it is still growing.</p><p>Weeding is optional. Your crops will grow normally if you skip it.</p><button class="btn" onclick="startGardenWeeding()">Let's Weed!</button><button class="btn alt" onclick="closeDialog()">Not Now</button>`,
     "garden-weeding-confirm",
   );
 }
@@ -338,7 +323,7 @@ function pullGardenWeed(i) {
     if (result.kind === "complete") {
       state.notice = result.message;
       show(
-        `<h2>Wonderful weeding!</h2><p>Your planted crops have a 20% bonus for the next harvest activity!</p><p>Pick ripe crops together with Harvest All, or gather the eligible ripe crops individually before End Day. Plants still growing when you begin picking will keep their normal yields.</p><p>Small bonus amounts build up into whole extra produce items of the same crop. New plantings do not receive this bonus.</p><button class="btn" onclick="closeDialog()">Back to the Garden</button>`,
+        `<h2>Wonderful Weeding!</h2><p>Your garden is growing even better! Every crop you have planted will give you 1 extra vegetable or 1 extra pound when it's ready to harvest. Even crops that aren't ready yet will get their bonus!</p><button class="btn" onclick="closeDialog()">Back to the Garden.</button>`,
         "garden-weeding-complete",
       );
     } else renderGardenWeeding(result.message, result.kind === "round");

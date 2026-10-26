@@ -24,7 +24,7 @@ const GUIDEBOOK_PAGES = [
   {
     heading: "Harvest and Keep Growing!",
     text: [
-      "Pick ripe crops or use Harvest All. Every five days, optional Math or Spelling Weeding earns 20% extra on your next harvest. Weed out wrong answers! Pick eligible ripe crops together before End Day.",
+      "Pick ripe crops or use Harvest All. Every five days, optional Math or Spelling Weeding rewards each planted crop with 1 extra item or pound. Weed out wrong answers! Each plant keeps its bonus until harvested.",
     ],
     illustration: "harvest",
   },

@@ -303,11 +303,10 @@
       };
       for (const p of clean.plots) if (p && p.weedingBonus !== true) delete p.weedingBonus;
       clean.weedingLesson = gardenLearning ? gardenLearning.recover({ ...clean, weedingLesson: s.weedingLesson }) : clean.weedingLesson;
-      const event = s.weedingHarvest;
-      clean.weedingHarvest = event && event.day === farmDay(clean) && Array.isArray(event.remaining)
-        ? { day: event.day, remaining: [...new Set(event.remaining.filter(i => Number.isInteger(i) && i >= 0 && i < 25 && clean.plots[i]?.weedingBonus === true && clean.plots[i].age >= get(clean.plots[i].id).days))] }
-        : null;
-      if (clean.weedingHarvest && !clean.weedingHarvest.remaining.length) finishBonusHarvest(clean);
+      // Legacy event-based rewards become persistent per-plot +1 flags. Never
+      // clear unpicked flags because of an old event date/remaining list.
+      // Keep valid fractional-credit records above as inactive legacy data.
+      clean.weedingHarvest = null;
       // Optional reward records migrate independently: an unknown/malformed
       // record must never reset an otherwise valid farm. A goal or `won` flag
       // is not evidence of a purchase. Never invent historical dates.
@@ -797,13 +796,9 @@
     if (!p) return 0;
     const c = get(p.id);
     const base = p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
-    return (
-      base +
-      (p.weedingBonus === true
-        ? Math.floor((base + (s.weedingCredits?.[p.id] || 0)) / 5)
-        : 0)
-    );
+    return base + (p.weedingBonus === true ? 1 : 0);
   }
+
   function weedingStatus(s) {
     return gardenLearning
       ? gardenLearning.status(s)
@@ -835,24 +830,7 @@
     }
     return result;
   }
-  // One harvest activity includes the eligible crops ripe when gathering begins.
-  // Individual picks may span visits/refreshes. End Day or Finish closes the basket.
-  function beginBonusHarvest(s, i) {
-    if (s.weedingHarvest || !s.plots[i]?.weedingBonus) return;
-    const remaining = s.plots.flatMap((p, index) =>
-      p?.weedingBonus && p.age >= get(p.id).days ? [index] : [],
-    );
-    s.weedingHarvest = { day: farmDay(s), remaining };
-    s.plots.forEach((p, index) => {
-      if (p && !remaining.includes(index)) delete p.weedingBonus;
-    });
-  }
-  function finishBonusHarvest(s) {
-    for (const p of s.plots) if (p) delete p.weedingBonus;
-    s.weedingHarvest = null;
-  }
   function endDay(s) {
-    if (s.weedingHarvest) finishBonusHarvest(s);
     settleMarket(s);
     if (s.marketPlayed || s.marketExpenses.length)
       s.lastMarketReport = accountingReport(s);
@@ -898,20 +876,10 @@
   function harvest(s, i) {
     const p = s.plots[i];
     requireRule(p && p.age >= get(p.id).days, "This crop is still growing.");
-    beginBonusHarvest(s, i);
     const c = get(p.id),
       n = harvestAmount(s, i);
     s.inventory[c.id] = (s.inventory[c.id] || 0) + n;
-    if (p.weedingBonus === true) {
-      const base = p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
-      s.weedingCredits ||= {};
-      s.weedingCredits[c.id] = (base + (s.weedingCredits[c.id] || 0)) % 5;
-    }
-    delete p.weedingBonus; // One bonus per plant harvest, including repeat producers.
-    if (s.weedingHarvest) {
-      s.weedingHarvest.remaining = s.weedingHarvest.remaining.filter(index => index !== i);
-      if (!s.weedingHarvest.remaining.length) finishBonusHarvest(s);
-    }
+    delete p.weedingBonus; // Consume only this plot's one-time extra unit.
     const again = p.left > 0;
     if (again) {
       p.left--;
@@ -1805,7 +1773,6 @@
     weedingAvailable,
     weedingStatus,
     startWeeding,
-    finishBonusHarvest,
     pullWeed,
     farmDay,
     endDay,

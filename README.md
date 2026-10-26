@@ -1,10 +1,10 @@
-## In review: Phase 8 Garden learning improvements
+## Current Garden weeding reward
 
-The `phase-8/educational-weeding-and-crop-closeups` branch adds optional five-day
-math/spelling challenges, a one-activity harvest bonus and forty crop-specific
-growth illustrations. It preserves established Garden tools and save keys.
-See [review notes and mobile screenshots](docs/garden-learning-review.md).
-This branch is not published to the permanent playtesting website yet.
+Complete optional math/spelling weeding during a five-day window to save one
+extra item or pound on every crop planted at completion. Each plot keeps its
+own bonus until harvested, even across days, seasons and refreshes. New
+plantings do not inherit old bonuses; repeat harvests return to normal yields.
+See [reward and save-migration notes](docs/per-plot-weeding-reward.md).
 
 ## Permanent public playtest
 
