@@ -90,6 +90,7 @@ function endDay() {
 }
 function advanceGardenDay(waterFirst = false) {
   if (state.customer) return endDay();
+  const previousDay = Game.farmDay(state);
   if (waterFirst) Game.water(state);
   const paid = Game.settleMarket(state);
   Game.endDay(state);
@@ -97,6 +98,7 @@ function advanceGardenDay(waterFirst = false) {
   popup = "";
   dialogKey = null;
   render();
+  scheduleGardenWeedingInvitation(previousDay);
 }
 function harvest(i) {
   const p = state.plots[i],

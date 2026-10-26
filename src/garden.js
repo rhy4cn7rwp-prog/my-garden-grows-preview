@@ -281,6 +281,34 @@ function finishGardenBonusHarvest() {
     "Harvest activity finished. Your normal crops and produce are unchanged.";
   closeDialog();
 }
+// Let the new day paint first. A changed scene, dialog, gesture, hidden tab or
+// newer day cancels the invitation instead of interrupting a child's activity.
+function scheduleGardenWeedingInvitation(previousDay) {
+  const farm = state,
+    day = Game.farmDay(state),
+    scene = view,
+    generation = renderGeneration;
+  if (scene !== "garden" || day % 5 !== 0 || !Game.weedingAvailable(state))
+    return;
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      if (
+        state !== farm ||
+        view !== scene ||
+        Game.farmDay(state) !== day ||
+        popup ||
+        document.hidden ||
+        gardenUI.drag ||
+        renderGeneration !== generation
+      )
+        return;
+      if (GardenLearning.claimInvitation(state, previousDay)) {
+        save(); // Persist the invitation before showing it; Not Now spends no opportunity.
+        openGardenWeeding();
+      }
+    }),
+  );
+}
 function openGardenWeeding() {
   if (!Game.weedingAvailable(state)) return;
   show(
