@@ -32,6 +32,7 @@ try:
    session=page.context.new_cdp_session(page)
    def touch(kind,x=0,y=0):session.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[] if kind=='touchEnd' else [{'x':x,'y':y}]})
    def drag(source,target):
+    target.scroll_into_view_if_needed()
     # Center the pair in the reading viewport without changing the game state.
     a=source.bounding_box();b=target.bounding_box();middle=(a['y']+a['height']/2+b['y']+b['height']/2)/2
     page.locator('#app').evaluate('(e,dy)=>e.scrollTop+=dy',middle-page.evaluate("()=>{const hud=document.querySelector('.hud').getBoundingClientRect(),foot=document.querySelector('.job-main-actions').getBoundingClientRect();return (hud.bottom+30+foot.top)/2}"))

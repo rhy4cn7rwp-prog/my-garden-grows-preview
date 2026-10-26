@@ -55,7 +55,7 @@
       "flowers",
       "Water Flowers",
       "Watering chore",
-      "Move your can to each thirsty flowerpot.",
+      "Water every thirsty flower in the garden. Paths and grass do not need water.",
     ],
     [
       "tidy",
@@ -124,7 +124,13 @@
       a.log.length <= 3000
     ) {
       try {
-        const restored = make(a.id, a.mode, a.seed, a.serial);
+        const restored = make(
+          a.id,
+          a.mode,
+          a.seed,
+          a.serial,
+          a.rulesVersion === 2 ? 2 : 1,
+        );
         for (const entry of a.log) {
           if (entry.type === "tick") tickActive(restored, entry.ms);
           else apply(restored, entry);
@@ -166,12 +172,13 @@
     );
     return s.jobs.active;
   }
-  function make(id, mode, seed, serial) {
+  function make(id, mode, seed, serial, rulesVersion = 2) {
     const r = rng(seed),
       little = mode === "little",
       n = little ? 2 : 4;
     const a = {
       id,
+      rulesVersion,
       mode,
       seed,
       serial,
@@ -252,6 +259,7 @@
           () => kinds[Math.floor(r() * (little ? 2 : 4))],
         ),
         sorted: [],
+        ...(rulesVersion >= 2 ? { arrivals: [0, 0, 0] } : {}),
       };
     } else if (id === "stacks") {
       const types = little ? 2 : 3,
@@ -341,11 +349,14 @@
       };
     } else if (id === "flowers") {
       a.data = {
-        items: Array.from({ length: little ? 4 : 6 }, () => ({
-          kind: "flower",
-          done: false,
-        })),
-        target: little ? 4 : 6,
+        items: Array.from(
+          { length: rulesVersion >= 2 ? (little ? 9 : 12) : little ? 4 : 6 },
+          () => ({
+            kind: "flower",
+            done: false,
+          }),
+        ),
+        target: rulesVersion >= 2 ? (little ? 9 : 12) : little ? 4 : 6,
       };
     } else if (id === "tidy") {
       a.data = {
@@ -431,6 +442,61 @@
       end = 0.36 + r() * 0.58;
     return { index, launch, flight, start, end, big: index % 7 === 6 };
   }
+  function packingFronts(a) {
+    return [0, 1, 2].map((lane) =>
+      a.data.items.findIndex(
+        (_, i) => i % 3 === lane && !a.data.sorted.includes(i),
+      ),
+    );
+  }
+  function packingProgress(a, lane) {
+    return Math.min(
+      1,
+      Math.max(
+        0,
+        (a.elapsed - (a.data.arrivals?.[lane] || 0)) /
+          (a.mode === "little" ? 6500 : 4000),
+      ),
+    );
+  }
+  function flowerPlots(a) {
+    const r = rng(a.seed + 913),
+      positions = shuffle(
+        Array.from({ length: 36 }, (_, i) => i),
+        r,
+      ),
+      map = new Map(a.data.items.map((_, i) => [positions[i], i]));
+    return Array.from({ length: 36 }, (_, p) =>
+      map.has(p)
+        ? { kind: "flower", item: map.get(p) }
+        : { kind: p % 7 === 0 ? "path" : p % 3 ? "grass" : "soil" },
+    );
+  }
+  function matchPoints(size, cascade = 0) {
+    return size * 10 + Math.max(0, size - 4) * 15 + cascade * 20;
+  }
+  function carrotPose(a, c, time = a.elapsed) {
+    const t = Math.max(0, Math.min(1, (time - c.launch) / c.flight)),
+      end = a.rulesVersion >= 2 ? 0.92 : 0.78;
+    return {
+      t,
+      x: c.start + (c.end - c.start) * t,
+      y: 0.45 + (end - 0.45) * t - 1.35 * t * (1 - t),
+    };
+  }
+  function catchTime(a, c) {
+    if (a.rulesVersion < 2) return c.launch + c.flight;
+    const b = 0.92 - 0.45 - 1.35,
+      t = (-b + Math.sqrt(b * b - 4 * 1.35 * (0.45 - 0.78))) / (2 * 1.35);
+    return c.launch + Math.round(c.flight * t);
+  }
+  function canCatch(a, c) {
+    const x = carrotPose(a, c, catchTime(a, c)).x;
+    return a.rulesVersion >= 2
+      ? Math.abs(a.data.basket - x) <=
+          a.data.width * 0.41 + (c.big ? 0.05 : 0.035)
+      : Math.abs(a.data.basket - c.end) < a.data.width / 2 + 0.04;
+  }
   function tickActive(a, ms) {
     requireRule(
       Number.isInteger(ms) && ms >= 0 && ms <= 120000,
@@ -442,17 +508,23 @@
     if (a.id === "catch") {
       for (let i = 0; i < Math.ceil(60000 / a.data.launchEvery); i++) {
         const c = carrot(a, i);
+        const at = catchTime(a, c);
+        if (
+          at > before &&
+          at <= a.elapsed &&
+          !a.data.caught.includes(i) &&
+          canCatch(a, c)
+        ) {
+          a.data.caught.push(i);
+          a.score += c.big ? 2 : 1;
+        }
         if (
           c.launch + c.flight > before &&
           c.launch + c.flight <= a.elapsed &&
           !a.data.caught.includes(i) &&
           !a.data.missed.includes(i)
-        ) {
-          if (Math.abs(a.data.basket - c.end) < a.data.width / 2 + 0.04) {
-            a.data.caught.push(i);
-            a.score += c.big ? 2 : 1;
-          } else a.data.missed.push(i);
-        }
+        )
+          a.data.missed.push(i);
       }
     }
     if (duration[a.id] && a.elapsed >= duration[a.id]) {
@@ -488,7 +560,10 @@
       );
       if (d.sorted.includes(e.item) || d.items[e.item] !== e.target)
         return false;
+      if (a.rulesVersion >= 2 && !packingFronts(a).includes(e.item))
+        return false;
       d.sorted.push(e.item);
+      if (d.arrivals) d.arrivals[e.item % 3] = a.elapsed;
       a.score = d.sorted.length;
       a.won = a.score === d.items.length;
     } else if (e.type === "stack") {
@@ -568,11 +643,32 @@
       [grid[e.from], grid[e.to]] = [grid[e.to], grid[e.from]];
       if (!matches(grid).length) return false;
       d.grid = grid;
+      if (a.rulesVersion >= 2) {
+        d.chain =
+          d.lastMatchAt !== undefined && a.elapsed - d.lastMatchAt <= 15000
+            ? Math.min(5, (d.chain || 1) + 1)
+            : 1;
+        d.lastMatchAt = a.elapsed;
+        d.bursts = [];
+      }
       const r = rng(a.seed + ++d.turn * 371);
       for (let pass = 0; pass < 20; pass++) {
         const hit = matches(d.grid);
         if (!hit.length) break;
-        a.score += hit.length * 10;
+        const points =
+          a.rulesVersion >= 2
+            ? matchPoints(hit.length, pass) +
+              (pass === 0 ? (d.chain - 1) * 10 : 0)
+            : hit.length * 10;
+        if (a.rulesVersion >= 2)
+          d.bursts.push({
+            grid: d.grid.slice(),
+            cells: hit.slice(),
+            points,
+            cascade: pass,
+            chain: d.chain,
+          });
+        a.score += points;
         hit.forEach((i) => (d.grid[i] = null));
         for (let x = 0; x < 6; x++) {
           const col = Array.from(
@@ -650,6 +746,13 @@
   }
   const api = {
     kinds,
+    packingFronts,
+    packingProgress,
+    flowerPlots,
+    matchPoints,
+    carrotPose,
+    catchTime,
+    canCatch,
     catalog,
     empty,
     recover,
