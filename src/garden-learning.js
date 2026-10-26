@@ -42,7 +42,13 @@
     return Math.floor(((s.season - 1) * 20 + s.day) / 5);
   }
   function empty() {
-    return { version: 1, completedCycle: 0, nextType: "math", session: null };
+    return {
+      version: 1,
+      completedCycle: 0,
+      invitedCycle: 0,
+      nextType: "math",
+      session: null,
+    };
   }
   function recover(s) {
     const raw = s.weedingLesson,
@@ -63,6 +69,12 @@
       raw.completedCycle <= current
     )
       out.completedCycle = raw.completedCycle;
+    if (
+      Number.isSafeInteger(raw.invitedCycle) &&
+      raw.invitedCycle >= 0 &&
+      raw.invitedCycle <= current
+    )
+      out.invitedCycle = raw.invitedCycle;
     out.nextType = raw.nextType === "spelling" ? "spelling" : "math";
     const a = raw.session;
     if (
@@ -126,6 +138,20 @@
       days,
       type: record.session?.cycle === c ? record.session.type : record.nextType,
     };
+  }
+  // Called only after a player-controlled End Day, never from load/navigation.
+  function claimInvitation(s, previousDay) {
+    const day = (s.season - 1) * 20 + s.day,
+      w = status(s);
+    if (
+      day !== previousDay + 1 ||
+      day % 5 !== 0 ||
+      !w.available ||
+      s.weedingLesson?.invitedCycle === w.cycle
+    )
+      return false;
+    (s.weedingLesson ||= empty()).invitedCycle = w.cycle;
+    return true;
   }
   function start(s, seed = Math.floor(Math.random() * 0xffffffff) + 1) {
     if (!status(s).available) throw Error("Weeding is not available just now.");
@@ -256,7 +282,16 @@
         "Wonderful weeding! Your planted garden has a next-harvest bonus.",
     };
   }
-  const api = { empty, recover, status, start, questions, select, count };
+  const api = {
+    empty,
+    recover,
+    status,
+    start,
+    questions,
+    select,
+    count,
+    claimInvitation,
+  };
   if (typeof module !== "undefined") module.exports = api;
   root.GardenLearning = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);
