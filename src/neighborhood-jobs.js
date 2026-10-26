@@ -272,6 +272,7 @@
                 crates[from].at(-1) === crates[from].at(-2))
             )
               options.push([from, to]);
+        if (!options.length) break; // The reversed moves already form a valid solution.
         const [from, to] = options[Math.floor(r() * options.length)];
         crates[to].push(crates[from].pop());
         reverse.unshift([to, from]);
@@ -628,6 +629,7 @@
     if (!a || a.ended) return;
     ms = Math.max(0, Math.min(120000, Math.round(ms)));
     tickActive(a, ms);
+    if (a.ended) s.jobs.best[a.id] = Math.max(s.jobs.best[a.id] || 0, a.score);
     const last = a.log.at(-1);
     if (last?.type === "tick" && last.ms + ms <= 120000) last.ms += ms;
     else a.log.push({ type: "tick", ms });
@@ -647,6 +649,7 @@
     if (s.jobs) s.jobs.active = null;
   }
   const api = {
+    kinds,
     catalog,
     empty,
     recover,

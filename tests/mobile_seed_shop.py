@@ -19,6 +19,7 @@ try:
    errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.set_default_timeout(6000)
    page.add_init_script("document.addEventListener('DOMContentLoaded',()=>{document.documentElement.style.setProperty('--viewport-safe-top','"+str(top)+"px');document.documentElement.style.setProperty('--viewport-safe-bottom','"+str(bottom)+"px');syncGameViewport();});")
    page.goto(os.environ.get('PREVIEW_URL',f'http://127.0.0.1:{server.server_port}/'))
+   page.evaluate("()=>{state=Game.initial();go('seeds')}")
    page.evaluate("([t,b])=>{document.documentElement.style.setProperty('--viewport-safe-top',t+'px');document.documentElement.style.setProperty('--viewport-safe-bottom',b+'px');syncGameViewport();go('seeds')}",[top,bottom])
    page.wait_for_function("document.querySelector('.seed-shop-interior')?.naturalWidth>0")
    def tap(name):page.get_by_role('button',name=name,exact=True).tap()

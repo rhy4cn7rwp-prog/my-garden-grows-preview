@@ -56,10 +56,11 @@ test("six-page guide teaches currently playable shopping, growing, bagging and m
   );
   assert.equal(new Set(guide.pages.map((p) => p.illustration)).size, 6);
 });
-test("fresh and recovered games start at home with no new save fields or changed purchases", () => {
+test("new farms start at home with $0; existing farms retain balances and purchases", () => {
   const fresh = ui();
   assert.equal(fresh.run("view"), "clubhouse");
-  assert.equal(fresh.run("state.cash"), 50);
+  assert.equal(fresh.run("state.cash"), 0);
+  assert.equal(fresh.run("state.newEconomy"), true);
   const s = G.initial();
   s.cash = 1000;
   G.purchaseDream(s, "bike");

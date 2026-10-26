@@ -20,7 +20,7 @@ try:
    page.add_init_script("document.addEventListener('DOMContentLoaded',()=>{document.documentElement.style.setProperty('--viewport-safe-top','"+str(t)+"px');document.documentElement.style.setProperty('--viewport-safe-bottom','"+str(b)+"px');syncGameViewport();});")
    page.goto(os.environ.get('PREVIEW_URL',f'http://127.0.0.1:{server.server_port}/'))
    def tap(name):page.get_by_role('button',name=name,exact=True).tap()
-   tap('Go to Town');tap('Market Supplies');page.wait_for_function("document.querySelector('.supply-shop-interior')?.naturalWidth>0")
+   page.evaluate("()=>{state=Game.initial();go('town')}");tap('Market Supplies');page.wait_for_function("document.querySelector('.supply-shop-interior')?.naturalWidth>0")
    def baseline():return page.evaluate("Object.fromEntries(Object.entries(state).filter(([k])=>!['cash','marketSupplyCart','marketSupplyStock','marketExpenses','bagCount'].includes(k)).map(([k,v])=>[k,k==='display'?Object.fromEntries(Object.entries(v).filter(([,n])=>n>0)):v]))")
    before=baseline()
    def fit():

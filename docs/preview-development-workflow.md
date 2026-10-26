@@ -16,3 +16,8 @@ User authorization updated October 26, 2026:
   specifically requested.
 
 Permanent playtest: https://rhy4cn7rwp-prog.github.io/my-garden-grows-preview/
+
+Phase 9 continuation approval: safely resolve further in-scope implementation
+and test issues without asking again. Escalate only for gameplay-design changes,
+save-loss risk or an issue that cannot be safely resolved. Merge PR #7 only after
+all relevant checks pass, then verify Pages and report the live URL.

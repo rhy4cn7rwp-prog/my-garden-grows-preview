@@ -39,6 +39,10 @@ function go(v) {
   popup = "";
   dialogKey = null;
   render();
+  if(changed && typeof Narration !== "undefined"){
+    if(v === "seeds")Narration.speak("Welcome, gardener! Tap an item to explore.","shop");
+    if(v === "market" && !state.customer)Narration.speak("Welcome to the Farmers Market. Arrange your harvest before opening.","shop");
+  }
   if (changed) {
     const app = document.querySelector("#app");
     if (app) app.scrollTop = 0;

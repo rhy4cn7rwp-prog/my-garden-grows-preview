@@ -221,38 +221,91 @@
   // The legacy factory stays stable for migration/rule fixtures. Only truly
   // absent saves and an explicitly confirmed restart use the new economy.
   function newGame() {
-    return {...initial(), cash:0, newEconomy:true, starterClaimed:false, experienceChosen:false};
+    return {
+      ...initial(),
+      cash: 0,
+      newEconomy: true,
+      starterClaimed: false,
+      experienceChosen: false,
+    };
   }
   function chooseExperience(s, mode) {
-    requireRule(["little","growing"].includes(mode), "Choose a gardening experience.");
-    s.learningExperience=mode; s.experienceChosen=true;
-    // Keep active jobs, lessons and customers exactly as saved. They finish in
-    // their original format; subsequent activities use the new preference.
+    requireRule(
+      ["little", "growing"].includes(mode),
+      "Choose a gardening experience.",
+    );
+    s.learningExperience = mode;
+    s.experienceChosen = true;
+    gardenLearning?.adaptExperience?.(s);
+    // Preserve jobs/customers and earned progress. Little Gardener adapts only
+    // the current Garden lesson; subsequent activities use the new preference.
   }
   function claimStarter(s) {
-    requireRule(s.newEconomy && !s.starterClaimed, "Your starter planting supplies have already been collected.");
-    for(const [id,n] of Object.entries({carrot:3,beans:2,lettuce:2}))s.seeds[id]=(s.seeds[id]||0)+n;
-    s.starterClaimed=true;
+    requireRule(
+      s.newEconomy && !s.starterClaimed,
+      "Your starter planting supplies have already been collected.",
+    );
+    for (const [id, n] of Object.entries({ carrot: 3, beans: 2, lettuce: 2 }))
+      s.seeds[id] = (s.seeds[id] || 0) + n;
+    s.starterClaimed = true;
   }
   function marketSetupTotal(s) {
-    return (s.owned.table?0:8)+(s.owned.scale?0:5)+(s.cashRegister?0:4)+(s.bagCount?0:3);
+    return (
+      (s.owned.table ? 0 : 8) +
+      (s.owned.scale ? 0 : 5) +
+      (s.cashRegister ? 0 : 4) +
+      (s.bagCount ? 0 : 3)
+    );
   }
   function purchaseMarketSetup(s) {
-    const total=marketSetupTotal(s);
-    requireRule(total>0 && s.cash>=total, "Save enough for your remaining equipment first. Neighborhood jobs always pay $1.");
-    const cart={};if(!s.owned.table)cart.table=1;if(!s.owned.scale)cart.scale=1;if(!s.bagCount)cart.bags=1;
-    const savedCart=s.supcart;
-    if(Object.keys(cart).length){s.supcart=cart;purchase(s,"supplies");s.supcart=savedCart;}
-    if(!s.cashRegister){s.cash=(cents(s.cash)-400)/100;s.cashRegister=true;recordExpense(s,"equipment",400,"upfront");}
+    const total = marketSetupTotal(s);
+    requireRule(
+      total > 0 && s.cash >= total,
+      "Save enough for your remaining equipment first. Neighborhood jobs always pay $1.",
+    );
+    const cart = {};
+    if (!s.owned.table) cart.table = 1;
+    if (!s.owned.scale) cart.scale = 1;
+    if (!s.bagCount) cart.bags = 1;
+    const savedCart = s.supcart;
+    if (Object.keys(cart).length) {
+      s.supcart = cart;
+      purchase(s, "supplies");
+      s.supcart = savedCart;
+    }
+    if (!s.cashRegister) {
+      s.cash = (cents(s.cash) - 400) / 100;
+      s.cashRegister = true;
+      recordExpense(s, "equipment", 400, "upfront");
+    }
     return total;
   }
   function autoPayLittle(s) {
-    requireRule(s.customer && (s.customer.learningExperience === "little" || s.learningExperience === "little"), "Use the cash register in Growing Gardener.");
-    const practice={...s.mathPractice},change={...s.changePractice};
-    if(s.step !== "pay")checkBasket(s);
-    requireRule(bagsRemaining(s)>0,"This purchase needs one paper bag. Buy more bags without losing the basket.");
-    for(const id of Object.keys(s.basket))if(s.basket[id])s.customer.lineAnswers[id]={quantity:s.basket[id],priceCents:cents(marketPrice(s,id)),answerCents:s.basket[id]*cents(marketPrice(s,id))};
-    if(s.step !== "pay")ring(s,totalOrder(s));s.change=changeDue(s);finish(s);s.mathPractice=practice;s.changePractice=change;
+    requireRule(
+      s.customer &&
+        (s.customer.learningExperience === "little" ||
+          s.learningExperience === "little"),
+      "Use the cash register in Growing Gardener.",
+    );
+    const practice = { ...s.mathPractice },
+      change = { ...s.changePractice };
+    if (s.step !== "pay") checkBasket(s);
+    requireRule(
+      bagsRemaining(s) > 0,
+      "This purchase needs one paper bag. Buy more bags without losing the basket.",
+    );
+    for (const id of Object.keys(s.basket))
+      if (s.basket[id])
+        s.customer.lineAnswers[id] = {
+          quantity: s.basket[id],
+          priceCents: cents(marketPrice(s, id)),
+          answerCents: s.basket[id] * cents(marketPrice(s, id)),
+        };
+    if (s.step !== "pay") ring(s, totalOrder(s));
+    s.change = changeDue(s);
+    finish(s);
+    s.mathPractice = practice;
+    s.changePractice = change;
   }
   function dictionary(value, ids) {
     return (
@@ -992,7 +1045,7 @@
     return false;
   }
   function openMarket(s, now = Date.now()) {
-    requireRule(!s.newEconomy || (s.owned.table && s.owned.scale && s.cashRegister && bagsRemaining(s)>0), "Collect your table, scale, cash register and bags at Market Supplies before opening. Neighborhood jobs can help you save $20.");
+    requireRule(!s.newEconomy || (s.owned.table && s.owned.scale && s.cashRegister && bagsRemaining(s)>0), "Collect any missing table, scale, cash register and bags at Market Supplies before opening. Neighborhood jobs always pay $1.");
     requireRule(
       !s.marketPlayed && !s.marketOpen,
       "Your market has already opened today. End the farming day before opening again.",
@@ -1008,6 +1061,7 @@
       );
       rentEquipment(s, "table", "upfront");
     }
+    if(s.newEconomy)s.standMode="owned";
     for (const c of crops) if (!canSellCrop(s, c.id)) s.display[c.id] = 0;
     s.marketOpen = true;
     s.marketPlayed = true;
@@ -1036,6 +1090,7 @@
   }
   function mathLevel(s) { return Math.min(5, Math.floor(dreamPurchaseCount(s) / 2)); }
   function orderDifficulty(s) {
+    if(s.learningExperience === "little")return 0;
     const support = Math.max(s.mathPractice?.support || 0, s.changePractice?.support || 0);
     const level = Math.max(0, mathLevel(s) - support);
     // Every third shopper is an easier review; milestones never remove practice.

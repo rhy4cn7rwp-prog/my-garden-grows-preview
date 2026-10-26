@@ -1,7 +1,7 @@
 """Optional book/startup and resumable market regression; isolated touch browsers only.
 Chromium Safari-sized/safe-area emulation is not a substitute for native Safari.
 """
-import os
+import os,re
 from functools import partial
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -24,7 +24,8 @@ try:
    def tap(name):page.get_by_role('button',name=name,exact=True).tap()
    def snapshot():return page.evaluate('JSON.stringify(state)')
    assert page.evaluate('view')=='clubhouse'
-   assert page.evaluate('state.cash')==50
+   assert page.evaluate('state.cash')==0
+   page.get_by_role('button',name=re.compile("^I'm ready for a challenge!")).tap()
    page.wait_for_function("document.querySelector('.clubhouse-world')?.dataset.composited==='true'")
    page.wait_for_function('!!clubhouseRoom.bookImage?.naturalWidth && !!clubhouseRoom.bookTableImage?.naturalWidth')
    if h>w:
@@ -77,7 +78,7 @@ try:
    for destination in ['seeds','supplies','garden','dream','market','town']:
     page.evaluate('v=>go(v)',destination);tap('Clubhouse');assert page.evaluate('view')=='clubhouse'
    # Own several rewards and retain their exact placements and unrelated progress.
-   page.evaluate('''()=>{state.cash=1000;Game.purchaseDream(state,'ball');Game.purchaseDream(state,'bike');Game.purchaseDream(state,'camera');Game.moveClubhouseItem(state,'ball',ClubhouseLayout.canonical('ball','window-seat',1000));state.seeds.carrot=7;state.inventory.carrot=state.display.carrot=60;state.bagCount=20;state.plots[0]={id:'carrot',age:1,watered:true,left:0,quality:100};state.owned.scale=1;state.marketElapsedMs=0;Game.openMarket(state);Game.newCustomer(state);Game.pauseMarketClock(state);marketAwaitingResume=true;state.marketElapsedMs=23456;save();go('clubhouse')}''')
+   page.evaluate('''()=>{state.newEconomy=false;state.cash=1000;Game.purchaseDream(state,'ball');Game.purchaseDream(state,'bike');Game.purchaseDream(state,'camera');Game.moveClubhouseItem(state,'ball',ClubhouseLayout.canonical('ball','window-seat',1000));state.seeds.carrot=7;state.inventory.carrot=state.display.carrot=60;state.bagCount=20;state.plots[0]={id:'carrot',age:1,watered:true,left:0,quality:100};state.owned.scale=1;state.marketElapsedMs=0;Game.openMarket(state);Game.newCustomer(state);Game.pauseMarketClock(state);marketAwaitingResume=true;state.marketElapsedMs=23456;save();go('clubhouse')}''')
    old=snapshot();page.reload();assert page.evaluate('view')=='clubhouse'
    assert page.evaluate('marketAwaitingResume') is True
    recovered=snapshot()

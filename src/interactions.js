@@ -229,7 +229,7 @@ function selectStand(mode) {
 function jobBoard() { go("jobs"); }
 function seedHelp() {
   show(`<h2>🌱 Community seed help</h2><p>If you have less than $1 and cannot keep selling, your neighbors can share starter seeds or bags. No fee, debt, or farm reset.</p>
-    ${Game.canReceiveSeedHelp(state) ? '<button class="btn" onclick="claimSeedHelp()">Accept community help</button>' : "<p>You have a way forward: buy a seed packet, plant your seeds, water your crops, or sell your harvest. Selling from a blanket is always free.</p>"}`);
+    ${Game.canReceiveSeedHelp(state) ? '<button class="btn" onclick="claimSeedHelp()">Accept community help</button>' : "<p>You have a way forward: buy a seed packet, plant your seeds, water your crops, or sell your harvest.</p>"}${state.newEconomy ? '<p>Neighborhood jobs always offer a way to earn. Save for your reusable market setup.</p><button class="btn" onclick="go(\'jobs\')">Visit Job Board</button>' : '<p>Selling from a blanket is always free.</p>'}`);
 }
 function claimSeedHelp() {
   act(() => {

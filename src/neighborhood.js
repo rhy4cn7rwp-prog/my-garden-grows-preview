@@ -15,10 +15,13 @@ const Neighborhood = (() => {
     feedback: "",
     lastScore: 0,
   };
-  const J = NeighborhoodJobs;
+  const J = NeighborhoodJobs,
+    kinds = J.kinds;
   function icon(kind, cls = "") {
-    if (["carrot", "corn", "tomato", "cucumber", "onion"].includes(kind))
-      return seedProduceArt(kind);
+    if (kind === "tomato-ripe" || kind === "tomato-green")
+      return `<svg class="job-symbol" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 25C13 13 10 69 30 83Q51 96 72 82C94 62 85 16 50 25Z" fill="${kind === "tomato-ripe" ? "#e45c42" : "#80ad5a"}" stroke="${kind === "tomato-ripe" ? "#ab4935" : "#56783d"}" stroke-width="3"/><path d="m31 27 18-4 4-15 4 15 17 5-17 3-7 12-3-13-17 7Z" fill="#4f7b3e"/><ellipse cx="33" cy="42" rx="7" ry="10" fill="${kind === "tomato-ripe" ? "#f8ad78" : "#bdd98c"}"/></svg>`;
+    if (CROPS.some((c) => c.id === kind)) return seedProduceArt(kind);
+    if (kind === "harvest") return gardenBasketArt();
     const paths = {
       sun: '<circle cx="50" cy="42" r="20" fill="#f4c750"/><path d="M50 10v8m0 48v8M18 42h8m48 0h8M27 19l6 6m34 34 6 6M27 65l6-6m34-34 6-6" stroke="#c9913c" stroke-width="4"/>',
       pot: '<path d="m23 37 54 0-8 42H31Z" fill="#d68e61" stroke="#995b38" stroke-width="3"/><rect x="18" y="29" width="64" height="15" rx="5" fill="#e9ad7a"/>',
@@ -69,7 +72,7 @@ const Neighborhood = (() => {
       d = a.data,
       timed = J.duration[a.id];
     if (a.ended)
-      return `<section class="job-results">${jobArt(a.id)}<h1>${a.won ? "Wonderful helping!" : "Nice practice!"}</h1><p>${a.score} ${a.id === "catch" ? "points" : "score"} · Personal best ${Math.max(a.score, state.jobs.best[a.id] || 0)}</p><p>${a.won ? "Your neighbor has $1 ready for you." : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? "Collect $1" : "Try again"}</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? "Thank you for helping! Here is a dollar." : "That was good practice. You can try again."}')">Read to Me</button></section>`;
+      return `<section class="job-results">${jobArt(a.id)}<h1>${a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}<p>${a.score} ${a.id === "catch" ? "points" : "score"} · Personal best ${Math.max(a.score, state.jobs.best[a.id] || 0)}</p><p>${a.won ? "Your neighbor has $1 ready for you." : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? "Collect $1" : "Try again"}</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? "Thank you for helping! Here is a dollar." : "That was good practice. You can try again."}')">Read to Me</button></section>`;
     let body = "";
     if (a.id === "words")
       body = `<ul class="job-word-list">${d.words.map((w) => `<li class="${d.found.includes(w) ? "found" : ""}">${a.mode === "little" ? icon(w.toLowerCase()) : ""}<button onclick="Neighborhood.read('${w}')">${w}${d.found.includes(w) ? " ✓" : ""}</button></li>`).join("")}</ul><div class="job-word-grid" style="--size:${d.size}">${d.grid.map((v, i) => `<button data-letter="${i}" onclick="Neighborhood.letterCell(${i})" class="${d.found.some((w) => d.paths[w].includes(i)) ? "found" : ""}" aria-label="Letter ${v}, row ${Math.floor(i / d.size) + 1}, column ${(i % d.size) + 1}">${v}</button>`).join("")}</div>`;
@@ -93,12 +96,12 @@ const Neighborhood = (() => {
       body = `<div class="job-magee-intro">${person("magee")}<p>“My garden labels are mixed up! Can you help me?”</p></div><p>Label ${d.round + 1} of ${d.words.length}</p>${little ? `<div class="job-picture-clue">${icon(w.toLowerCase())}</div>` : ""}<button class="btn alt" onclick="Neighborhood.read('${w}','magee')">Hear the word</button><div class="job-letter-slots">${[...w].map((_, i) => `<button data-job-drop="letter" onclick="Neighborhood.act({type:'removeLetter',slot:${i}})" aria-label="Letter slot ${i + 1}">${d.slots[i] === undefined ? "" : d.tiles[d.slots[i]]}</button>`).join("")}</div><div class="job-letter-tiles">${d.tiles.map((v, i) => `<button data-job-drag="letter" data-item="${i}" onclick="Neighborhood.tile(${i})" ${d.slots.includes(i) ? "disabled" : ""}>${v}</button>`).join("")}</div><button class="btn alt" onclick="Neighborhood.act({type:'hint'})">Picture / letter hint</button>${d.hints ? `<p class="job-hint">${icon(w.toLowerCase())}Starts with ${w.slice(0, d.hints)}${"·".repeat(w.length - d.hints)}</p>` : ""}${little ? `<p>Say each sound, then blend the word.</p><div class="job-phonics">${[...w].map((l) => `<button class="btn alt" onclick="Narration.phoneme('${l}')" aria-label="Hear ${l} sound">${l} sound</button>`).join("")}</div>` : ""}`;
     }
     if (a.id === "match")
-      body = `<p>Goal ${d.target} points · Match FOUR or more!</p><div class="job-match-grid ${ui.falling ? "job-fall" : ""}">${d.grid.map((v, i) => `<button data-match-cell="${i}" data-job-drag="swap" data-item="${i}" data-job-drop="swap-${i}" onclick="Neighborhood.matchCell(${i})" class="${ui.selected === i ? "selected" : ""}" aria-label="${kinds[v]}, row ${Math.floor(i / 6) + 1}, column ${(i % 6) + 1}">${icon(kinds[v])}</button>`).join("")}</div>${a.mode === "little" ? '<button class="btn alt" onclick="Neighborhood.matchHint()">Show me a possible swap</button>' : ""}`;
+      body = `<p>Goal ${d.target} points · Match FOUR or more!</p><div class="job-match-grid ${Date.now() < (ui.dropUntil || 0) ? "job-fall" : ""}">${(ui.previewGrid || d.grid).map((v, i) => `<button data-match-cell="${i}" data-job-drag="swap" data-item="${i}" data-job-drop="swap-${i}" onclick="Neighborhood.matchCell(${i})" class="${ui.selected === i ? "selected" : ""} ${(ui.hits || []).includes(i) ? "job-pop" : ""}" aria-label="${kinds[v]}, row ${Math.floor(i / 6) + 1}, column ${(i % 6) + 1}">${icon(kinds[v])}</button>`).join("")}</div>${a.mode === "little" ? '<button class="btn alt" onclick="Neighborhood.matchHint()">Show me a possible swap</button>' : ""}`;
     if (a.id === "catch")
-      body = `<div class="job-catch-world" data-catch-world aria-label="Catch carrots by moving the basket"><div class="job-jones">${person("jones")}</div><div class="job-carrots"></div><div class="job-catching-basket" style="width:${d.width * 100}%;left:${d.basket * 100}%">${gardenBasketArt()}</div></div><p>${d.caught.length} carrots caught · Goal ${d.target} points</p><div class="job-actions"><button class="btn" onclick="Neighborhood.moveBasket(-.1)">Move left</button><button class="btn" onclick="Neighborhood.moveBasket(.1)">Move right</button></div>`;
+      body = `<div class="job-catch-world" data-catch-world aria-label="Catch carrots by moving the basket"><div class="job-jones">${person("jones")}</div><div class="job-jones-bubble">“Grab that basket! Catch these carrots for me, would ya?”</div><div class="job-carrots"></div><div class="job-catching-basket" style="width:${d.width * 100}%;left:${d.basket * 100}%">${gardenBasketArt()}</div></div><p><span data-catch-count>${d.caught.length}</span> carrots caught · Goal ${d.target} points</p><div class="job-actions"><button class="btn" onclick="Neighborhood.moveBasket(-.1)">Move left</button><button class="btn" onclick="Neighborhood.moveBasket(.1)">Move right</button></div>`;
     if (["weeds", "tomatoes", "flowers", "tidy"].includes(a.id))
-      body = `<p>${a.id === "tomatoes" ? `Pick ${d.target} ripe tomatoes.` : a.id === "flowers" ? "Water every flowerpot." : a.id === "weeds" ? "Pull jagged red weeds; keep round green leaves." : "Put leaves and sticks in their matching piles."} ${a.score} / ${d.target}</p>${a.id === "flowers" ? `<button class="job-can ${ui.selected === "water" ? "selected" : ""}" data-job-drag="water" onclick="Neighborhood.pick('water')" aria-label="Pick up watering can">${gardenCanArt()}</button>` : ""}<div class="job-yard job-yard-${a.id}">${d.items.map((item, i) => `<button data-job-drag="chore" data-item="${i}" data-job-drop="yard-${i}" onclick="Neighborhood.chore(${i})" class="yard-item ${item.done ? "done" : ""} ${item.kind === "green" ? "unripe" : ""}" aria-label="${item.done ? "Finished" : item.kind} ${i + 1}" ${item.done ? "disabled" : ""}>${icon(a.id === "tomatoes" ? "tomato" : item.kind === "flower" ? "flower" : item.kind)}${a.id === "flowers" ? `<span>${item.done ? "Blooming!" : "Thirsty"}</span>` : item.kind === "green" ? "<span>Not ripe</span>" : item.kind === "ripe" ? "<span>Ripe</span>" : ""}</button>`).join("")}</div>${a.id === "tidy" ? `<div class="job-crates">${["leaf", "stick"].map((k) => `<button data-job-drop="${k}" onclick="Neighborhood.place('${k}')">${icon(k)}${k === "leaf" ? "Leaves" : "Sticks"}</button>`).join("")}</div>` : a.id === "tomatoes" || a.id === "weeds" ? `<div class="job-drop-basket" data-job-drop="basket">${gardenBasketArt()}<span>${a.id === "weeds" ? "Weed basket" : "Harvest basket"}</span></div>` : ""}`;
-    return `<section class="job-play"><header><h1>${j.name}</h1><p class="job-instructions">${j.instructions}</p><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button></div></header><div class="job-play-area">${body}</div><p class="job-feedback" role="status">${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
+      body = `<p>${a.id === "tomatoes" ? `Pick ${d.target} ripe tomatoes.` : a.id === "flowers" ? "Water every flowerpot." : a.id === "weeds" ? "Pull jagged red weeds; keep round green leaves." : "Put leaves and sticks in their matching piles."} ${a.score} / ${d.target}</p>${a.id === "flowers" ? `<button class="job-can ${ui.selected === "water" ? "selected" : ""}" data-job-drag="water" onclick="Neighborhood.pick('water')" aria-label="Pick up watering can">${gardenCanArt()}</button>` : ""}<div class="job-yard job-yard-${a.id}">${d.items.map((item, i) => `<button data-job-drag="chore" data-item="${i}" data-job-drop="yard-${i}" onclick="Neighborhood.chore(${i})" class="yard-item ${item.done ? "done" : ""} ${item.kind === "green" ? "unripe" : ""}" aria-label="${item.done ? "Finished" : item.kind} ${i + 1}" ${item.done ? "disabled" : ""}>${icon(a.id === "tomatoes" ? (item.kind === "green" ? "tomato-green" : "tomato-ripe") : item.kind === "flower" ? "flower" : item.kind)}${a.id === "flowers" ? `<span>${item.done ? "Blooming!" : "Thirsty"}</span>` : item.kind === "green" ? "<span>Not ripe</span>" : item.kind === "ripe" ? "<span>Ripe</span>" : ""}</button>`).join("")}</div>${a.id === "tidy" ? `<div class="job-crates">${["leaf", "stick"].map((k) => `<button data-job-drop="${k}" onclick="Neighborhood.place('${k}')">${icon(k)}${k === "leaf" ? "Leaves" : "Sticks"}</button>`).join("")}</div>` : a.id === "tomatoes" || a.id === "weeds" ? `<div class="job-drop-basket" data-job-drop="basket">${gardenBasketArt()}<span>${a.id === "weeds" ? "Weed basket" : "Harvest basket"}</span></div>` : ""}`;
+    return `<section class="job-play"><header><h1>${j.name}</h1><p class="job-instructions">${j.instructions}</p></header><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-actions job-main-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button></div><div class="job-play-area">${body}</div><p class="job-feedback" role="status">${ui.lastWord ? `<strong class="job-word-success">${ui.lastWord}</strong> ` : ""}${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
   }
   function read(text, who = "guide") {
     Narration.speak(text, who, true);
@@ -108,7 +111,11 @@ const Neighborhood = (() => {
       j = J.catalog.find((j) => j.id === a?.id);
     if (j)
       read(
-        j.instructions,
+        (a.id === "labels"
+          ? "My garden labels are mixed up! Can you help me? "
+          : a.id === "catch"
+            ? "Grab that basket! Catch these carrots for me, would ya? "
+            : "") + j.instructions,
         a.id === "labels" ? "magee" : a.id === "catch" ? "jones" : "guide",
       );
   }
@@ -120,9 +127,16 @@ const Neighborhood = (() => {
       ui.paused = false;
       ui.feedback = "";
       ui.selected = null;
+      ui.lastWord = "";
+      ui.lastScore = 0;
+      ui.falling = false;
+      ui.previewGrid = null;
+      ui.hits = [];
+      ui.dropUntil = 0;
       ui.wordStart = null;
       ui.last = 0;
       go("jobs");
+      document.querySelector("#app").scrollTop = 0;
       readInstructionIfEnabled();
     } catch (e) {
       ui.feedback = e.message;
@@ -140,20 +154,38 @@ const Neighborhood = (() => {
     const prior = a.score,
       word = a.id === "labels" ? a.data.words[a.data.round] : null;
     try {
+      const preview = e.type === "swap" ? a.data.grid.slice() : null;
+      if (preview)
+        [preview[e.from], preview[e.to]] = [preview[e.to], preview[e.from]];
+      ui.lastWord = "";
       const ok = J.action(state, e);
       ui.feedback = ok
         ? "Lovely helping!"
         : "Try another one. Nothing is lost.";
+      if (
+        a.id === "labels" &&
+        a.score === prior &&
+        a.data.slots.length === a.data.tiles.length
+      )
+        ui.feedback =
+          "Try changing a letter. Tap a filled slot, or use a hint.";
       if (a.id === "labels" && a.score > prior) {
-        Narration.speak(word, "magee", true);
+        Narration.speak(word, "magee");
+        ui.lastWord = word;
         ui.feedback = "You made " + word + "!";
       }
       if (a.score > prior) Narration.effect();
       ui.selected = null;
       if (e.type === "swap" && ok) {
         ui.falling = true;
+        ui.previewGrid = preview;
+        ui.hits = J.matches(preview);
         setTimeout(() => {
+          if (state.jobs.active !== a) return;
           ui.falling = false;
+          ui.previewGrid = null;
+          ui.hits = [];
+          ui.dropUntil = Date.now() + 220;
           if (view === "jobs") render();
         }, 260);
       }
@@ -279,6 +311,7 @@ const Neighborhood = (() => {
     render();
   }
   function stop() {
+    clear();
     checkpoint();
     ui.paused = true;
     ui.last = 0;
@@ -342,7 +375,16 @@ const Neighborhood = (() => {
         .querySelectorAll("[data-pack-item]")
         .forEach(
           (el, i) =>
-            (el.style.left = 3 + ((a.elapsed / 18000 + i / 3) % 1) * 73 + "%"),
+            (el.style.left =
+              3 +
+              (((matchMedia("(prefers-reduced-motion: reduce)").matches
+                ? 0
+                : a.elapsed) /
+                (a.mode === "little" ? 18000 : 10000) +
+                i / 3) %
+                1) *
+                73 +
+              "%"),
         );
     if (a.id === "catch") {
       const holder = document.querySelector(".job-carrots");
@@ -359,11 +401,22 @@ const Neighborhood = (() => {
             return `<span class="flying-carrot ${c.big ? "big" : ""}" style="left:${(c.start + (c.end - c.start) * t) * 100}%;top:${55 + 27 * t - 160 * t * (1 - t)}%;transform:rotate(${t * 320}deg)">${icon("carrot")}</span>`;
           })
           .join("");
+      document
+        .querySelector("[data-catch-count]")
+        ?.replaceChildren(document.createTextNode(d.caught.length));
+      if (a.score > ui.lastScore) Narration.effect();
+      ui.lastScore = a.score;
       const b = document.querySelector(".job-catching-basket");
       if (b) b.style.left = d.basket * 100 + "%";
     }
   }
   function sync() {
+    const hud = document.querySelector(".jobs-game .hud");
+    if (hud)
+      document.documentElement.style.setProperty(
+        "--jobs-hud-height",
+        hud.getBoundingClientRect().height + "px",
+      );
     if (ui.view !== view || ui.active !== state.jobs.active) {
       if (ui.view === "jobs" && view !== "jobs") {
         stop();
@@ -372,7 +425,8 @@ const Neighborhood = (() => {
       ui.active = state.jobs.active;
       if (view === "jobs") ui.last = performance.now();
     }
-    if (view === "jobs" && !ui.frame) ui.frame = requestAnimationFrame(loop);
+    if (view === "jobs" && !state.jobs.active?.ended && !ui.frame)
+      ui.frame = requestAnimationFrame(loop);
     else if (view !== "jobs" && ui.frame) {
       cancelAnimationFrame(ui.frame);
       ui.frame = 0;
@@ -405,7 +459,8 @@ const Neighborhood = (() => {
         });
       }
     }
-    if (view === "jobs") ui.frame = requestAnimationFrame(loop);
+    if (view === "jobs" && !state.jobs.active?.ended && !ui.frame)
+      ui.frame = requestAnimationFrame(loop);
   }
   function settings() {
     learningSettings();
@@ -510,7 +565,11 @@ const Neighborhood = (() => {
         act({ type: "letter", tile: d.item });
       else if (d.kind === "water" && target.startsWith("yard-"))
         act({ type: "chore", item: +target.slice(5) });
-      else if (d.kind === "chore") act({ type: "chore", item: d.item, target });
+      else if (
+        d.kind === "chore" &&
+        (target === "basket" || ["leaf", "stick"].includes(target))
+      )
+        act({ type: "chore", item: d.item, target });
       else if (d.kind === "swap" && target.startsWith("swap-"))
         act({ type: "swap", from: d.item, to: +target.slice(5) });
     }
@@ -534,6 +593,7 @@ const Neighborhood = (() => {
     if (document.hidden) {
       stop();
       clear();
+      if (view === "jobs") render();
     }
   });
   window.addEventListener("pagehide", stop);

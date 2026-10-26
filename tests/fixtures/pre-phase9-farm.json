@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "gardenWeeding": {
+    "day": 0,
+    "pulled": []
+  },
+  "weedingCredits": {},
+  "weedingLesson": {
+    "version": 1,
+    "completedCycle": 0,
+    "invitedCycle": 0,
+    "nextType": "math",
+    "session": null
+  },
+  "weedingHarvest": null,
+  "marketSupplyStock": {
+    "consumables": {
+      "boxes": 0,
+      "priceTags": 0
+    },
+    "reusable": {
+      "marketSigns": 0,
+      "produceBaskets": 0
+    }
+  },
+  "marketSupplyCart": {},
+  "cash": 877.65,
+  "day": 1,
+  "season": 1,
+  "goal": 1,
+  "mathPractice": {
+    "support": 0,
+    "streak": 2,
+    "mistakes": 0,
+    "retrying": false
+  },
+  "changePractice": {
+    "support": 0,
+    "streak": 0,
+    "mistakes": 0,
+    "retrying": false
+  },
+  "dreamPurchaseCount": 1,
+  "dreamPurchases": {
+    "ball": {
+      "owned": true,
+      "season": 1,
+      "day": 1,
+      "price": 100
+    }
+  },
+  "clubhousePositions": {},
+  "clubhouseLayoutVersion": 2,
+  "seeds": {
+    "carrot": 7
+  },
+  "plots": [
+    {
+      "id": "carrot",
+      "age": 1,
+      "left": 0,
+      "quality": 88,
+      "watered": true,
+      "weedingBonus": true
+    },
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "inventory": {
+    "carrot": 20
+  },
+  "plan": {},
+  "display": {
+    "carrot": 20,
+    "corn": 0,
+    "beans": 0,
+    "strawberry": 0,
+    "cucumber": 0,
+    "potato": 0,
+    "onion": 0,
+    "tomato": 0,
+    "lettuce": 0,
+    "radish": 0
+  },
+  "cart": {},
+  "supcart": {},
+  "owned": {
+    "table": 1,
+    "canopy": 0,
+    "bags": 0,
+    "scale": 1
+  },
+  "hour": 9.033333333333333,
+  "marketElapsedMs": 12345,
+  "marketStartedAt": 1800000000000,
+  "marketClosedAt": null,
+  "visitors": 1,
+  "sales": 0,
+  "customer": {
+    "name": "Maya",
+    "historyRecorded": true,
+    "returning": false,
+    "rememberVisit": false,
+    "rememberedCrop": null,
+    "dialogueVariant": 0,
+    "want": {
+      "carrot": 1
+    },
+    "prices": {
+      "carrot": 2,
+      "corn": 3,
+      "beans": 4,
+      "strawberry": 6,
+      "cucumber": 3,
+      "potato": 3,
+      "onion": 2,
+      "tomato": 3,
+      "lettuce": 3,
+      "radish": 2
+    },
+    "lineMath": true,
+    "lineAnswers": {
+      "carrot": {
+        "quantity": 1,
+        "priceCents": 200,
+        "answerCents": 200
+      }
+    },
+    "mathLevel": 0,
+    "personality": "thoughtful",
+    "satisfaction": 60,
+    "decision": 30,
+    "greeting": "good",
+    "response": "good",
+    "alternativeOffered": false
+  },
+  "step": "pay",
+  "basket": {
+    "carrot": 1
+  },
+  "change": 3,
+  "won": false,
+  "marketOpen": true,
+  "marketPlayed": true,
+  "weather": "sunny",
+  "notice": "",
+  "standMode": "blanket",
+  "tableRented": false,
+  "rentals": {},
+  "equipmentDebt": [],
+  "marketSettled": false,
+  "marketChargesPaid": 0,
+  "rentalUpfrontPaid": 0,
+  "bagCount": 12,
+  "rentalBagsRemaining": 0,
+  "customerHistory": {
+    "sequence": 1,
+    "recent": [
+      "Maya"
+    ],
+    "people": {
+      "Maya": {
+        "visits": 1,
+        "purchases": 0,
+        "lastSeen": 1,
+        "lastDay": 1,
+        "dayVisits": 1,
+        "lastCrop": null
+      }
+    }
+  },
+  "customersServed": 0,
+  "marketExpenses": [],
+  "legacyAccounting": false,
+  "lastMarketReport": null,
+  "tendered": 5
+}
