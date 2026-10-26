@@ -22,7 +22,7 @@ function gardenPlotMarkup(p, i) {
   const c = p ? crop(p.id) : null,
     planned = state.plan[i] && crop(state.plan[i]),
     ready = p && p.age >= c.days,
-    regrowing = p && c.repeat > 0 && p.left < c.repeat && p.age === 0,
+    regrowing = p && c.repeat > 0 && p.left < c.repeat && p.age < c.days,
     stage = ready
       ? "ready"
       : regrowing

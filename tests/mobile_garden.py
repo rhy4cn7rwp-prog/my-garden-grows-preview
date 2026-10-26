@@ -86,7 +86,9 @@ try:
    page.locator('[data-garden-plot="2"]').tap();tap('🧺 Harvest')
    assert page.evaluate('state.inventory.beans')==page.evaluate("crop('beans').yield")
    assert page.evaluate('state.plots[2].age')==0 and page.evaluate('state.plots[2].watered') is False
+   assert page.locator('[data-garden-plot="2"]').get_attribute('data-stage')=='regrowing'
    left=page.evaluate('state.plots[2].left');tap('End Day');tap('Water All and End Day');assert page.evaluate('state.plots[2].age')==1
+   assert page.locator('[data-garden-plot="2"]').get_attribute('data-stage')=='regrowing'
    tap('Harvest All Ready Crops')
    assert page.evaluate('state.plots[2].left')==left
    stock=page.evaluate('JSON.stringify(state.inventory)');tap('Harvest All Ready Crops');assert page.evaluate('JSON.stringify(state.inventory)')==stock
