@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="212" viewBox="0 0 240 212">
+<defs>
+<linearGradient id="leg" x1="0" x2="1"><stop stop-color="#75441f"/><stop offset=".45" stop-color="#ce9452"/><stop offset="1" stop-color="#875020"/></linearGradient>
+<radialGradient id="top" cx=".4" cy=".3" r=".8"><stop stop-color="#f1cf87"/><stop offset=".6" stop-color="#d9a462"/><stop offset="1" stop-color="#a8733c"/></radialGradient>
+<linearGradient id="rim" x2="0" y2="1"><stop stop-color="#d2a16a"/><stop offset="1" stop-color="#86502b"/></linearGradient>
+</defs>
+<ellipse cx="122" cy="204" rx="96" ry="7" fill="#603a23" opacity=".22"/>
+<path d="M105 62h25l-4 113h-18Z" fill="url(#leg)" stroke="#70441f" stroke-width="2"/>
+<path d="M39 63q4 50-6 103l-7 32q2 8 17 6l9-39L64 64Z" fill="url(#leg)" stroke="#744622" stroke-width="3"/>
+<path d="M176 65h24l10 102 8 32q-2 8-17 5l-7-39Z" fill="url(#leg)" stroke="#744622" stroke-width="3"/>
+<path d="m41 153 70-10 88 10-2 10-85-11-72 12Z" fill="#ba8548" stroke="#83532b" stroke-width="2"/>
+<path d="M10 45h220v15c-5 53-212 53-220 0Z" fill="url(#rim)" stroke="#85552c" stroke-width="3"/>
+<ellipse cx="120" cy="45" rx="111" ry="38" fill="url(#top)" stroke="#88552e" stroke-width="3"/>
+<ellipse cx="120" cy="43" rx="103" ry="31" fill="none" stroke="#f8dca2" stroke-width="2" opacity=".7"/>
+<g fill="none" stroke="#986431" opacity=".28" stroke-width="1.5"><path d="M27 29q55 15 110 0t72 9M22 43q49 12 98-1t98 4M36 58q43 9 87-1t75 1M67 18q23 5 50 0t49 2"/><ellipse cx="158" cy="43" rx="17" ry="4"/><ellipse cx="158" cy="43" rx="8" ry="2"/></g>
+<!-- A small reading stand props the cover toward the player. -->
+<path d="m108 40 26-41 23 50-8 4-16-32-16 26Z" fill="#98652f" stroke="#74491f" stroke-width="2"/>
+<path d="m70 49 98 1 6 8-105-1Z" fill="#c38b48" stroke="#7b4e25" stroke-width="2"/>
+</svg>

@@ -272,6 +272,7 @@ function compositeClubhouseRoom() {
   const owned = Game.dreams.filter((d) => Game.ownsDream(state, d.id));
   const key =
     String(!!r.bookImage?.naturalWidth) +
+    String(!!r.bookTableImage?.naturalWidth) +
     JSON.stringify(
       owned.map((d) => [
         d.id,
@@ -613,6 +614,7 @@ function destroyInteractiveClubhouse() {
   r.image = null;
   r.rewardImage = null;
   r.bookImage = null;
+  r.bookTableImage = null;
   r.scene = null;
   r.sceneKey = null;
   r.abort = null;
@@ -637,8 +639,13 @@ function syncInteractiveClubhouse() {
     r.occCtx = r.occCanvas.getContext("2d");
     r.ctx = r.canvas.getContext("2d", { alpha: false });
     r.image = world.querySelector("img");
+    r.bookTableImage = new Image();
+    r.bookTableImage.src = CLUBHOUSE_BOOK.table.art;
+    r.bookTableImage.addEventListener("load", requestClubhousePaint, {
+      signal: r.abort.signal,
+    });
     r.bookImage = new Image();
-    r.bookImage.src = "assets/guidebook/book.svg";
+    r.bookImage.src = CLUBHOUSE_BOOK.art;
     r.bookImage.addEventListener("load", requestClubhousePaint, {
       signal: r.abort.signal,
     });

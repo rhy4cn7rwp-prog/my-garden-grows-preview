@@ -15,7 +15,7 @@ function navigationIcon(name) {
 function header() {
   return `<nav class="hud" aria-label="Farm navigation">
     <button class="nav" onclick="${view === "town" ? "settings()" : "go('town')"}" aria-label="${view === "town" ? "Settings" : "Back to village"}">${navigationIcon(view === "town" ? "settings" : "back")}</button>
-    <div class="farm-status"><output class="balance" aria-label="Money balance">${navigationIcon("wallet")}${money(state.cash)}</output><span class="calendar" aria-label="Season and day">Season ${state.season} · Day ${state.day}/20</span></div>
+    <div class="farm-status"><output class="balance" aria-label="Money balance">${navigationIcon("wallet")}${money(state.cash)}</output><span class="calendar" aria-label="Season and day">Season ${state.season} · Day ${Game.farmDay(state)}</span></div>
     <button class="nav clubhouse-nav" onclick="go('clubhouse')" aria-label="Clubhouse" ${view === "clubhouse" ? 'aria-current="page"' : ""}>${navigationIcon("clubhouse")}</button>
   </nav>`;
 }
@@ -67,6 +67,7 @@ function syncGameViewport() {
     (viewport ? viewport.height : innerHeight) - top - bottom < 470
       ? "true"
       : "false";
+  if (typeof syncInteractiveGarden === "function") syncInteractiveGarden();
   if (typeof syncMarketSpeech === "function") syncMarketSpeech();
   if (typeof syncMarketSupplySign === "function") syncMarketSupplySign();
   if (typeof syncSeedShopSign === "function") syncSeedShopSign();

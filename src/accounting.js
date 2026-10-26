@@ -25,7 +25,7 @@ function accountingMarkup(report) {
     .filter(Boolean)
     .join(" · ");
   return `<section class="accounting-report" aria-label="Market-day accounting report">
-    <p class="report-day">Season ${report.season} · Day ${report.day}</p>
+    <p class="report-day">Season ${report.season} · Day ${Game.farmDay(report)}</p>
     <table><caption>Market cash in and out</caption><tbody>
       <tr class="sales-row"><th scope="row">Total produce sales</th><td>${money(report.sales)}</td></tr>
       <tr><th scope="row">Customers served</th><td>${report.customers}${report.legacy ? " since update" : ""}</td></tr>

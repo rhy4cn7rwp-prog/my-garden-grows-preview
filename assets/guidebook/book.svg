@@ -8,7 +8,8 @@
 <path d="m20 7 9 89" stroke="#c5aa62" stroke-width="3"/>
 <path d="m29 17 52-3 7 63-52 5Z" fill="none" stroke="#e4c77b" stroke-width="1.5"/>
 <path d="M56 65q-19-5-16-18 17-1 17 16 0-17 16-20 5 17-15 22v10" fill="#a9c57b" stroke="#d9dc9b" stroke-width="1.5"/>
-<text x="59" y="33" text-anchor="middle" fill="#fff0c1" font-family="Georgia,serif" font-weight="bold" font-size="13" transform="rotate(-3 59 33)">How to</text>
-<text x="60" y="47" text-anchor="middle" fill="#fff0c1" font-family="Georgia,serif" font-weight="bold" font-size="15" transform="rotate(-3 60 47)">Play</text>
+<rect x="30" y="18" width="59" height="36" rx="4" fill="#fff0bc" stroke="#d3b16c" stroke-width="1.5" transform="rotate(-3 59 36)"/>
+<text x="59" y="33" text-anchor="middle" fill="#151b13" font-family="Georgia,serif" font-weight="bold" font-size="16" transform="rotate(-3 59 33)">How to</text>
+<text x="60" y="47" text-anchor="middle" fill="#151b13" font-family="Georgia,serif" font-weight="bold" font-size="19" transform="rotate(-3 60 47)">Play</text>
 <path d="m90 81 2 23 6-5 5 4-3-23" fill="#d7904e" stroke="#88532e"/>
 </svg>
