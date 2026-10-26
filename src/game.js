@@ -10,6 +10,7 @@
       ? require("./market-supplies-rules.js")
       : root.MarketSupplyRules;
   const marketCustomers = typeof module !== "undefined" ? require("./market-customers.js") : root.MarketCustomers;
+  const gardenLearning = typeof module !== "undefined" ? require("./garden-learning.js") : root.GardenLearning;
   const crops = [
     {
       id: "carrot",
@@ -150,6 +151,8 @@
       version: 1,
       gardenWeeding: { day: 0, pulled: [] },
       weedingCredits: {},
+      weedingLesson: gardenLearning?.empty() || { version: 1, completedCycle: 0, nextType: "math", session: null },
+      weedingHarvest: null,
       marketSupplyStock: supplyShop
         ? supplyShop.emptyStock()
         : {
@@ -299,6 +302,12 @@
         pulled: Array.isArray(weeds?.pulled) ? [...new Set(weeds.pulled.filter(i => Number.isInteger(i) && i >= 0 && i < 6))] : [],
       };
       for (const p of clean.plots) if (p && p.weedingBonus !== true) delete p.weedingBonus;
+      clean.weedingLesson = gardenLearning ? gardenLearning.recover({ ...clean, weedingLesson: s.weedingLesson }) : clean.weedingLesson;
+      const event = s.weedingHarvest;
+      clean.weedingHarvest = event && event.day === farmDay(clean) && Array.isArray(event.remaining)
+        ? { day: event.day, remaining: [...new Set(event.remaining.filter(i => Number.isInteger(i) && i >= 0 && i < 25 && clean.plots[i]?.weedingBonus === true && clean.plots[i].age >= get(clean.plots[i].id).days))] }
+        : null;
+      if (clean.weedingHarvest && !clean.weedingHarvest.remaining.length) finishBonusHarvest(clean);
       // Optional reward records migrate independently: an unknown/malformed
       // record must never reset an otherwise valid farm. A goal or `won` flag
       // is not evidence of a purchase. Never invent historical dates.
@@ -788,24 +797,62 @@
     if (!p) return 0;
     const c = get(p.id);
     const base = p.quality < 60 ? Math.max(1, c.yield - 1) : c.yield;
-    return base + (p.weedingBonus === true ? Math.floor((base + (s.weedingCredits?.[p.id] || 0)) / 5) : 0);
+    return (
+      base +
+      (p.weedingBonus === true
+        ? Math.floor((base + (s.weedingCredits?.[p.id] || 0)) / 5)
+        : 0)
+    );
+  }
+  function weedingStatus(s) {
+    return gardenLearning
+      ? gardenLearning.status(s)
+      : {
+          available: false,
+          bonus: s.plots.some((p) => p?.weedingBonus),
+          days: 5 - (farmDay(s) % 5),
+          cycle: Math.floor(farmDay(s) / 5),
+        };
   }
   function weedingAvailable(s) {
-    return s.plots.some(Boolean) && !s.plots.some(p => p?.weedingBonus === true) &&
-      (s.gardenWeeding?.day !== farmDay(s) || s.gardenWeeding.pulled.length < 6);
+    return weedingStatus(s).available;
+  }
+  function startWeeding(s, seed) {
+    requireRule(
+      gardenLearning,
+      "Please reload to load the Garden learning activity.",
+    );
+    return gardenLearning.start(s, seed);
   }
   function pullWeed(s, index) {
-    requireRule(weedingAvailable(s), "Your garden already has its weeding bonus. Enjoy your next harvest!");
-    requireRule(Number.isInteger(index) && index >= 0 && index < 6, "Choose a weed to pull.");
-    if (!s.gardenWeeding || s.gardenWeeding.day !== farmDay(s))
-      s.gardenWeeding = { day: farmDay(s), pulled: [] };
-    if (s.gardenWeeding.pulled.includes(index)) return false;
-    s.gardenWeeding.pulled.push(index);
-    if (s.gardenWeeding.pulled.length === 6)
+    requireRule(
+      gardenLearning,
+      "Please reload to load the Garden learning activity.",
+    );
+    const result = gardenLearning.select(s, index);
+    if (result.kind === "complete") {
       for (const p of s.plots) if (p) p.weedingBonus = true;
-    return true;
+    }
+    return result;
+  }
+  // One harvest activity includes the eligible crops ripe when gathering begins.
+  // Individual picks may span visits/refreshes. End Day or Finish closes the basket.
+  function beginBonusHarvest(s, i) {
+    if (s.weedingHarvest || !s.plots[i]?.weedingBonus) return;
+    const remaining = s.plots.flatMap((p, index) =>
+      p?.weedingBonus && p.age >= get(p.id).days ? [index] : [],
+    );
+    s.weedingHarvest = { day: farmDay(s), remaining };
+    s.plots.forEach((p, index) => {
+      if (p && !remaining.includes(index)) delete p.weedingBonus;
+    });
+  }
+  function finishBonusHarvest(s) {
+    for (const p of s.plots) if (p) delete p.weedingBonus;
+    s.weedingHarvest = null;
   }
   function endDay(s) {
+    if (s.weedingHarvest) finishBonusHarvest(s);
     settleMarket(s);
     if (s.marketPlayed || s.marketExpenses.length)
       s.lastMarketReport = accountingReport(s);
@@ -851,6 +898,7 @@
   function harvest(s, i) {
     const p = s.plots[i];
     requireRule(p && p.age >= get(p.id).days, "This crop is still growing.");
+    beginBonusHarvest(s, i);
     const c = get(p.id),
       n = harvestAmount(s, i);
     s.inventory[c.id] = (s.inventory[c.id] || 0) + n;
@@ -860,6 +908,10 @@
       s.weedingCredits[c.id] = (base + (s.weedingCredits[c.id] || 0)) % 5;
     }
     delete p.weedingBonus; // One bonus per plant harvest, including repeat producers.
+    if (s.weedingHarvest) {
+      s.weedingHarvest.remaining = s.weedingHarvest.remaining.filter(index => index !== i);
+      if (!s.weedingHarvest.remaining.length) finishBonusHarvest(s);
+    }
     const again = p.left > 0;
     if (again) {
       p.left--;
@@ -1751,6 +1803,9 @@
     plantsNeedingWater,
     harvestAmount,
     weedingAvailable,
+    weedingStatus,
+    startWeeding,
+    finishBonusHarvest,
     pullWeed,
     farmDay,
     endDay,

@@ -404,13 +404,325 @@ body[data-view="garden"] #app {
   }
 }
 
-.garden-weeding { text-align:center; padding: 4px 12px; }
-.garden-weeding .btn { min-height:44px; }
-.garden-weed-patch { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;background:#9b7047;border-radius:18px; }
-.garden-weed { position:relative;height:80px;min-width:44px;border:2px solid #805431;border-radius:12px;background:#b38a58;cursor:pointer;color:#3a281a;font-weight:bold; }
-.garden-weed svg { height:70px;width:70px;position:static; }
-.garden-weed:active svg { transform:translateY(-12px) rotate(-8deg);transition:transform .15s; }
-.garden-weed:disabled { opacity:.7;cursor:default;background:#c6a575; }
-@media(prefers-reduced-motion:reduce){.garden-weed:active svg{transform:none;transition:none}}
+.garden-weeding {
+  text-align: center;
+  padding: 4px 12px;
+}
+.garden-weeding .btn {
+  min-height: 44px;
+}
+.garden-weed-patch {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px;
+  background: #9b7047;
+  border-radius: 18px;
+}
+.garden-weed {
+  position: relative;
+  height: 80px;
+  min-width: 44px;
+  border: 2px solid #805431;
+  border-radius: 12px;
+  background: #b38a58;
+  cursor: pointer;
+  color: #3a281a;
+  font-weight: bold;
+}
+.garden-weed svg {
+  height: 70px;
+  width: 70px;
+  position: static;
+}
+.garden-weed:active svg {
+  transform: translateY(-12px) rotate(-8deg);
+  transition: transform 0.15s;
+}
+.garden-weed:disabled {
+  opacity: 0.7;
+  cursor: default;
+  background: #c6a575;
+}
+@media (prefers-reduced-motion: reduce) {
+  .garden-weed:active svg {
+    transform: none;
+    transition: none;
+  }
+}
 
-.garden-heading > .btn {min-height:44px;font-size:13px;padding:5px 8px;}
+.garden-heading > .btn {
+  min-height: 44px;
+  font-size: 13px;
+  padding: 5px 8px;
+}
+
+/* Learning dialogs remain inside Safari's changing visual viewport. Scrolling
+   is reserved for reading; answer cards and Close remain comfortably tappable. */
+.garden-weeding-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 150px;
+}
+.garden-weeding-entry .btn {
+  min-height: 44px;
+  font-size: 13px;
+  padding: 5px 8px;
+}
+.garden-weeding-entry small {
+  font-size: 12px;
+  line-height: 15px;
+  color: #655344;
+}
+.garden-weeding-entry .btn:disabled {
+  background: #bdb9ad;
+  color: #433d34;
+  opacity: 1;
+  box-shadow: none;
+  border-color: #9a968c;
+  cursor: default;
+}
+.garden-bonus-status {
+  flex-basis: 100%;
+  font-size: 13px;
+  padding: 6px 0;
+  line-height: 1.3;
+}
+.garden-bonus-status .btn {
+  min-height: 44px;
+  font-size: 13px;
+  margin: 3px;
+}
+.modal.garden-weeding,
+.modal.garden-weeding-confirm,
+.modal.garden-weeding-complete,
+.modal.garden-crop,
+.modal.garden-bonus-finish {
+  position: fixed;
+  top: var(--visible-top, 0px);
+  left: var(--visible-left, 0px);
+  width: var(--visible-width, 100%);
+  height: var(--visible-height, 100svh);
+  padding: max(6px, var(--viewport-safe-top))
+    max(6px, var(--village-safe-right)) max(6px, var(--viewport-safe-bottom))
+    max(6px, var(--village-safe-left));
+  box-sizing: border-box;
+}
+.modal[class*="garden-"] .dialog {
+  max-height: 100%;
+  max-width: 480px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+.modal[class*="garden-"] .dialog h2 {
+  margin: 0 0 6px;
+  font-size: 23px;
+}
+.modal[class*="garden-"] .dialog p {
+  margin: 6px 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.modal[class*="garden-"] .dialog > div:last-child:not(.garden-weed-basket) {
+  position: sticky;
+  bottom: -1px;
+  background: #fff8e8;
+  padding: 5px 0 0;
+  z-index: 3;
+}
+.modal[class*="garden-"] .btn {
+  min-height: 44px;
+}
+.garden-weeding .garden-weed-patch {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 9px;
+}
+.garden-weeding .garden-weed {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: auto;
+  min-height: 128px;
+  padding: 7px 4px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.garden-weeding .garden-answer-label {
+  background: #fff4d5;
+  color: #3f2c1d;
+  padding: 5px 2px;
+  border-radius: 8px;
+  width: 100%;
+  font-size: clamp(14px, 4vw, 18px);
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.garden-weeding .garden-weed svg {
+  position: static;
+  height: 54px;
+  width: 58px;
+  flex-shrink: 0;
+}
+.garden-answer-correction {
+  font-size: 14px;
+  font-weight: 800;
+  color: #9b1f24;
+  background: #fff7e2;
+  border-radius: 6px;
+  padding: 3px;
+  width: 100%;
+  line-height: 1.2;
+}
+.garden-weeding .weed-removed {
+  opacity: 1;
+  background: #c9a779;
+}
+.garden-weeding .weed-removed .garden-answer-label {
+  opacity: 0.65;
+}
+.garden-weed-feedback {
+  min-height: 38px;
+}
+.garden-weeding .garden-round-label {
+  font-weight: 800;
+  color: #496637;
+}
+.garden-weed-basket {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  border: 2px dashed #9c794d;
+  border-radius: 16px;
+  background: #f3dfbc;
+}
+.garden-weed-basket svg {
+  width: 62px;
+  height: 48px;
+}
+.garden-weed-ghost {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  pointer-events: none;
+  max-width: 180px;
+  padding: 12px;
+  border-radius: 15px;
+  background: #fff1c9;
+  border: 2px solid #8a6a3d;
+  color: #3f2c1d;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 8px 18px #49311e55;
+}
+.garden-round-enter {
+  animation: garden-new-round 0.4s ease-out;
+}
+@keyframes garden-new-round {
+  from {
+    opacity: 0.35;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.garden-crop-closeup {
+  margin: 8px auto;
+  text-align: center;
+}
+.garden-crop-closeup img {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  max-height: min(29svh, 230px);
+  object-fit: contain;
+  margin: auto;
+}
+.garden-crop-closeup figcaption {
+  font-size: 15px;
+  font-weight: bold;
+  color: #4a6935;
+}
+.garden-growth-guide {
+  margin: 8px 0;
+  font-size: 14px;
+}
+.garden-growth-guide summary {
+  min-height: 44px;
+  padding: 10px;
+  cursor: pointer;
+  color: #3b612d;
+  font-weight: bold;
+}
+.garden-growth-guide > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.garden-growth-guide figure {
+  margin: 0;
+  text-align: center;
+}
+.garden-growth-guide img {
+  width: 100%;
+}
+@media (max-height: 560px) {
+  .garden-weeding .dialog {
+    padding: 10px;
+  }
+  .garden-weeding .garden-weed {
+    min-height: 103px;
+  }
+  .garden-weeding .garden-weed svg {
+    height: 30px;
+    width: 39px;
+  }
+  .garden-weeding .garden-weed-feedback {
+    min-height: 20px;
+  }
+  .garden-weeding .garden-weed-basket {
+    height: 44px;
+  }
+  .garden-weeding .garden-weed-basket svg {
+    height: 40px;
+  }
+  .garden-weeding .garden-weed-instruction {
+    font-size: 14px;
+  }
+  .garden-crop-closeup img {
+    max-height: 150px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .garden-round-enter {
+    animation: none;
+  }
+}
+.garden-weeding .garden-weed-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  bottom: -1px;
+  background: #fff8e8;
+  padding: 5px 0;
+  z-index: 4;
+}
+.garden-weeding .garden-weed-footer .garden-weed-basket {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+.garden-weeding .garden-weed-footer .btn {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 8px;
+}

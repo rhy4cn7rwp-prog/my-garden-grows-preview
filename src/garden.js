@@ -42,7 +42,7 @@ function gardenPlotMarkup(p, i) {
 function gardenScene() {
   const ready = state.plots.filter((p) => p && p.age >= crop(p.id).days).length,
     stored = CROPS.filter((c) => state.inventory[c.id] > 0).length;
-  return `<section class="garden-heading"><h1>My Garden</h1><button class="btn" onclick="openGardenWeeding()">Pull weeds</button><output role="status" aria-live="polite">${state.notice || "Plan, plant, water and harvest at your own pace."}</output></section><section class="garden-tools" aria-label="Garden tools"><button class="btn ${gardenUI.waterMode ? "alt" : ""}" onclick="gardenInspectMode()" aria-pressed="${!gardenUI.waterMode}">Plant / Inspect</button><button class="garden-can ${gardenUI.waterMode ? "is-selected" : ""}" data-garden-tool="water" onclick="gardenToggleWater()" aria-label="Watering can" aria-pressed="${gardenUI.waterMode}">${gardenCanArt()}<span>${gardenUI.waterMode ? "Tap a plant" : "Drag or tap"}</span></button><button class="garden-basket" data-garden-basket onclick="inventory()" aria-label="Harvest basket">${gardenBasketArt()}<span>Harvest basket<small>${ready ? `${ready} ready to pick` : `${stored} crop ${stored === 1 ? "variety" : "varieties"} stored`}</small></span></button></section><section class="garden-world" aria-label="Your 5 by 5 garden"><svg class="garden-scenery" viewBox="0 128 512 294" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="garden-ground" width="30" height="24" patternUnits="userSpaceOnUse"><rect width="30" height="24" fill="#ab7c49"/><circle cx="4" cy="6" r="1" fill="#d5af77"/><ellipse cx="22" cy="18" rx="2" ry="1" fill="#805632"/></pattern></defs><image href="assets/scene-4.webp" width="512" height="512"/><rect x="68" y="173" width="375" height="238" rx="14" fill="url(#garden-ground)"/></svg><div class="garden-plots" role="group" aria-label="25 garden plots">${state.plots.map(gardenPlotMarkup).join("")}</div></section><section class="garden-controls" aria-label="Garden actions"><button class="btn" onclick="plantPlanned()" ${Object.keys(state.plan).length ? "" : "disabled"}>Plant Plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="cancelPlanting()" ${Object.keys(state.plan).length ? "" : "disabled"}>Cancel Plan</button><button class="btn" onclick="endDay()">End Day</button><button class="btn" onclick="water()">Water All</button><button class="btn garden-harvest-all" onclick="harvestReady()">Harvest All Ready Crops</button><p>${gardenUI.waterMode ? "Tap a planted plot to water it." : "Tap plots to plant or inspect. Drag ripe crops to the basket."}</p></section>`;
+  return `<section class="garden-heading"><h1>My Garden</h1>${gardenWeedingButton()}<output role="status" aria-live="polite">${state.notice || "Plan, plant, water and harvest at your own pace."}</output>${gardenBonusStatus()}</section><section class="garden-tools" aria-label="Garden tools"><button class="btn ${gardenUI.waterMode ? "alt" : ""}" onclick="gardenInspectMode()" aria-pressed="${!gardenUI.waterMode}">Plant / Inspect</button><button class="garden-can ${gardenUI.waterMode ? "is-selected" : ""}" data-garden-tool="water" onclick="gardenToggleWater()" aria-label="Watering can" aria-pressed="${gardenUI.waterMode}">${gardenCanArt()}<span>${gardenUI.waterMode ? "Tap a plant" : "Drag or tap"}</span></button><button class="garden-basket" data-garden-basket onclick="inventory()" aria-label="Harvest basket">${gardenBasketArt()}<span>Harvest basket<small>${ready ? `${ready} ready to pick` : `${stored} crop ${stored === 1 ? "variety" : "varieties"} stored`}</small></span></button></section><section class="garden-world" aria-label="Your 5 by 5 garden"><svg class="garden-scenery" viewBox="0 128 512 294" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="garden-ground" width="30" height="24" patternUnits="userSpaceOnUse"><rect width="30" height="24" fill="#ab7c49"/><circle cx="4" cy="6" r="1" fill="#d5af77"/><ellipse cx="22" cy="18" rx="2" ry="1" fill="#805632"/></pattern></defs><image href="assets/scene-4.webp" width="512" height="512"/><rect x="68" y="173" width="375" height="238" rx="14" fill="url(#garden-ground)"/></svg><div class="garden-plots" role="group" aria-label="25 garden plots">${state.plots.map(gardenPlotMarkup).join("")}</div></section><section class="garden-controls" aria-label="Garden actions"><button class="btn" onclick="plantPlanned()" ${Object.keys(state.plan).length ? "" : "disabled"}>Plant Plan (${Object.keys(state.plan).length})</button><button class="btn alt" onclick="cancelPlanting()" ${Object.keys(state.plan).length ? "" : "disabled"}>Cancel Plan</button><button class="btn" onclick="endDay()">End Day</button><button class="btn" onclick="water()">Water All</button><button class="btn garden-harvest-all" onclick="harvestReady()">Harvest All Ready Crops</button><p>${gardenUI.waterMode ? "Tap a planted plot to water it." : "Tap plots to plant or inspect. Drag ripe crops to the basket."}</p></section>`;
 }
 function gardenInspectMode() {
   gardenUI.waterMode = false;
@@ -256,18 +256,154 @@ function syncInteractiveGarden() {
   );
 }
 
-function openGardenWeeding() {
-  const active = Game.weedingAvailable(state),
-    pulled = state.gardenWeeding?.day === Game.farmDay(state) ? state.gardenWeeding.pulled : [];
-  show(`<h2>Garden weeding</h2><p>Optional: pull all six weeds to help your whole planted garden! Each current plant gets about 20% extra on its next harvest, in whole produce units. Small bonus amounts build up until they make an extra item of that crop. Skipping weeds never reduces your normal harvest.</p>${active ? `<div class="garden-weed-patch" aria-label="Pull six weeds">${Array.from({length:6},(_,i)=>`<button class="garden-weed" aria-label="Pull weed ${i+1}" onclick="pullGardenWeed(${i})" ${pulled.includes(i)?'disabled':''}>${pulled.includes(i)?'<span>Cleared!</span>':gardenLeafArt('weed'+i,'growing')}</button>`).join('')}</div><p>${pulled.length} of 6 pulled. Tap a weed to pull it!</p>` : `<p>${state.plots.some(p=>p?.weedingBonus) ? 'Your planted crops have their next-harvest bonus! It cannot stack.' : !state.plots.some(Boolean) ? 'Plant some crops first, then come back to pull weeds.' : 'All done today! After using your bonuses, you can weed again on another farming day.'}</p>`}`);
+function gardenWeedingButton() {
+  const w = Game.weedingStatus(state);
+  return `<span class="garden-weeding-entry"><button class="btn" onclick="openGardenWeeding()" ${w.available ? "" : "disabled"}>Pull weeds</button>${!w.available ? `<small>${w.bonus ? "Harvest bonus ready" : !state.plots.some(Boolean) && w.cycle > 0 && !w.complete ? "Plant crops to weed" : `In ${w.days} game ${w.days === 1 ? "day" : "days"}`}</small>` : ""}</span>`;
 }
-function pullGardenWeed(i) {
+function gardenBonusStatus() {
+  const a = state.weedingHarvest,
+    count = a?.remaining.length;
+  if (a)
+    return `<div class="garden-bonus-status" role="status">Bonus harvest: ${count} ripe ${count === 1 ? "plant" : "plants"} still to pick. Pick them individually or use Harvest All before End Day. <button class="btn alt" onclick="confirmFinishBonusHarvest()">Finish bonus harvest</button></div>`;
+  return Game.weedingStatus(state).bonus
+    ? '<div class="garden-bonus-status">20% care bonus saved! Your next harvest includes eligible crops ripe when you begin picking.</div>'
+    : "";
+}
+function confirmFinishBonusHarvest() {
+  show(
+    `<h2>Finish gathering?</h2><p>Your remaining ripe plants will keep their normal produce, but this harvest activity’s unused bonuses will end.</p><button class="btn" onclick="finishGardenBonusHarvest()">Finish gathering</button><button class="btn alt" onclick="closeDialog()">Keep picking</button>`,
+    "garden-bonus-finish",
+  );
+}
+function finishGardenBonusHarvest() {
+  Game.finishBonusHarvest(state);
+  state.notice =
+    "Harvest activity finished. Your normal crops and produce are unchanged.";
+  closeDialog();
+}
+function openGardenWeeding() {
+  if (!Game.weedingAvailable(state)) return;
+  show(
+    `<h2>Time to Weed!</h2><p>Your garden needs a little extra care!</p><p>Find the incorrect answers hiding among the weeds to help your garden grow.</p><p>Complete the challenge to earn 20% more produce on your next harvest!</p><p>Weeding is optional. Your crops will grow normally if you skip it.</p><button class="btn" onclick="startGardenWeeding()">Let's Weed!</button><button class="btn alt" onclick="closeDialog()">Not Now</button>`,
+    "garden-weeding-confirm",
+  );
+}
+function startGardenWeeding() {
   act(() => {
-    Game.pullWeed(state, i);
-    if (state.gardenWeeding.pulled.length === 6) {
-      state.notice = 'Well done! Your planted garden has a one-use next-harvest bonus.';
-      render();
-    }
-    openGardenWeeding();
+    Game.startWeeding(state);
+    renderGardenWeeding();
   });
 }
+function renderGardenWeeding(message = "", transition = false) {
+  const a = state.weedingLesson.session;
+  if (!a || !Game.weedingAvailable(state)) return closeDialog();
+  const items = GardenLearning.questions(a);
+  show(
+    `<h2>${a.type === "math" ? "Math" : "Spelling"} Weeding</h2><p class="garden-round-label">Round ${a.round + 1} of ${a.roundCount}</p><p class="garden-weed-instruction">Pull the ${a.type === "math" ? "incorrect equations" : "misspelled words"}. Leave the correct ones growing!</p><div class="garden-weed-patch ${transition ? "garden-round-enter" : ""}" role="group" aria-label="Four planted answers">${items.map((q, i) => `<button class="garden-weed ${a.removed.includes(i) ? "weed-removed" : ""}" data-weed-answer="${i}" aria-label="${a.removed.includes(i) ? "Cleared answer" : "Answer"} ${i + 1}: ${q.original}" onclick="pullGardenWeed(${i})" ${a.removed.includes(i) ? "disabled" : ""}><span class="garden-answer-label">${a.removed.includes(i) ? "Cleared!" : q.original}</span>${a.removed.includes(i) ? "" : gardenLeafArt("weed" + i, "growing")}${!a.removed.includes(i) && a.mistakes >= 2 && !q.correct ? `<span class="garden-answer-correction">Correct: ${q.correction}</span>` : ""}</button>`).join("")}</div><p class="garden-weed-feedback" role="status" aria-live="polite">${message || "Tap an answer to pull it, or drag it to the basket."}</p><div class="garden-weed-footer"><div class="garden-weed-basket" data-weed-basket aria-label="Weed basket">${gardenBasketArt()}<span>Weed basket</span></div><button class="btn alt" onclick="closeDialog()">Close ✕</button></div>`,
+    "garden-weeding",
+  );
+}
+function pullGardenWeed(i) {
+  if (Date.now() < (gardenUI.weedSuppressUntil || 0)) return;
+  act(() => {
+    const result = Game.pullWeed(state, i);
+    if (result.kind === "complete") {
+      state.notice = result.message;
+      show(
+        `<h2>Wonderful weeding!</h2><p>Your planted crops have a 20% bonus for the next harvest activity!</p><p>Pick ripe crops together with Harvest All, or gather the eligible ripe crops individually before End Day. Plants still growing when you begin picking will keep their normal yields.</p><p>Small bonus amounts build up into whole extra produce items of the same crop. New plantings do not receive this bonus.</p><button class="btn" onclick="closeDialog()">Back to the Garden</button>`,
+        "garden-weeding-complete",
+      );
+    } else renderGardenWeeding(result.message, result.kind === "round");
+  });
+}
+// Drag is an alternative to tap, not a mandatory fine-motor exercise. Invalid
+// drops and cancellation leave the round unchanged. A released drag cannot also tap.
+(function () {
+  let drag = null;
+  const clear = () => {
+    drag?.ghost?.remove();
+    drag = null;
+    document
+      .querySelector("[data-weed-basket]")
+      ?.classList.remove("garden-drop-valid");
+  };
+  document.addEventListener("pointerdown", (e) => {
+    const target = e.target.closest("[data-weed-answer]:not(:disabled)");
+    if (
+      !target ||
+      !e.isPrimary ||
+      (e.pointerType === "mouse" && e.button !== 0)
+    )
+      return;
+    drag = {
+      target,
+      pointer: e.pointerId,
+      index: +target.dataset.weedAnswer,
+      x: e.clientX,
+      y: e.clientY,
+      moved: false,
+    };
+    target.setPointerCapture(e.pointerId);
+  });
+  document.addEventListener(
+    "pointermove",
+    (e) => {
+      if (!drag || e.pointerId !== drag.pointer || !drag.target.isConnected)
+        return;
+      if (
+        !drag.moved &&
+        Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 10
+      )
+        return;
+      e.preventDefault();
+      if (!drag.moved) {
+        drag.moved = true;
+        drag.ghost = document.createElement("div");
+        drag.ghost.className = "garden-weed-ghost";
+        drag.ghost.textContent = drag.target.querySelector(
+          ".garden-answer-label",
+        ).textContent;
+        document.body.append(drag.ghost);
+      }
+      Object.assign(drag.ghost.style, {
+        left: e.clientX + "px",
+        top: e.clientY + "px",
+      });
+      document
+        .querySelector("[data-weed-basket]")
+        ?.classList.toggle(
+          "garden-drop-valid",
+          !!document
+            .elementFromPoint(e.clientX, e.clientY)
+            ?.closest("[data-weed-basket]"),
+        );
+    },
+    { passive: false },
+  );
+  document.addEventListener("pointerup", (e) => {
+    if (!drag || e.pointerId !== drag.pointer) return;
+    const { index, moved, target } = drag,
+      valid = !!document
+        .elementFromPoint(e.clientX, e.clientY)
+        ?.closest("[data-weed-basket]");
+    clear();
+    if (!moved) return;
+    e.preventDefault();
+    if (valid && target.isConnected) pullGardenWeed(index);
+    gardenUI.weedSuppressUntil = Date.now() + 400;
+  });
+  document.addEventListener("pointercancel", clear);
+  document.addEventListener(
+    "click",
+    (e) => {
+      if (
+        Date.now() < (gardenUI.weedSuppressUntil || 0) &&
+        e.target.closest("[data-weed-answer]")
+      ) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    },
+    true,
+  );
+})();
