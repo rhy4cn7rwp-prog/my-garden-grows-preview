@@ -1,3 +1,16 @@
+## Issue #1 — first review increment (branch only; not deployed)
+
+Customer atlas fragments are isolated with source-space silhouette clips. The
+How to Play book now has dark high-contrast lettering and a small round wooden
+reading table in the centered Clubhouse view. All six pages describe the current
+playable loop, including order amounts, one bag per sale and checkout/change.
+
+See [the increment plan and staged future guide](docs/issue-1-increments.md) for
+what is included, validation and remaining onboarding/Job Board/equipment/math work.
+The new-mechanics guide is a review draft until those mechanics are implemented.
+No saved-state schema, wallet, inventory, treasure coordinates or market rules
+change in this increment. Review screenshots are in [docs/review](docs/review/).
+
 ## Phase 5: a home in the Clubhouse and optional illustrated guide
 
 Every new/reloaded game now opens in the existing Clubhouse. The shared Home /
@@ -5,12 +18,12 @@ Clubhouse control still leads there, **Go to Town** opens the unchanged village,
 and the direct Dream Shop shortcut remains available. All other destinations,
 treasure ownership, sizing, placement and panoramic rays are preserved.
 
-A green **How to Play** book rests on the lower nook bookshelf. Its artwork is
+A green **How to Play** book rests on a round reading table in the centered view. Its artwork is
 composited in room coordinates through the same panoramic lens as the furniture;
 its separate 44px-minimum accessible control follows that projection. The bottom
 How to Play shortcut opens the same book from any viewing direction. This fixed
 room accessory is not a Dream Shop reward and never modifies collection ownership
-or saved treasure positions. Its six optional pages use the requested wording,
+or saved treasure positions. Its six optional pages explain the currently playable game loop with
 large Back/Next/Close controls, a page counter, keyboard focus containment and
 Escape-to-close. Page illustrations reuse original shop, reward and room artwork,
 plus lightweight original SVG gardening/basket illustrations. No room background

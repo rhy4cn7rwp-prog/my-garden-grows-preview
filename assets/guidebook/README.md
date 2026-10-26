@@ -1,12 +1,14 @@
 # Optional How to Play book
 
 `book.svg` is an original lightweight illustration: a green clothbound gardening
-book with gilt edging, a growing sprout and a ribbon bookmark. No third-party art
+book with gilt edging, a growing sprout and a ribbon bookmark. The title now uses dark ink on a cream panel for contrast. No third-party art
 or currency is included. Its title is also available as accessible text and via
 the always-visible Clubhouse shortcut.
 
-The book is rendered onto the existing room texture at source (1258, 317.2), on
-the lower nook bookshelf, and sampled by the existing panoramic camera. It is a
+The book is rendered onto the existing room texture at source (1086, 485), on
+a round wooden reading table in front of the centered camera. `side-table.svg`
+is an original lightweight table/reading-stand illustration, projected through
+the same camera as the room. Neither is a new treasure-placement surface. It is a
 fixed accessory, not an owned/movable treasure; it never changes saved positions.
 
 Guide page images use the existing licensed project artwork for the Seed & Feed

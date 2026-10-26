@@ -26,14 +26,18 @@ try:
    assert page.evaluate('view')=='clubhouse'
    assert page.evaluate('state.cash')==50
    page.wait_for_function("document.querySelector('.clubhouse-world')?.dataset.composited==='true'")
-   page.wait_for_function('!!clubhouseRoom.bookImage?.naturalWidth')
+   page.wait_for_function('!!clubhouseRoom.bookImage?.naturalWidth && !!clubhouseRoom.bookTableImage?.naturalWidth')
+   if h>w:
+    book=page.locator('.clubhouse-guidebook').bounding_box()
+    assert book is not None and book['width']>=44 and book['height']>=44
+    assert abs(book['x']+book['width']/2-w/2)<2,(w,h,book)
    fresh=snapshot()
    if w==428 and h==746:page.screenshot(path='/tmp/guidebook-clubhouse.png')
    # Book is genuinely in room space, and also accessible without turning.
    if w>=375 and h>=500:
     page.locator('.clubhouse-guidebook').tap()
    else:tap('How to Play')
-   titles=['Choose Your Dream!',"Let's Go Shopping!",'Time to Grow!','Harvest Time!',"Let's Make Some Money!",'Dreams Come True!']
+   titles=['Choose Your Dream!',"Shop for Your Garden!",'Plant, Water, Harvest!','Get Ready for Market!',"Help Your Customers!",'Count, Save, Dream!']
    for i,title in enumerate(titles):
     assert page.locator('#guidebook-title').inner_text()==title
     assert page.locator('.guidebook-pages output').inner_text()==f'{i+1} of 6'

@@ -3,53 +3,70 @@ const GUIDEBOOK_PAGES = [
   {
     heading: "Choose Your Dream!",
     text: [
-      "Visit the Dream Shop and pick something special you'd love to have. That's what you're going to save your money for!",
+      "Visit the Dream Shop and choose something you'd love to save for. Choosing a dream does not spend your money. When you've saved enough, visit the shop again to buy it.",
     ],
     illustration: "dream",
   },
   {
-    heading: "Let's Go Shopping!",
+    heading: "Shop for Your Garden!",
     text: [
-      "Head to Seed & Feed to buy your seeds. But remember to save some money for your market supplies!",
+      "Visit Seed & Feed for planting supplies. Choose individual crops or a mixed bundle. Check your basket total before paying, and leave money for market supplies.",
     ],
     illustration: "shopping",
   },
   {
-    heading: "Time to Grow!",
+    heading: "Plant, Water, Harvest!",
     text: [
-      "Take your seeds to your garden plot and plant them. Don't forget to water your garden each day!",
+      "Go to your garden, choose a plot and plant. Water each day so your crops can grow! When they're ready, harvest them for your market stand.",
     ],
     illustration: "grow",
   },
   {
-    heading: "Harvest Time!",
+    heading: "Get Ready for Market!",
     text: [
-      "When your crops are ready, pick them and get ready for the farmers market!",
+      "Visit Market Supplies for bags and equipment. Choose your selling space and arrange your harvest. A scale lets you sell produce by the pound. Every completed purchase uses one paper bag.",
     ],
     illustration: "harvest",
   },
   {
-    heading: "Let's Make Some Money!",
+    heading: "Help Your Customers!",
     text: [
-      "Bring your produce and supplies to the farmers market. Help customers, sell your harvest, and earn money for your dream!",
+      "Say hello, then read the customer's order. Match the produce and the amounts: some are counted, others are measured in pounds. Check the basket before working out the price.",
     ],
     illustration: "market",
   },
   {
-    heading: "Dreams Come True!",
+    heading: "Count, Save, Dream!",
     text: [
-      "Saved enough money? Go back to the Dream Shop and buy your dream item! You'll find it waiting for you right here in your Clubhouse.",
+      "Work out the prices shown, then enter the total. Count back change with bills and coins. Save your earnings, visit the Dream Shop to buy your reward, and find it in your Clubhouse!",
       "Then choose another dream and keep growing!",
     ],
     illustration: "clubhouse",
   },
 ];
-// A fixed book resting on the existing lower nook shelf, in painting coordinates.
+// The book and its small round reading table share the existing room lens.
 // Composited through the same lens as the room; never a movable/owned reward.
-const CLUBHOUSE_BOOK = { x: 1258, y: 317.2, width: 92, height: 83 };
+const CLUBHOUSE_BOOK = {
+  x: 1086,
+  y: 485,
+  width: 124,
+  height: 112,
+  art: "assets/guidebook/book.svg?v=issue-1-review-1",
+  table: {
+    x: 1086,
+    y: 584,
+    width: 170,
+    height: 150,
+    art: "assets/guidebook/side-table.svg?v=issue-1-review-1",
+  },
+};
 function drawClubhouseGuidebook(ctx) {
   const image = clubhouseRoom.bookImage,
     b = CLUBHOUSE_BOOK;
+  const table = clubhouseRoom.bookTableImage,
+    t = b.table;
+  if (table?.complete && table.naturalWidth)
+    ctx.drawImage(table, t.x - t.width / 2, t.y - t.height, t.width, t.height);
   if (image?.complete && image.naturalWidth)
     ctx.drawImage(image, b.x - b.width / 2, b.y - b.height, b.width, b.height);
 }

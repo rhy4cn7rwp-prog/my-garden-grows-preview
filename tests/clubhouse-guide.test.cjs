@@ -30,28 +30,28 @@ function ui(saved = null) {
   );
   return { run: (code) => vm.runInContext(code, context), context, storage };
 }
-test("optional guide contains the six requested headings and exact child-friendly wording", () => {
+test("six-page guide teaches currently playable shopping, growing, bagging and money steps", () => {
   assert.equal(guide.pages.length, 6);
   assert.deepEqual(
     guide.pages.map((p) => p.heading),
     [
       "Choose Your Dream!",
-      "Let's Go Shopping!",
-      "Time to Grow!",
-      "Harvest Time!",
-      "Let's Make Some Money!",
-      "Dreams Come True!",
+      "Shop for Your Garden!",
+      "Plant, Water, Harvest!",
+      "Get Ready for Market!",
+      "Help Your Customers!",
+      "Count, Save, Dream!",
     ],
   );
   assert.deepEqual(
     guide.pages.map((p) => p.text.join("\n\n")),
     [
-      "Visit the Dream Shop and pick something special you'd love to have. That's what you're going to save your money for!",
-      "Head to Seed & Feed to buy your seeds. But remember to save some money for your market supplies!",
-      "Take your seeds to your garden plot and plant them. Don't forget to water your garden each day!",
-      "When your crops are ready, pick them and get ready for the farmers market!",
-      "Bring your produce and supplies to the farmers market. Help customers, sell your harvest, and earn money for your dream!",
-      "Saved enough money? Go back to the Dream Shop and buy your dream item! You'll find it waiting for you right here in your Clubhouse.\n\nThen choose another dream and keep growing!",
+      "Visit the Dream Shop and choose something you'd love to save for. Choosing a dream does not spend your money. When you've saved enough, visit the shop again to buy it.",
+      "Visit Seed & Feed for planting supplies. Choose individual crops or a mixed bundle. Check your basket total before paying, and leave money for market supplies.",
+      "Go to your garden, choose a plot and plant. Water each day so your crops can grow! When they're ready, harvest them for your market stand.",
+      "Visit Market Supplies for bags and equipment. Choose your selling space and arrange your harvest. A scale lets you sell produce by the pound. Every completed purchase uses one paper bag.",
+      "Say hello, then read the customer's order. Match the produce and the amounts: some are counted, others are measured in pounds. Check the basket before working out the price.",
+      "Work out the prices shown, then enter the total. Count back change with bills and coins. Save your earnings, visit the Dream Shop to buy your reward, and find it in your Clubhouse!\n\nThen choose another dream and keep growing!",
     ],
   );
   assert.equal(new Set(guide.pages.map((p) => p.illustration)).size, 6);
@@ -151,4 +151,24 @@ test("book page turns and boundary controls never touch farm state", () => {
   vm.runInContext("closeGuidebook();openGuidebook()", context);
   assert.match(context.html, /1 of 6/);
   assert.equal(JSON.stringify(context.state), before);
+});
+
+test("book has dark high-contrast lettering, rests centered on its own round table and does not become an owned reward", () => {
+  const guide = require("../src/guidebook.js"),
+    G = require("../src/game.js");
+  const svg = fs.readFileSync(
+    require.resolve("../assets/guidebook/book.svg"),
+    "utf8",
+  );
+  assert.match(svg, /<text[^>]*fill="#151b13"[^>]*>How to<\/text>/);
+  assert.match(svg, /<rect[^>]*fill="#fff0bc"/);
+  assert.equal(guide.book.x, 2172 / 2);
+  assert.equal(guide.book.table.x, guide.book.x);
+  assert.ok(guide.book.y < guide.book.table.y);
+  assert.ok(guide.book.width < guide.book.table.width);
+  assert.equal(G.dreams.length, 6);
+  assert.equal(
+    G.dreams.some((x) => /^(book|table)$/i.test(x.id)),
+    false,
+  );
 });
