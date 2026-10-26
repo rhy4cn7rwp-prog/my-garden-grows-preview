@@ -36,3 +36,14 @@ Four original named customers continue to use the original atlas.
 
 The old `register.webp` is preserved as artwork history and is no longer a market
 button; checkout uses the in-game keypad and existing payment controls.
+
+## Issue #1: isolate touching atlas neighbors
+
+The atlas pixels are unchanged. Rectangular bounds alone included stray sleeves
+from adjacent characters. `src/customer-portraits.js` now supplies reviewed
+source-space SVG silhouettes for all four original and 24 expanded portraits,
+including seam overrides for three touching sleeves. Bounds, mouth anchors and
+far-counter clipping stay unchanged. Generate geometry with
+`tools/build_customer_clips.py` (offline Pillow/NumPy/SciPy alpha analysis); review
+the real-browser contact sheets and pixel regression before accepting new art.
+No runtime image processing, new sprite downloads or player-state changes occur.
