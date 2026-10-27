@@ -65,7 +65,7 @@ test("unavailable browser voices fall back without blocking gameplay or modifyin
   A.equal(t.run("state.narrationEnabled"), false);
 });
 test("all regular-word phonemes are bundled valid non-silent mono PCM audio, not external service dependencies", () => {
-  for (const letter of "sunpotmdig") {
+  for (const letter of "abcdefghijklmnopqrstuvwxyz") {
     const b = fs.readFileSync(`assets/neighborhood/phonics/${letter}.wav`);
     A.equal(b.toString("ascii", 0, 4), "RIFF");
     A.equal(b.toString("ascii", 8, 12), "WAVE");

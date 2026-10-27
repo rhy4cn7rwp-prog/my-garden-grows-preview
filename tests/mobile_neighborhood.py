@@ -32,6 +32,7 @@ try:
    session=page.context.new_cdp_session(page)
    def touch(kind,x=0,y=0):session.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[] if kind=='touchEnd' else [{'x':x,'y':y}]})
    def drag(source,target):
+    source.scroll_into_view_if_needed()
     target.scroll_into_view_if_needed()
     # Center the pair in the reading viewport without changing the game state.
     a=source.bounding_box();b=target.bounding_box();middle=(a['y']+a['height']/2+b['y']+b['height']/2)/2
@@ -72,9 +73,11 @@ try:
      elif job=='labels':
       while not page.evaluate('state.jobs.active.ended'):
        indices=page.evaluate("()=>{const d=state.jobs.active.data,used=[];return [...d.words[d.round]].map(v=>{const i=d.tiles.findIndex((x,i)=>x===v&&!used.includes(i));used.push(i);return i})}")
-       # One real tile drag; other letters use equally supported taps.
-       drag(page.locator(f'[data-job-drag="letter"][data-item="{indices[0]}"]'),page.locator('[data-job-drop="letter"]').first)
-       for i in indices[1:]:page.locator(f'[data-job-drag="letter"][data-item="{i}"]').tap()
+       # Place from right to left into explicitly selected slots.
+       for slot in reversed(range(len(indices))):
+        i=indices[slot]
+        page.locator(f'.free-letter-tray [data-item="{i}"]').tap()
+        page.locator(f'[data-job-drop="letter-{slot}"]').tap()
      elif job=='match':
       m=page.evaluate('NeighborhoodJobs.moves(state.jobs.active.data.grid)[0]');drag(page.locator(f'[data-match-cell="{m[0]}"]'),page.locator(f'[data-match-cell="{m[1]}"]'))
       assert page.evaluate('state.jobs.active.score')>0
@@ -84,10 +87,25 @@ try:
       page.wait_for_timeout(120);tap('Pause');elapsed=page.evaluate('state.jobs.active.elapsed');page.wait_for_timeout(150);assert page.evaluate('state.jobs.active.elapsed')==elapsed
       page.reload();page.evaluate("go('jobs')");assert page.evaluate('state.jobs.active.elapsed')>=elapsed;paused=page.evaluate('state.jobs.active.elapsed');page.wait_for_timeout(120);assert page.evaluate('state.jobs.active.elapsed')==paused
       tap('Play / Resume');page.wait_for_timeout(120);assert page.evaluate('state.jobs.active.elapsed')>paused
-      page.evaluate("()=>{Neighborhood.stop();NeighborhoodJobs.tick(state,120000-state.jobs.active.elapsed);render()}")
+      page.evaluate("()=>{Neighborhood.stop();NeighborhoodJobs.tick(state,NeighborhoodJobs.clockLimit(state.jobs.active)-state.jobs.active.elapsed);render()}")
      elif job=='catch':
       world=page.locator('[data-catch-world]');world.scroll_into_view_if_needed();r=world.bounding_box();touch('touchStart',r['x']+r['width']*.8,r['y']+r['height']*.7);touch('touchMove',r['x']+r['width']*.4,r['y']+r['height']*.7);touch('touchEnd');assert page.evaluate('state.jobs.active.data.basket')<.6
       page.wait_for_timeout(100);page.evaluate("()=>{Neighborhood.stop();const a=state.jobs.active,d=a.data;for(let i=0;i<Math.ceil(60000/d.launchEvery);i++){const c=NeighborhoodJobs.carrot(a,i),time=c.launch+c.flight;if(time<=a.elapsed||time>60000)continue;NeighborhoodJobs.action(state,{type:'basket',x:c.end});NeighborhoodJobs.tick(state,time-a.elapsed);}NeighborhoodJobs.tick(state,60000-a.elapsed);render()}")
+     elif job=='tidy':
+      # Direction buttons and actual dragging, then remaining route through UI taps.
+      route=page.evaluate("()=>{const d=state.jobs.active.data,seen=new Set([d.mower]),route=[];function walk(i){for(const j of JobLawn.neighbors(d,i))if(!seen.has(j)){seen.add(j);route.push(j);walk(j);route.push(i)}}walk(d.mower);return route}")
+      for cell in route:
+       if page.evaluate("state.jobs.active.data.stage!=='mow'"):break
+       current=page.evaluate('state.jobs.active.data.mower');direction='right' if cell==current+1 else 'left' if cell==current-1 else 'down' if cell>current else 'up'
+       page.get_by_role('button',name='Mow '+direction,exact=True).tap()
+      assert page.evaluate("state.jobs.active.data.stage==='rake'")
+      # Tap each lawn patch to sweep all required clippings, no deadline.
+      for cell in page.evaluate('state.jobs.active.data.cells.map((c,i)=>c.blocked?-1:i).filter(i=>i>=0)'):
+       el=page.locator(f'[data-lawn-cell="{cell}"]');el.scroll_into_view_if_needed();r=el.bounding_box();touch('touchStart',r['x']+r['width']/2,r['y']+r['height']/2);touch('touchEnd')
+      assert page.evaluate("state.jobs.active.data.stage==='compost'")
+      for pile in range(3):
+       page.get_by_role('button',name=f'Grass pile {pile+1}',exact=True).tap()
+       page.get_by_role('button',name='Compost bin',exact=True).tap()
      else:
       if job=='flowers':
        drag(page.locator('[data-job-drag="water"]'),page.locator('[data-job-drop="yard-0"]'))

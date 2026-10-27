@@ -18,6 +18,9 @@ const Neighborhood = (() => {
   const J = NeighborhoodJobs,
     kinds = J.kinds;
   function icon(kind, cls = "") {
+    const picture =
+      typeof JobWordPictures !== "undefined" ? JobWordPictures.art(kind) : null;
+    if (picture) return picture;
     if (kind === "tomato-ripe" || kind === "tomato-green")
       return `<svg class="job-symbol" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 25C13 13 10 69 30 83Q51 96 72 82C94 62 85 16 50 25Z" fill="${kind === "tomato-ripe" ? "#e45c42" : "#80ad5a"}" stroke="${kind === "tomato-ripe" ? "#ab4935" : "#56783d"}" stroke-width="3"/><path d="m31 27 18-4 4-15 4 15 17 5-17 3-7 12-3-13-17 7Z" fill="#4f7b3e"/><ellipse cx="33" cy="42" rx="7" ry="10" fill="${kind === "tomato-ripe" ? "#f8ad78" : "#bdd98c"}"/></svg>`;
     if (CROPS.some((c) => c.id === kind)) return seedProduceArt(kind);
@@ -39,8 +42,7 @@ const Neighborhood = (() => {
     return `<svg class="job-symbol ${cls}" viewBox="0 0 100 100" aria-hidden="true">${paths[kind] || paths.flower}</svg>`;
   }
   function person(who) {
-    const magee = who === "magee";
-    return `<svg class="job-neighbor neighbor-${who}" viewBox="0 0 180 210" role="img" aria-label="${magee ? "Mrs. Magee, smiling in her gardening apron" : "Mr. Jones, a cheerful gardener in overalls"}"><path d="M38 206q-9-77 51-88 57 8 55 88" fill="${magee ? "#bc809f" : "#779da8"}" stroke="#6b624f" stroke-width="3"/><path d="M66 148h47v58H66Z" fill="${magee ? "#f1c594" : "#4e7790"}"/><path d="M60 151 43 187m76-35 23 34" stroke="#d3a076" stroke-width="17" stroke-linecap="round"/><ellipse cx="90" cy="82" rx="38" ry="46" fill="#e1b591" stroke="#9a7357" stroke-width="2"/>${magee ? '<path d="M51 88q-28-68 25-69 58-19 55 70-9-43-30-51-18 26-50 24" fill="#ded4bf"/><circle cx="117" cy="22" r="19" fill="#ded4bf"/><g fill="none" stroke="#7d7166" stroke-width="3"><circle cx="74" cy="82" r="13"/><circle cx="107" cy="82" r="13"/><path d="M87 82h7"/></g>' : '<path d="M36 48q56-26 108 0l8 12H26Z" fill="#c8ab6a" stroke="#927a4c" stroke-width="3"/><path d="m55 43 9-32h51l13 32" fill="#dfc480"/><path d="M64 112q29 18 53-4-8 29-39 27" fill="#d8c9ac"/>'}<g fill="#574734"><circle cx="74" cy="82" r="3"/><circle cx="107" cy="82" r="3"/></g><path d="M86 94q8 5 13-1m-19 14q13 11 26-1" fill="none" stroke="#a36956" stroke-width="3" stroke-linecap="round"/><ellipse class="neighbor-blink" cx="74" cy="82" rx="4" ry="1" fill="#ba8d70"/></svg>`;
+    return who === "magee" ? JobArt.magee() : JobArt.jones();
   }
   function jobArt(id) {
     if (id === "labels") return person("magee");
@@ -48,7 +50,7 @@ const Neighborhood = (() => {
     if (id === "words") return icon("sun");
     if (id === "flowers") return icon("flower");
     if (id === "weeds") return icon("weed");
-    if (id === "tidy") return icon("leaf");
+    if (id === "tidy") return JobLawnScene.mower();
     return icon(
       id === "packing" ? "corn" : id === "stacks" ? "cucumber" : "tomato",
     );
@@ -58,10 +60,10 @@ const Neighborhood = (() => {
   function scene() {
     const a = state.jobs.active;
     if (a) return active(a);
-    return `<section class="job-board"><header><h1>Neighborhood Job Board</h1><p>Help a neighbor. Every completed job earns $1!</p><button class="btn alt" onclick="Neighborhood.settings()">Play &amp; sound settings</button><button class="btn alt" onclick="Neighborhood.read('Welcome to the neighborhood! Choose any job. Each completed job earns one dollar.')">Read to Me</button></header><div class="job-notices">${J.catalog
+    return `<section class="job-board"><header><h1>Neighborhood Job Board</h1><p>Help a neighbor. Finish for $1; beat your own record for $3 total!</p><button class="btn alt" onclick="Neighborhood.settings()">Play &amp; sound settings</button><button class="btn alt" onclick="Neighborhood.read('Welcome to the neighborhood! Choose any job. Finish a job for one dollar. Beat an existing personal best for three dollars total.')">Read to Me</button></header><div class="job-notices">${J.catalog
       .map((j) => {
         const wait = J.available(state, j.id);
-        return `<button class="job-notice" data-job-card="${j.id}" onclick="Neighborhood.start('${j.id}')" ${wait ? "disabled" : ""}>${jobArt(j.id)}<strong>${j.name}</strong><span>${j.type} · $1.00</span><small data-job-cooldown="${j.id}">${wait ? "Available in " + countdown(wait) : "Available now"}</small></button>`;
+        return `<div class="job-notice-wrap"><button class="job-notice" data-job-card="${j.id}" onclick="Neighborhood.start('${j.id}')" ${wait ? "disabled" : ""}>${jobArt(j.id)}<strong>${j.name}</strong><span>${j.type} · $1 / record $3</span><small data-job-cooldown="${j.id}">${wait ? "Available in " + countdown(wait) : "Available now"}</small></button><span class="job-card-best">${recordIndicator(j.id)}</span><button class="btn alt job-record-button" data-records="${j.id}" onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${j.id}'))" onclick="Neighborhood.leaderboard('${j.id}')">Leaderboard</button></div>`;
       })
       .join(
         "",
@@ -70,9 +72,11 @@ const Neighborhood = (() => {
   function active(a) {
     const j = J.catalog.find((j) => j.id === a.id),
       d = a.data,
-      timed = J.duration[a.id];
+      timed = J.clockLimit(a),
+      result = J.result(state.jobs, a),
+      reward = result.rewardCents / 100;
     if (a.ended)
-      return `<section class="job-results">${jobArt(a.id)}<h1>${a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}${a.won && ["weeds", "tomatoes", "flowers"].includes(a.id) ? `<p>${a.id === "flowers" ? "Every flower is blooming!" : a.id === "tomatoes" ? "End of the row — your harvest basket is full!" : "End of the row — the healthy plants have room to grow!"}</p>` : ""}<p>${a.score} ${a.id === "catch" ? "points" : "score"} · Personal best ${Math.max(a.score, state.jobs.best[a.id] || 0)}</p><p>${a.won ? "Your neighbor has $1 ready for you." : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onpointerup="Neighborhood.touchResult(event,'${a.won ? "collect" : "retry"}')" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? "Collect $1" : "Try again"}</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? "Thank you for helping! Here is a dollar." : "That was good practice. You can try again."}')">Read to Me</button></section>`;
+      return `<section class="job-results">${jobArt(a.id)}<h1>${result.newBest && reward === 3 ? "New Personal Best!" : a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}${a.won && ["weeds", "tomatoes", "flowers"].includes(a.id) ? `<p>${a.id === "flowers" ? "Every flower is blooming!" : a.id === "tomatoes" ? "End of the row — your harvest basket is full!" : "End of the row — the healthy plants have room to grow!"}</p>` : ""}<p>Your result: ${recordText(result.value, result.kind)} · ${recordIndicator(a.id, a)}</p><p>${a.won ? `Your neighbor has $${reward} total ready for you.${result.newBest && reward === 3 ? " You beat your own record!" : ""}` : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onpointerup="Neighborhood.touchResult(event,'${a.won ? "collect" : "retry"}')" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? `Collect $${reward}` : "Try again"}</button><button class="btn alt" onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? `Thank you for helping! Your reward is ${reward === 1 ? "one dollar" : "three dollars"}.` : "That was good practice. You can try again."}')">Read to Me</button></section>`;
     let body = "";
     if (a.id === "words")
       body = `<ul class="job-word-list">${d.words.map((w) => `<li class="${d.found.includes(w) ? "found" : ""}">${a.mode === "little" ? icon(w.toLowerCase()) : ""}<button onclick="Neighborhood.read('${w}')">${w}${d.found.includes(w) ? " ✓" : ""}</button></li>`).join("")}</ul><div class="job-word-grid" style="--size:${d.size}">${d.grid.map((v, i) => `<button data-letter="${i}" onclick="Neighborhood.letterCell(${i})" class="${d.found.some((w) => d.paths[w].includes(i)) ? "found" : ""}" aria-label="Letter ${v}, row ${Math.floor(i / d.size) + 1}, column ${(i % d.size) + 1}">${v}</button>`).join("")}</div>`;
@@ -94,20 +98,23 @@ const Neighborhood = (() => {
         )
         .join(
           "",
-        )}</div><div class="job-actions"><button class="btn alt" onclick="Neighborhood.act({type:'undo'})">Undo</button><button class="btn alt" onclick="Neighborhood.act({type:'restart'})">Restart</button></div>`;
+        )}</div><div class="job-actions"><button class="btn alt" onpointerup="TouchActions.run(event,()=>Neighborhood.act({type:'undo'}))" onclick="Neighborhood.act({type:'undo'})">Undo</button><button class="btn alt" onpointerup="TouchActions.run(event,()=>Neighborhood.act({type:'restart'}))" onclick="Neighborhood.act({type:'restart'})">Restart</button></div>`;
     if (a.id === "labels") {
       const w = d.words[d.round],
         little = a.mode === "little";
       body = `<div class="job-magee-intro">${person("magee")}<p>“My garden labels are mixed up! Can you help me?”</p></div><p>Label ${d.round + 1} of ${d.words.length}</p>${little ? `<div class="job-picture-clue">${icon(w.toLowerCase())}</div>` : ""}<button class="btn alt" onclick="Neighborhood.read('${w}','magee')">Hear the word</button><div class="job-letter-slots">${[...w].map((_, i) => `<button data-job-drop="letter" onclick="Neighborhood.act({type:'removeLetter',slot:${i}})" aria-label="Letter slot ${i + 1}">${d.slots[i] === undefined ? "" : d.tiles[d.slots[i]]}</button>`).join("")}</div><div class="job-letter-tiles">${d.tiles.map((v, i) => `<button data-job-drag="letter" data-item="${i}" onclick="Neighborhood.tile(${i})" ${d.slots.includes(i) ? "disabled" : ""}>${v}</button>`).join("")}</div><button class="btn alt" onclick="Neighborhood.act({type:'hint'})">Picture / letter hint</button>${d.hints ? `<p class="job-hint">${icon(w.toLowerCase())}Starts with ${w.slice(0, d.hints)}${"·".repeat(w.length - d.hints)}</p>` : ""}${little ? `<p>Say each sound, then blend the word.</p><div class="job-phonics">${[...w].map((l) => `<button class="btn alt" onclick="Narration.phoneme('${l}')" aria-label="Hear ${l} sound">${l} sound</button>`).join("")}</div>` : ""}`;
     }
+    if (a.id === "labels" && a.rulesVersion >= 3)
+      body = JobLetters.scene(a, ui.selected);
     if (a.id === "match")
       body = `<p>Goal ${d.target} points · Match FOUR or more!</p><div class="job-match-grid ${Date.now() < (ui.dropUntil || 0) ? "job-fall" : ""}">${(ui.previewGrid || d.grid).map((v, i) => `<button data-match-cell="${i}" data-job-drag="swap" data-item="${i}" data-job-drop="swap-${i}" onclick="Neighborhood.matchCell(${i})" class="${ui.selected === i ? "selected" : ""} ${(ui.hits || []).includes(i) ? "job-pop" : ""}" aria-label="${kinds[v]}, row ${Math.floor(i / 6) + 1}, column ${(i % 6) + 1}">${icon(kinds[v])}</button>`).join("")}</div>${a.mode === "little" ? '<button class="btn alt" onclick="Neighborhood.matchHint()">Show me a possible swap</button>' : ""}`;
     if (a.id === "catch") body = JobScenes.catchScene(a);
-    if (a.id === "tidy")
+    if (a.id === "tidy" && a.rulesVersion < 3)
       body = `<p>Put leaves and sticks in their matching piles. ${a.score} / ${d.target}</p><div class="job-yard job-yard-tidy">${d.items.map((item, i) => `<button data-job-drag="chore" data-item="${i}" onclick="Neighborhood.chore(${i})" class="yard-item ${item.done ? "done" : ""}" aria-label="${item.done ? "Finished" : item.kind} ${i + 1}" ${item.done ? "disabled" : ""}>${icon(item.kind)}</button>`).join("")}</div><div class="job-crates">${["leaf", "stick"].map((k) => `<button data-job-drop="${k}" onclick="Neighborhood.place('${k}')">${icon(k)}${k === "leaf" ? "Leaves" : "Sticks"}</button>`).join("")}</div>`;
+    if (a.id === "tidy" && a.rulesVersion >= 3) body = JobLawnScene.scene(a);
     if (["weeds", "tomatoes"].includes(a.id)) body = JobScenes.rows(a);
     if (a.id === "flowers") body = JobScenes.flowers(a, ui.selected);
-    return `<section class="job-play ${ui.paused ? "is-paused" : ""} ${["packing", "weeds", "tomatoes", "flowers"].includes(a.id) ? "illustrated-chore" : ""}"><header><h1>${j.name}</h1><p class="job-instructions">${j.instructions}</p></header><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-actions job-main-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button></div><div class="job-play-area">${body}</div><p class="job-feedback" role="status">${ui.lastWord ? `<strong class="job-word-success">${ui.lastWord}</strong> ` : ""}${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
+    return `<section class="job-play ${ui.paused ? "is-paused" : ""} ${["packing", "weeds", "tomatoes", "flowers", "tidy"].includes(a.id) ? "illustrated-chore" : ""}"><header><h1>${j.name}</h1><p class="job-instructions">${J.instructions(a)}</p></header><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-record-strip"><small>${recordIndicator(a.id, a)}</small><button onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button></div><div class="job-actions job-main-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button></div><div class="job-play-area">${body}</div><p class="job-feedback" role="status">${ui.lastWord ? `<strong class="job-word-success">${ui.lastWord}</strong> ` : ""}${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
   }
   function read(text, who = "guide") {
     Narration.speak(text, who, true);
@@ -121,7 +128,7 @@ const Neighborhood = (() => {
           ? "My garden labels are mixed up! Can you help me? "
           : a.id === "catch"
             ? "Grab that basket! Catch these carrots for me, would ya? "
-            : "") + j.instructions,
+            : "") + J.instructions(a),
         a.id === "labels" ? "magee" : a.id === "catch" ? "jones" : "guide",
       );
   }
@@ -180,7 +187,8 @@ const Neighborhood = (() => {
       if (
         a.id === "labels" &&
         a.score === prior &&
-        a.data.slots.length === a.data.tiles.length
+        a.data.slots.length === a.data.tiles.length &&
+        a.data.slots.every((x) => x !== null)
       )
         ui.feedback =
           "Try changing a letter. Tap a filled slot, or use a hint.";
@@ -273,7 +281,6 @@ const Neighborhood = (() => {
         ["weeds", "tomatoes"].includes(a.id)
       ) {
         JobScenes.lift(a, e.item, sourceRect, sourceHTML);
-        JobScenes.advance(a);
       }
     } catch (error) {
       ui.feedback = error.message;
@@ -314,8 +321,145 @@ const Neighborhood = (() => {
       render();
     } else act({ type: "stack", from: ui.selected, to: i });
   }
+  function letterSlot(slot) {
+    if (ui.paused || Date.now() < ui.suppress) return;
+    const d = state.jobs.active.data;
+    if (ui.selected === null) {
+      if (d.slots[slot] !== null) pick(d.slots[slot]);
+      return;
+    }
+    act({ type: "letter", tile: ui.selected, slot });
+  }
+  function returnLetter() {
+    if (ui.selected !== null) act({ type: "returnLetter", tile: ui.selected });
+  }
+  function lawnAct(event) {
+    if (ui.paused) return;
+    checkpoint();
+    const a = state.jobs.active;
+    if (a?.id !== "tidy" || a.rulesVersion < 3 || a.ended) return;
+    const stage = a.data.stage;
+    const ok = J.action(state, event);
+    if (!ok) return;
+    save();
+    if (stage !== a.data.stage || a.ended) {
+      clear();
+      render();
+    } else {
+      JobLawnScene.paint(a);
+      paint();
+    }
+  }
+  function lawnStep(dir) {
+    const a = state.jobs.active;
+    if (!a || a.id !== "tidy") return;
+    const d = a.data,
+      delta = { up: -d.width, down: d.width, left: -1, right: 1 }[dir];
+    lawnAct({ type: "mow", cell: d.mower + delta });
+  }
+  function lawnTap(e) {
+    const world = document.querySelector(".job-lawn-world"),
+      a = state.jobs.active;
+    if (!world || !a) return;
+    const d = a.data,
+      r = world.getBoundingClientRect(),
+      x = Math.floor(((e.clientX - r.x) / r.width) * d.width),
+      y = Math.floor(((e.clientY - r.y) / r.height) * d.height);
+    if (x < 0 || x >= d.width || y < 0 || y >= d.height) return;
+    const cell = y * d.width + x;
+    if (d.stage === "rake") lawnAct({ type: "rake", cell });
+    else if (d.stage === "mow") {
+      const cx = d.mower % d.width,
+        cy = Math.floor(d.mower / d.width),
+        dx = x - cx,
+        dy = y - cy;
+      if (dx || dy) {
+        const next =
+          Math.abs(dx) >= Math.abs(dy)
+            ? d.mower + Math.sign(dx)
+            : d.mower + Math.sign(dy) * d.width;
+        lawnAct({ type: "mow", cell: next });
+      }
+    }
+  }
+  function compost() {
+    if (ui.selected !== null) {
+      lawnAct({ type: "compost", pile: +ui.selected });
+      ui.selected = null;
+    }
+  }
+  function recordText(value, kind) {
+    return value === null || value === undefined
+      ? "Not set yet"
+      : kind === "points"
+        ? `${value} points`
+        : `${(value / 1000).toFixed(2)} seconds`;
+  }
+  function recordIndicator(id, a) {
+    const mode = a?.mode || state.learningExperience;
+    const entries = Object.entries(state.jobs.records || {}).filter(
+      ([key, r]) => key.startsWith(id + "|" + mode + "|") && r.best !== null,
+    );
+    if (a) {
+      const spec = J.recordSpec(a),
+        r = state.jobs.records?.[spec.key];
+      return "Personal best: " + recordText(r?.best, spec.kind);
+    }
+    if (!entries.length) return "Personal best: not set yet";
+    const kind = ["match", "catch"].includes(id) ? "points" : "time",
+      values = entries.map(([, r]) => r.best);
+    return (
+      "Personal best: " +
+      recordText(
+        kind === "points" ? Math.max(...values) : Math.min(...values),
+        kind,
+      )
+    );
+  }
+  function difficultyLabel(key) {
+    const [id, mode, version, settings] = key.split("|"),
+      parts = settings.split("-").map(Number);
+    const prefix = version === "v3" ? "" : "Earlier saved game · ";
+    if (["words", "labels"].includes(id))
+      return (
+        prefix +
+        `Words with ${Math.min(...parts)}–${Math.max(...parts)} letters`
+      );
+    if (id === "stacks")
+      return (
+        prefix +
+        `${parts[0]} vegetables per crate · ${parts[2] <= 1 ? "gentle" : parts[2] <= 2 ? "medium" : "tricky"} layout`
+      );
+    return (
+      prefix +
+      (mode === "little" ? "Little Gardener" : "Growing Gardener") +
+      " challenge"
+    );
+  }
+  function leaderboard(id) {
+    const a = state.jobs.active;
+    if (view === "jobs" && a && !ui.paused) {
+      checkpoint();
+      ui.paused = true;
+      save();
+      render();
+    }
+    const mode = a?.id === id ? a.mode : state.learningExperience,
+      entries = Object.entries(state.jobs.records || {}).filter(([key]) =>
+        key.startsWith(id + "|" + mode + "|"),
+      );
+    const name = J.catalog.find((j) => j.id === id).name;
+    show(
+      `<h2>${name} · Personal Leaderboard</h2><p>${mode === "little" ? "Little Gardener" : "Growing Gardener"} records stay on this device. ${["match", "catch"].includes(id) ? "More points is better." : "Less active time is better. There is no time limit."}</p><p>Compare the same experience and difficulty. First finish: $1. Beat an existing best: $3 total. Ties: $1.</p>${Number.isFinite(state.jobs.best[id]) && !Object.keys(state.jobs.records || {}).some((key) => key.startsWith(id + "|")) ? `<p>Earlier saved best score: ${state.jobs.best[id]}. New records compare matching experiences and challenges.</p>` : ""}${entries.length ? entries.map(([key, r]) => `<section class="job-local-record"><strong>${difficultyLabel(key)}</strong><p>Personal best: ${recordText(r.best, r.last.kind)}</p><p>Previous best: ${recordText(r.last.previousBest, r.last.kind)}</p><p>Latest result: ${recordText(r.last.value, r.last.kind)}${r.last.won ? " · completed" : " · practice"} · $${r.last.rewardCents / 100}</p></section>`).join("") : "<p>Finish this job to set your first record!</p>"}${a?.id === id && a.ended ? `<p>Current result: ${recordText(J.result(state.jobs, a).value, J.result(state.jobs, a).kind)}. Collect your reward to save a successful record.</p>` : ""}`,
+      "job-records",
+    );
+  }
   function tile(i) {
     if (Date.now() < ui.suppress) return;
+    if (state.jobs.active.rulesVersion >= 3) {
+      pick(i);
+      return;
+    }
     act({ type: "letter", tile: i });
   }
   function chore(i) {
@@ -455,11 +599,11 @@ const Neighborhood = (() => {
       ui.paused = true;
       save();
       Narration.speak(
-        "Thank you for helping! Here is one dollar.",
+        `Thank you for helping! Here ${r.rewardCents === 300 ? "are three dollars for your new personal best" : "is one dollar"}.`,
         r.id === "catch" ? "jones" : "magee",
       );
       show(
-        `<h2>Thank you, neighbor!</h2><p>You earned exactly $1.00. You now have ${money(state.cash)}.</p><button class="btn" onclick="go('jobs')">Back to Job Board</button>`,
+        `<h2>Thank you, neighbor!</h2><p>You earned ${money(r.rewardCents / 100)} total${r.newBest && r.rewardCents === 300 ? " — New Personal Best!" : ""}. You now have ${money(state.cash)}.</p><button class="btn" onclick="go('jobs')">Back to Job Board</button>`,
       );
     } catch (e) {
       ui.feedback = e.message;
@@ -474,7 +618,7 @@ const Neighborhood = (() => {
       .querySelector("[data-job-time]")
       ?.replaceChildren(
         document.createTextNode(
-          countdown(Math.max(0, (J.duration[a.id] || 0) - a.elapsed)),
+          countdown(Math.max(0, J.clockLimit(a) - a.elapsed)),
         ),
       );
     document
@@ -564,10 +708,15 @@ const Neighborhood = (() => {
   // Shared pointer capture: drag cards into crates/baskets; tap alternatives stay available.
   document.addEventListener("pointerdown", (e) => {
     if (view !== "jobs" || ui.paused || !e.isPrimary) return;
-    const el = e.target.closest(
-      "[data-job-drag],[data-letter],[data-catch-world]",
+    let el = e.target.closest(
+      "[data-job-drag],[data-letter],[data-catch-world],[data-job-row]",
     );
     if (!el || el.disabled) return;
+    const healthyPan =
+      el.dataset.jobDrag === "chore" &&
+      state.jobs.active?.id === "weeds" &&
+      state.jobs.active.data.items[+el.dataset.item]?.kind === "plant";
+    if (healthyPan) el = el.closest("[data-job-row]");
     ui.drag = {
       el,
       id: e.pointerId,
@@ -577,11 +726,17 @@ const Neighborhood = (() => {
       item: +el.dataset.item,
       kind:
         el.dataset.jobDrag ||
-        (el.hasAttribute("data-letter") ? "word" : "catch"),
+        (el.hasAttribute("data-letter")
+          ? "word"
+          : el.hasAttribute("data-job-row")
+            ? "row"
+            : "catch"),
+      scrollStart: el.scrollLeft,
       start: +el.dataset.letter,
     };
     el.setPointerCapture(e.pointerId);
     if (ui.drag.kind === "catch") basketAt(e);
+    if (ui.drag.kind === "lawn") lawnTap(e);
   });
   function basketAt(e) {
     const r = document
@@ -598,6 +753,23 @@ const Neighborhood = (() => {
     (e) => {
       const d = ui.drag;
       if (!d || d.id !== e.pointerId) return;
+      if (d.kind === "row") {
+        if (Math.abs(e.clientX - d.x) > 8) d.moved = true;
+        if (d.moved) {
+          e.preventDefault();
+          d.el.scrollLeft = d.scrollStart + d.x - e.clientX;
+        }
+        return;
+      }
+      if (d.kind === "lawn") {
+        d.moved = true;
+        e.preventDefault();
+        if (performance.now() - (d.last || 0) > 60) {
+          lawnTap(e);
+          d.last = performance.now();
+        }
+        return;
+      }
       if (d.kind === "catch") {
         if (performance.now() - (d.last || 0) > 70) {
           basketAt(e);
@@ -655,7 +827,8 @@ const Neighborhood = (() => {
       .elementFromPoint(e.clientX, e.clientY)
       ?.closest("[data-job-drop]");
     clear();
-    if (!d.moved || d.kind === "catch") return;
+    if (!d.moved || d.kind === "catch" || d.kind === "lawn" || d.kind === "row")
+      return;
     e.preventDefault();
     if (d.kind === "word" && d.end !== undefined) wordPath(d.start, d.end);
     else if (drop) {
@@ -663,6 +836,12 @@ const Neighborhood = (() => {
       if (d.kind === "stack" && target.startsWith("stack-"))
         act({ type: "stack", from: d.item, to: +target.slice(6) });
       else if (d.kind === "pack") act({ type: "pack", item: d.item, target });
+      else if (d.kind === "pile" && target === "compost")
+        lawnAct({ type: "compost", pile: d.item });
+      else if (d.kind === "letter" && target === "letter-tray")
+        act({ type: "returnLetter", tile: d.item });
+      else if (d.kind === "letter" && target.startsWith("letter-"))
+        act({ type: "letter", tile: d.item, slot: +target.slice(7) });
       else if (d.kind === "letter" && target === "letter")
         act({ type: "letter", tile: d.item });
       else if (d.kind === "water" && target.startsWith("yard-"))
@@ -733,5 +912,11 @@ const Neighborhood = (() => {
     read,
     readInstruction,
     settings,
+    letterSlot,
+    returnLetter,
+    lawnTap,
+    lawnStep,
+    compost,
+    leaderboard,
   };
 })();

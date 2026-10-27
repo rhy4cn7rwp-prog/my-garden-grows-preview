@@ -62,5 +62,43 @@ const JobArt = (() => {
       "Mr. Jones, a smiling gardener in a straw hat and overalls",
     );
   }
-  return { basket, plant, weed, flower, ground, field, jones };
+  function carrotTops() {
+    return svg(
+      `<ellipse cx="120" cy="219" rx="100" ry="17" fill="#795335" opacity=".35"/><g stroke="#3f793a" stroke-width="4" fill="#75a94d">${Array.from(
+        { length: 9 },
+        (_, i) => {
+          const x = 28 + i * 23,
+            tilt = ((i % 3) - 1) * 15;
+          return `<g transform="translate(${x} 210) rotate(${tilt})"><path d="M0 4V-119m0 27-20-17m20 33 25-23m-25 43-30-27m30 44 34-28m-34 47-25-21" fill="none"/><path d="m0-114-9-19 8 3 3-17 4 16 8-3-8 20m-21 8-18-13 13-1-5-11 15 12 8 1m27 9 15-20 1 12 10-2-15 19m-35 18-25-12 14-3-6-12 21 13m49 3 20-24 1 15 13-3-24 23"/></g>`;
+        },
+      ).join(
+        "",
+      )}</g><path d="m88 214 12 7 7-7m45-2 12 8 6-9" fill="#d49755" stroke="#8c6039" stroke-width="3"/>`,
+      "0 0 250 240",
+    );
+  }
+  function yellowWeed(harder = false) {
+    return svg(
+      `<path d="M100 187 90 219m10-31 13 31m-13-28-24 17m26-16 25 18" fill="none" stroke="#c5a376" stroke-width="3"/><path d="M100 185V44m0 113-41-19 12-11-30-29 31 1-13-31 41 21 24-38 2 42 33-6-20 32 12 10-51 26" fill="${harder ? "#b6ae65" : "#d5c26b"}" stroke="#8b7f3e" stroke-width="4"/><path d="m99 117-24-16m26 46 24-19" stroke="#f0dfa0" stroke-width="3"/>`,
+    );
+  }
+  function magee() {
+    return svg(
+      `<defs><linearGradient id="magee-apron" x2="1" y2="1"><stop stop-color="#e3b489"/><stop offset="1" stop-color="#c88c70"/></linearGradient></defs><ellipse cx="111" cy="275" rx="70" ry="12" fill="#6a513533"/><path d="m73 229-7 36-17 9h43l7-43m20 1 6 32 28 10h-48l-5-41" fill="#71584d" stroke="#55453c" stroke-width="3"/><path d="M56 124q52-27 101 3l16 107q-59 29-128 0Z" fill="#a37ca2" stroke="#795c7b" stroke-width="3"/><path d="M58 128q-18 5-25 37l15 19m104-55q23 12 19 43l-20 14" fill="none" stroke="#ab85ad" stroke-width="19" stroke-linecap="round"/><path d="m46 178 20 9m89-6-15 7" stroke="#e2b58f" stroke-width="14" stroke-linecap="round"/><path d="M79 124v37h54v-37m-55 30-17 75q45 20 89 0l-18-75" fill="url(#magee-apron)" stroke="#a47359" stroke-width="3"/><path d="M87 183h38v26q-17 12-38 0Z" fill="#deb28c" stroke="#ab8063" stroke-width="3"/><path d="M96 193q6-13 13 0m-5 0v14" fill="none" stroke="#a27c4f" stroke-width="3"/><circle cx="118" cy="17" r="20" fill="#ddd5c7" stroke="#afa69a" stroke-width="3"/><path d="M65 92q-24-63 23-69 63-17 62 70" fill="#d7d0c4" stroke="#aaa197" stroke-width="3"/><ellipse cx="105" cy="79" rx="42" ry="49" fill="#e6bc97" stroke="#a87f60" stroke-width="3"/><path d="M64 68q-13-50 30-43 50-13 54 44-23-7-30-26-18 27-54 25" fill="#e1d9cb" stroke="#b7ada1" stroke-width="3"/><g fill="none" stroke="#796e64" stroke-width="3"><ellipse cx="88" cy="81" rx="15" ry="13"/><ellipse cx="123" cy="81" rx="15" ry="13"/><path d="M102 80h7m-36-2-10-2m76 3 10-1"/></g><g fill="none" stroke="#b9afa1" stroke-width="2"><path d="M71 51q7-22 22-19"/><path d="M84 47q14-18 24-14"/><path d="M121 38q15 8 19 21"/></g><path d="M77 66q9-5 17-1m20 0q9-4 17 2" stroke="#a09387" stroke-width="3" fill="none"/><path d="m64 205-6 21m94-21 6 21m-61 4h25" stroke="#e1bd93" stroke-width="3" fill="none"/><g fill="#554d3f"><circle cx="89" cy="82" r="3"/><circle cx="121" cy="82" r="3"/></g><path d="M103 90q-6 10 4 10m-18 9q17 16 34-1" stroke="#ab745a" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#dca086" opacity=".65"><ellipse cx="77" cy="99" rx="9" ry="5"/><ellipse cx="133" cy="99" rx="8" ry="5"/></g><path d="m77 120 28 16 28-17-12 23-17-5-16 5Z" fill="#f3d49e" stroke="#c49f72" stroke-width="2"/>`,
+      "0 0 210 290",
+      "Mrs. Magee, a smiling gardener with silver hair, glasses and a flower apron",
+    );
+  }
+  return {
+    basket,
+    plant,
+    weed,
+    flower,
+    ground,
+    field,
+    jones,
+    magee,
+    carrotTops,
+    yellowWeed,
+  };
 })();

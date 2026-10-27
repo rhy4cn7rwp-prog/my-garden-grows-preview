@@ -16,12 +16,14 @@ def callback(samples,n,events):
 lib.espeak_SetSynthCallback(callback)
 lib.espeak_Synth.argtypes=[C.c_void_p,C.c_size_t,C.c_uint,C.c_int,C.c_uint,C.c_uint,C.c_void_p,C.c_void_p]
 out=Path(__file__).resolve().parents[1]/'assets/neighborhood/phonics'
-for name,phoneme in {'s':'s','u':'V','n':'nnnnn','p':'p','o':'0','t':'t','m':'mmm','d':'d@-','i':'I','g':'g'}.items():
+for name,phoneme in {'a':'a','b':'b@-','c':'k','e':'E','f':'ffff','h':'h@-','j':'dZ@-','k':'k','l':'lll','q':'kw@-','r':'r@-','v':'vvv','w':'w@-','x':'ks','y':'j@-','z':'zzz','s':'s','u':'V','n':'nnnnn','p':'p','o':'0','t':'t','m':'mmm','d':'d@-','i':'I','g':'g'}.items():
+ if '--missing-only' in sys.argv and (out/(name+'.wav')).exists():continue
  chunks.clear();text=('[[%s]]'%phoneme).encode()+b'\0';lib.espeak_Synth(text,len(text),0,1,0,0x101,None,None);lib.espeak_Synchronize()
  samples=array.array('h',b''.join(chunks))
  # A voiced stop needs a tiny release context; trim the following weak vowel
  # rather than teaching a letter name or an elongated 'duh'.
- if name=='d':samples=samples[:int(rate*.105)]
+ if name in ['d','b','j']:samples=samples[:int(rate*.105)]
+ if name in ['h','q','r','w','y']:samples=samples[:int(rate*.18)]
  peak=max(map(abs,samples),default=0)
  if peak<100:raise RuntimeError('Silent phoneme '+name)
  gain=15000/peak

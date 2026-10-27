@@ -35,27 +35,22 @@ const JobScenes = (() => {
   }
   function rows(a) {
     const d = a.data,
-      tomato = a.id === "tomatoes",
-      remaining = d.target - a.score;
-    const pending = d.items
-      .map((it, i) => ({ it, i }))
-      .filter(({ it }) => !it.done && it.kind === (tomato ? "ripe" : "weed"))
-      .slice(0, remaining)
-      .map(({ i }) => i);
-    const visible = d.items
-      .map((it, i) => ({ it, i }))
-      .filter(({ it, i }) =>
-        tomato
-          ? it.kind === "green" || it.done || pending.includes(i)
-          : i <=
-            Math.max(...d.items.map((it, i) => (it.kind === "weed" ? i : -1))),
+      tomato = a.id === "tomatoes";
+    let groups;
+    if (tomato)
+      groups = Array.from({ length: 4 }, (_, n) =>
+        d.items
+          .map((it, i) => ({ it, i }))
+          .filter(({ i }) => Math.floor(i / 3) === n),
       );
-    const groups = tomato
-      ? Array.from({ length: 4 }, (_, n) =>
-          visible.filter(({ i }) => Math.floor(i / 3) === n),
-        ).filter((g) => g.length)
-      : visible.map((v) => [v]);
-    return `<p>${tomato ? "Pick ripe red tomatoes. Let the green ones grow." : "Pull jagged weeds with roots. Leave the round-leaf plants."} ${a.score} / ${d.target}</p><div class="job-row-window" data-job-row aria-label="${tomato ? "Tomato" : "Corn and bean"} row; swipe to explore"><div class="job-row-landscape"><div class="job-row-start">Start<br>the row →</div>${groups.map((group, n) => `<section class="job-row-station" data-row-station="${n}" style="--station:${n}"><div class="job-crop-stalk">${JobArt.plant(tomato ? "tomato" : n % 2 ? "beans" : "corn")}</div>${group.map(({ it, i }, slot) => `<button data-job-drag="chore" data-item="${i}" onpointerup="TouchActions.run(event,()=>Neighborhood.chore(${i}))" onclick="Neighborhood.chore(${i})" class="job-row-pick ${tomato ? "row-tomato" : "row-weed"} ${it.done ? "picked" : ""} ${it.kind === "green" ? "unripe" : ""}" style="--fruit-x:${[25, 72, 49][slot]}%;--fruit-y:${[43, 48, 72][slot]}%" aria-label="${it.done ? "Finished" : it.kind} ${i + 1}" ${it.done ? "disabled" : ""}>${tomato ? Neighborhood.icon(it.kind === "green" ? "tomato-green" : "tomato-ripe") : it.kind === "weed" ? JobArt.weed(a.mode === "growing") : Neighborhood.icon("plant")}${it.done ? '<span class="job-picked-mark">✓</span>' : ""}${tomato ? `<small>${it.kind === "green" ? "Not ripe" : "Ripe"}</small>` : ""}</button>`).join("")}</section>`).join("")}<div class="job-row-end">End of<br>the row!<span>✦</span></div></div></div><div class="job-row-footer"><div class="job-drop-basket" data-job-drop="basket">${JobArt.basket()}<span>${tomato ? "Harvest" : "Weed"} basket</span></div><div><strong>${a.score} of ${d.target}</strong><progress max="${d.target}" value="${a.score}" aria-label="Row progress"></progress><small>Swipe along the row. Tap or pull into the basket.</small></div></div>`;
+    else if (a.rulesVersion >= 3)
+      groups = Array.from({ length: a.mode === "little" ? 4 : 5 }, (_, n) =>
+        d.items
+          .map((it, i) => ({ it, i }))
+          .filter(({ it }) => it.cluster === n),
+      );
+    else groups = d.items.map((it, i) => [{ it, i }]);
+    return `<p>${tomato ? "Pick ripe red tomatoes. Let green ones grow." : "Pull yellow jagged weeds. Leave green feathery carrot tops."} ${a.score} / ${d.target}</p><div class="job-row-window ${tomato ? "" : "carrot-bed"}" data-job-row aria-label="${tomato ? "Tomato" : "Carrot"} row; swipe to explore"><div class="job-row-landscape"><div class="job-row-start">Start<br>the row →</div>${groups.map((group, n) => `<section class="job-row-station ${tomato ? "" : "carrot-cluster"}" data-row-station="${n}"><div class="job-crop-stalk">${tomato ? JobArt.plant("tomato") : JobArt.carrotTops()}</div>${group.map(({ it, i }, slot) => `<button data-job-drag="chore" data-item="${i}" onpointerup="TouchActions.run(event,()=>Neighborhood.chore(${i}))" onclick="Neighborhood.chore(${i})" class="job-row-pick ${tomato ? "row-tomato" : it.kind === "plant" ? "carrot-healthy" : "row-weed yellow-weed"} ${it.done ? "picked" : ""} ${it.kind === "green" ? "unripe" : ""}" style="--fruit-x:${[25, 72, 49][slot]}%;--fruit-y:${[43, 48, 72][slot]}%;--weed-x:${[13, 86, 38, 65, 50][slot]}%;--weed-bottom:${[16, 18, 0, 39, 45][slot]}%" aria-label="${it.done ? "Finished" : it.kind === "plant" ? "Healthy carrot tops" : it.kind} ${i + 1}" ${it.done ? "disabled" : ""}>${tomato ? Neighborhood.icon(it.kind === "green" ? "tomato-green" : "tomato-ripe") : it.kind === "plant" ? JobArt.carrotTops() : JobArt.yellowWeed(a.mode === "growing")}${tomato ? `<small>${it.kind === "green" ? "Not ripe" : "Ripe"}</small>` : ""}</button>`).join("")}</section>`).join("")}<div class="job-row-end">End of<br>the row!<span>✦</span></div></div></div><div class="job-row-footer"><div class="job-drop-basket" data-job-drop="basket">${JobArt.basket()}<span>${tomato ? "Harvest" : "Weed"} basket</span></div><div><strong>${a.score} of ${d.target}</strong><progress max="${d.target}" value="${a.score}" aria-label="Row progress"></progress><small>Swipe the scenery both ways. Tap or pull into the basket.</small></div></div>`;
   }
   function flowers(a, selected) {
     return `<p>Water every thirsty flower. Paths and grass can stay dry! ${a.score} / ${a.data.target}</p><div class="job-flower-tools"><button class="job-can ${selected === "water" ? "selected" : ""}" data-job-drag="water" onpointerup="TouchActions.run(event,()=>Neighborhood.pick('water'))" onclick="Neighborhood.pick('water')" aria-label="Pick up watering can">${gardenCanArt()}</button><span>Drag the can to a flower,<br>or pick it up and tap a flower.</span></div><div class="job-flower-grid" aria-label="Six by six flower garden">${J.flowerPlots(
@@ -77,36 +72,8 @@ const JobScenes = (() => {
     if (!row) return;
     const memorized = rowMemory.get(key(a));
     if (memorized !== undefined) row.scrollLeft = memorized;
-    else {
-      const next = a.data.items.findIndex(
-        (it) => !it.done && it.kind === (a.id === "weeds" ? "weed" : "ripe"),
-      );
-      const el = row.querySelector(`[data-item="${next}"]`);
-      if (el)
-        row.scrollLeft = Math.max(
-          0,
-          el.closest(".job-row-station").offsetLeft - 30,
-        );
-    }
+    else row.scrollLeft = 0;
     row.onscroll = () => rowMemory.set(key(a), row.scrollLeft);
-  }
-  function advance(a) {
-    const row = document.querySelector("[data-job-row]");
-    if (!row) return;
-    const next = Array.from(
-      row.querySelectorAll("[data-item]:not([disabled])"),
-    ).find(
-      (el) =>
-        a.data.items[+el.dataset.item].kind ===
-        (a.id === "weeds" ? "weed" : "ripe"),
-    );
-    if (next) {
-      const station = next.closest(".job-row-station");
-      row.scrollTo({
-        left: station.offsetLeft - 30,
-        behavior: reduced() ? "instant" : "smooth",
-      });
-    }
   }
   function lift(a, index, rect, html) {
     if (reduced() || !rect) return;
@@ -210,7 +177,6 @@ const JobScenes = (() => {
     flowers,
     remember,
     restore,
-    advance,
     lift,
     paint,
   };
