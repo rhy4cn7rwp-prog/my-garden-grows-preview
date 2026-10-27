@@ -4,7 +4,13 @@ const JobLetters = (() => {
     const d = a.data,
       w = d.words[d.round],
       little = a.mode === "little";
-    return `<div class="job-magee-intro">${JobArt.magee()}<p>“Try your letters in any space. You can move them again!”</p></div><p>Label ${d.round + 1} of ${d.words.length}</p><div class="job-label-clue">${JobWordPictures.art(w) || Neighborhood.icon(w.toLowerCase())}<button class="btn alt" onclick="Neighborhood.read('${w.toLowerCase()}. ${JobVocabulary.clues[w] || "A word from our garden."}','magee')">Hear the word</button></div><p class="letter-directions">Choose a letter, then any space. Drag to move or swap.</p><div class="job-letter-slots free-letter-slots">${[
+    const knownIllustration =
+      CROPS.some((c) => c.id === w.toLowerCase()) ||
+      ["SUN", "POT", "MUD", "DIG", "FLOWER", "HARVEST"].includes(w);
+    const picture =
+      JobWordPictures.art(w) ||
+      (knownIllustration ? Neighborhood.icon(w.toLowerCase()) : "");
+    return `<div class="job-magee-intro">${JobArt.magee()}<p>“Try your letters in any space. You can move them again!”</p></div><p>Label ${d.round + 1} of ${d.words.length}</p><div class="job-label-clue">${picture}<button class="btn alt" onclick="Neighborhood.read('${w.toLowerCase()}. ${JobVocabulary.clues[w] || "A word from our garden."}','magee')">Hear the word</button></div><p class="letter-directions">Choose a letter, then any space. Drag to move or swap.</p><div class="job-letter-slots free-letter-slots">${[
       ...w,
     ]
       .map((_, i) => {
