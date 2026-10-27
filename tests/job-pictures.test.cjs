@@ -137,14 +137,15 @@ test("all 30 sliding pictures support both grids, legal moves, Restart same scra
         a = s.jobs.active;
       while (a.data.scene !== scene) J.action(s, { type: "nextPicture" });
       const d = a.data;
-      A.equal(d.size, mode === "little" ? 3 : 4);
+      A.equal(d.cols, mode === "little" ? 2 : 3);
+      A.equal(d.rows,3);
       J.tick(s, 60000);
       A.equal(a.elapsed, 0);
       J.action(s, { type: "pictureBegin" });
       J.tick(s, 2500);
       const hole = d.tiles.indexOf(null),
         invalid = d.tiles.findIndex(
-          (_, i) => i !== hole && !P.adjacent(d.size, hole).includes(i),
+          (_, i) => i !== hole && !P.adjacent(d.cols, hole,d.rows).includes(i),
         );
       A.equal(J.action(s, { type: "slide", cell: invalid }), false);
       J.action(s, { type: "slide", cell: d.solution[0] });

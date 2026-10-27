@@ -4,7 +4,7 @@ const JobGardenScenes = (() => {
     return `<img src="assets/job-garden/carrot-tops.webp" alt="" draggable="false" style="transform:rotate(${seed * 37}deg)"/>`;
   }
   function weed(seed) {
-    return `<svg viewBox="0 0 100 130" aria-hidden="true"><ellipse cx="50" cy="95" rx="21" ry="9" fill="#352719" opacity=".3"/><g stroke="#8d8035" fill="#c8bb58" stroke-width="1.5"><path d="M50 99Q18 71 15 23q17 14 35 76M51 98Q74 61 83 32q7 29-32 66M48 98Q37 44 31 12q20 18 17 86M52 97Q62 40 69 15q5 38-17 82"/><path d="M50 99Q51 42 49 8" fill="none" stroke-width="3"/>${Array.from({ length: 5 }, (_, i) => `<path d="m49 ${10 + i * 8}-9-7 1 10 8 5 9-8-1-8-8 8Z" fill="${seed % 2 ? "#ddc26e" : "#c7b558"}"/>`).join("")}</g><g stroke="#aa8b62" stroke-width="1.5" fill="none"><path d="m50 97-4 18-5 7m8-14 9 12m-7-23 3 28"/></g></svg>`;
+    return `<svg viewBox="0 0 100 130" aria-hidden="true"><image href="assets/job-polish/golden-weed.webp" x="0" y="0" width="100" height="112"/><g stroke="#aa8b62" stroke-width="1.5" fill="none"><path d="m50 99-4 18-5 7m8-14 9 12m-7-23 3 28"/></g></svg>`;
   }
   function bed(a) {
     const d = a.data,

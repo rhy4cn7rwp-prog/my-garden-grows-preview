@@ -1,0 +1,82 @@
+[
+  {
+    "id": "jones",
+    "original": "source/jones.png",
+    "file": "jones.webp",
+    "sourceSha256": "0ffd49325d73a5559e76f7defeef65afa6adad4cd41f29b09d19263bdc02e3a0",
+    "deliverySha256": "f7154bebec492fa42b123b86fd471a49b6aeb73524a2d3b03abdd7b82f6e8769",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "magee",
+    "original": "source/magee.png",
+    "file": "magee.webp",
+    "sourceSha256": "e7f881304f62a7dc130a02334a8c6fe523428ed1336e1999ec02f5822219db97",
+    "deliverySha256": "cd85cbb93d7217d1f5f0b5499f94f5c900fc7b57c3fa2209364da76f5c495b88",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "packing-shed",
+    "original": "source/packing-shed.png",
+    "file": "packing-shed.webp",
+    "sourceSha256": "552b6ee2549e858f06e6e609e9decf9fa1eb4f8793e8f4806634b763fd278b0e",
+    "deliverySha256": "0057ca18fb03cb449aea5882d2eab4d47ba51cef26600cad9b4574f40f4d04c2",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "catch-garden",
+    "original": "source/catch-garden.png",
+    "file": "catch-garden.webp",
+    "sourceSha256": "fcc39e76ecf329c6c6e813fc1a42f43891e07d6ad866e1263096ff0ce4a93a00",
+    "deliverySha256": "2fc337639748fae8e49f6feeb1f1f34796982a2208490f9943f12bbfb3a6d484",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "basket",
+    "original": "source/basket.png",
+    "file": "basket.webp",
+    "sourceSha256": "6c575fee955fe2dcf7ebc02a73fe66b304745b6e0ca18b175a628766023bf2c0",
+    "deliverySha256": "1c323ec757ad84cfc459c3a1c0beb30f9d176ae6fa9dd1db81b5145cb5952a9f",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "tomato-plant",
+    "original": "source/tomato-plant.png",
+    "file": "tomato-plant.webp",
+    "sourceSha256": "e6c05ee1ab2fce77c76ee6c2dea40f52bdbbe0c29e54f4c60b89c8921711413c",
+    "deliverySha256": "16335dedded14e81fe98ce04edb5d8980b11cd1a7c6cb99380df49e7450fb3c7",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "flowers",
+    "original": "source/flowers.png",
+    "file": "flowers.webp",
+    "sourceSha256": "ecfe7fbf5d05ecbe74f33371cd8a945c531faa425fa83b161532681603e0976b",
+    "deliverySha256": "88d4400501f57a38566d253e3c68606cae813a39663ce5189caac8137313b3ce",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "crate",
+    "original": "source/crate.png",
+    "file": "crate.webp",
+    "sourceSha256": "d4557f455dd4901636860fdf2396e3bd57d47e3657519692e2494f5c82fd3ecf",
+    "deliverySha256": "881403b414d206e781ac260cde6960bda84d421c518ce1db61e1d7fee2e4c359",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "golden-weed",
+    "original": "source/golden-weed.png",
+    "file": "golden-weed.webp",
+    "sourceSha256": "1efe727975e788d9e442b74b30c58090f0bf9243e973b31b86a0b5e9cc50b91f",
+    "deliverySha256": "b064db230793018958c9dbd53c5c8d7b919ad500de1d627eba98d1e7f6305b48",
+    "origin": "Original generated storybook illustration; Seed & Feed style and existing character references."
+  },
+  {
+    "id": "tomatoes",
+    "original": "source/tomatoes.png",
+    "file": "tomatoes.webp",
+    "sourceSha256": "8e39d9518335bcb536e34a38290907fc5491127105dafbbe48e3177e08048db9",
+    "deliverySha256": "a9380ee268ac0180364c50b9a18a09c4e69a19596ccb79a55747c21634a93f6b",
+    "origin": "Original generated red and green tomato sprite illustration, Seed & Feed art reference."
+  }
+]

@@ -698,3 +698,50 @@
   font-size: 11px;
   padding: 3px 1px;
 }
+/* Every requested object has a scene-matched picture in both reading modes. */
+.seek-checklist.picture-list {
+  grid-template-columns: repeat(var(--clues, 5), minmax(0, 1fr));
+  gap: 4px;
+}
+.seek-checklist.picture-list button {
+  min-height: 48px;
+  padding: 3px;
+  position: relative;
+}
+.seek-checklist.picture-list svg {
+  height: 40px;
+  width: 100%;
+}
+.seek-checklist.picture-list .clue-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.seek-checklist.picture-list button.found::after {
+  content: "✓";
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  color: #285c27;
+  background: #e0f1c8;
+  border-radius: 50%;
+  font-size: 14px;
+}
+.picture-tile,
+.picture-empty {
+  height: calc(100% / var(--rows, var(--grid)));
+}
+.seek-checklist.picture-list.many-clues {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x;
+  scrollbar-width: thin;
+  padding-bottom: 3px;
+}
+.seek-checklist.picture-list.many-clues button {
+  flex: 0 0 56px;
+  min-width: 44px;
+}

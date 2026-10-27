@@ -193,7 +193,7 @@
           a.mode,
           a.seed,
           a.serial,
-          [2, 3, 4].includes(a.rulesVersion) ? a.rulesVersion : 1,
+          [2, 3, 4, 5].includes(a.rulesVersion) ? a.rulesVersion : 1,
           a.wordPlan,
           { picturePlan: a.picturePlan, stackLevel: a.stackLevel },
         );
@@ -239,7 +239,11 @@
       s.learningExperience === "little" ? "little" : "growing",
       seed >>> 0 || 1,
       s.jobs.sequence,
-      ["weeds", "tomatoes", "stacks", "hidden", "sliding"].includes(id) ? 4 : 3,
+      ["sliding", "tidy"].includes(id)
+        ? 5
+        : ["weeds", "tomatoes", "stacks", "hidden"].includes(id)
+          ? 4
+          : 3,
       plan,
       {
         picturePlan: ["hidden", "sliding"].includes(id)
@@ -305,7 +309,7 @@
         "Choose a valid picture collection.",
       );
       a.picturePlan = options.picturePlan.slice();
-      a.data = Pictures.make(id, mode, seed, a.picturePlan);
+      a.data = Pictures.make(id, mode, seed, a.picturePlan, 0, rulesVersion);
       return a;
     }
     if (id === "stacks" && rulesVersion >= 4) {
@@ -522,7 +526,7 @@
     } else if (id === "tidy") {
       a.data =
         rulesVersion >= 3
-          ? Lawn.make(mode)
+          ? Lawn.make(mode, rulesVersion)
           : {
               items: shuffle(
                 Array.from({ length: little ? 6 : 10 }, (_, i) => ({

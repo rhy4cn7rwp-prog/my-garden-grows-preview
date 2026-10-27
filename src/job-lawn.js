@@ -1,17 +1,36 @@
 /* Connected walkable lawn, no deadline. Each event visits adjacent cells only. */
 (function (root) {
   "use strict";
-  function make(mode) {
+  function make(mode, rulesVersion = 3) {
     const width = 7,
       height = mode === "little" ? 6 : 8,
-      blocked = mode === "little" ? [10, 17, 31] : [10, 17, 24, 33, 40, 47];
+      blocked =
+        rulesVersion >= 5
+          ? mode === "little"
+            ? [9, 10, 17, 23, 26, 31, 33, 36]
+            : [9, 10, 17, 23, 24, 33, 36, 40, 47, 51, 54]
+          : mode === "little"
+            ? [10, 17, 31]
+            : [10, 17, 24, 33, 40, 47];
     const cells = Array.from({ length: width * height }, (_, i) => ({
       blocked: blocked.includes(i),
+      ...(rulesVersion >= 5
+        ? {
+            obstacle: blocked.includes(i)
+              ? [9, 10, 17, 23, 24, 31, 33, 40, 47].includes(i)
+                ? "flower"
+                : i % 2
+                  ? "tree"
+                  : "bed"
+              : null,
+          }
+        : {}),
       cut: i === 0,
       raked: false,
       cleared: false,
     }));
     return {
+      ...(rulesVersion >= 5 ? { resets: 0 } : {}),
       width,
       height,
       cells,
@@ -31,9 +50,38 @@
       i + d.width,
     ].filter((j) => j >= 0 && j < d.cells.length && !d.cells[j].blocked);
   }
+  function adjacent(d, i) {
+    return [
+      i % d.width ? i - 1 : -1,
+      i % d.width < d.width - 1 ? i + 1 : -1,
+      i - d.width,
+      i + d.width,
+    ].filter((j) => j >= 0 && j < d.cells.length);
+  }
   function apply(a, e) {
     const d = a.data;
     if (e.type === "mow") {
+      if (
+        a.rulesVersion >= 5 &&
+        d.stage === "mow" &&
+        Number.isInteger(e.cell) &&
+        adjacent(d, d.mower).includes(e.cell) &&
+        d.cells[e.cell].obstacle === "flower"
+      ) {
+        d.cells.forEach((c, i) => {
+          c.cut = i === 0;
+          c.raked = false;
+          c.cleared = false;
+        });
+        d.mower = 0;
+        d.rake = 0;
+        d.piles = [0, 0, 0];
+        d.collected = [false, false, false];
+        d.resets++;
+        a.score = 0;
+        return true;
+      }
+
       if (
         d.stage !== "mow" ||
         !Number.isInteger(e.cell) ||

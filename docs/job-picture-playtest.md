@@ -11,8 +11,8 @@ changing the shared farm or wallet.
   in the scene, pinch or use +/− to zoom, drag to look around, or ask for a Hint.
   Fit shows the whole picture again. There is no deadline.
 - **Piece It Together:** select a picture before beginning. Tap a tile next to the
-  empty space. Little Gardener has a 3×3 puzzle and a small preview; Growing
-  Gardener has 4×4 and can choose a preview. Hint highlights a tile and describes
+  empty space. Little Gardener has a 2-column × 3-row puzzle and a small preview; Growing
+  Gardener has 3×3 and can choose a preview. Hint highlights a tile and describes
   its destination. Restart keeps the same scramble and active time.
 - **Neighborhood weeding:** drag the soil in either direction to explore the
   overhead bed. Pull golden grassy weeds; healthy feathery carrot tops stay put.

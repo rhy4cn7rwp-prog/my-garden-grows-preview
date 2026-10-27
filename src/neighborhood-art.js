@@ -2,13 +2,15 @@
 const JobArt = (() => {
   const svg = (body, box = "0 0 200 240", label = "") =>
     `<svg viewBox="${box}" ${label ? `role="img" aria-label="${label}"` : 'aria-hidden="true"'}>${body}</svg>`;
-  function basket() {
+  function legacyBasket() {
     return svg(
       `<defs><pattern id="job-wicker" width="14" height="12" patternUnits="userSpaceOnUse"><path d="M0 2h14M0 8h14M4 0v6m7 0v6" stroke="#98623b" stroke-width="2"/></pattern></defs><path d="M29 41Q22-5 100 5q78-10 71 36" fill="none" stroke="#99643f" stroke-width="8"/><ellipse cx="100" cy="35" rx="85" ry="27" fill="#65462f" stroke="#d8ac6d" stroke-width="7"/><ellipse cx="100" cy="35" rx="72" ry="17" fill="#493b2b"/><path d="M16 39 33 112q65 27 134 0l17-73q-79 44-168 0" fill="#c69457" stroke="#845733" stroke-width="4"/><path d="M20 49 35 109q65 24 130 0l15-60q-80 38-160 0" fill="url(#job-wicker)"/><path d="M17 39q83 45 166 0" fill="none" stroke="#e4be7e" stroke-width="8"/><path d="M37 107q61 22 125 0" fill="none" stroke="#e1b677" stroke-width="4"/>`,
       "0 0 200 130",
     );
   }
   function plant(type = "corn") {
+    if (type === "tomato")
+      return JobPolishArt.svg("tomato-plant", "0 0 200 240");
     if (type === "beans")
       return svg(
         `<path d="M101 230V18M49 230 83 22m55 210L119 23" stroke="#bd9b6d" stroke-width="5" fill="none"/><path d="M95 230q-34-57 13-81t-9-71q-36-29 10-57" fill="none" stroke="#528442" stroke-width="5"/><g fill="#7fa953" stroke="#4c7a3c" stroke-width="3"><path d="M99 180q-64 0-49-39 42-5 49 39m8-25q56 0 44-36-43 0-44 36M90 112q-58-1-42-34 36-8 42 34m15-27q51 4 39-34-38-2-39 34M109 53Q75 48 82 19q32 4 27 34"/></g><g fill="#acc96b" stroke="#59843d" stroke-width="3"><path d="M68 140q-7 54 15 60 15-20-15-60m65-29q29 31 8 59-20-17-8-59"/></g>`,
@@ -25,13 +27,14 @@ const JobArt = (() => {
       `<path d="m100 183-9 34m10-31 14 35m-15-32-25 23m25-22 30 14" fill="none" stroke="#b9976c" stroke-width="3"/><path d="M100 185V52m0 105-45-19 16-13-29-28 31 2-11-37 38 28 27-39-3 43 35-11-23 38 17 8-53 24" fill="${harder ? "#a28051" : "#b96250"}" stroke="#6d4b37" stroke-width="4"/><path d="m99 106-18-14m19 47 26-26" stroke="#dfac78" stroke-width="3"/><path d="M80 187h40" stroke="#684934" stroke-width="6" stroke-linecap="round"/>`,
     );
   }
-  function flower(done, variant = 0) {
+  function legacyFlower(done, variant = 0) {
     const colors = ["#ef8fa0", "#c2a1e2", "#f4cb6d"];
     return svg(
       `<ellipse cx="100" cy="207" rx="82" ry="25" fill="${done ? "#795339" : "#bc976a"}"/><path d="M100 207Q${done ? 94 : 126} 141 ${done ? 100 : 122} 88M100 172q-68 2-50-39 37-1 50 39m2-17q63-10 51-43-36-3-51 43" fill="#7ba654" stroke="#4a763a" stroke-width="5"/><g transform="translate(${done ? 100 : 122} ${done ? 76 : 103}) rotate(${done ? 0 : 32})"><g fill="${colors[variant % 3]}" stroke="#a76864" stroke-width="2">${Array.from({ length: 6 }, (_, i) => `<ellipse cy="-24" rx="15" ry="25" transform="rotate(${i * 60})"/>`).join("")}</g><circle r="17" fill="#f7d46d" stroke="#bc934d" stroke-width="3"/><circle cx="-4" cy="-5" r="5" fill="#ffe9a8"/></g>${done ? '<g fill="#9ed9ed"><path d="M48 176q-12 19 0 20 13-1 0-20m101-12q-12 19 0 20 13-1 0-20"/></g>' : '<path d="m45 208 16-9m67 18 13-9m-55-3-10 10" stroke="#9b774f" stroke-width="3"/>'}`,
     );
   }
   function ground(kind) {
+    if (["tree", "bed"].includes(kind)) return JobPolishArt.ground(kind);
     return svg(
       kind === "path"
         ? '<path d="M10 22h78l12 51-91 8ZM108 7l81 17-2 69-75-10ZM9 104l87-7 2 76-85 12ZM117 109l71-6 4 97-81-18Z" fill="#c9b28a" stroke="#a58b67" stroke-width="5"/>'
@@ -40,7 +43,7 @@ const JobArt = (() => {
           : '<ellipse cx="100" cy="160" rx="83" ry="44" fill="#b48b5d"/><path d="m45 153 17-9m23 32 18-7m29-21 14 12M66 190l18-4" stroke="#8d6948" stroke-width="5"/>',
     );
   }
-  function field() {
+  function legacyField() {
     return svg(
       `<defs><linearGradient id="job-sky" x2="0" y2="1"><stop stop-color="#9fdaee"/><stop offset="1" stop-color="#eef3c1"/></linearGradient><linearGradient id="job-earth" x2="0" y2="1"><stop stop-color="#b8bd76"/><stop offset="1" stop-color="#a8794d"/></linearGradient></defs><path fill="url(#job-sky)" d="M0 0h800v500H0Z"/><g fill="#fff8df" opacity=".8"><ellipse cx="110" cy="60" rx="80" ry="23"/><ellipse cx="660" cy="90" rx="100" ry="25"/></g><path d="M0 190Q150 90 300 180q210-140 500-10v330H0" fill="#a1ba70"/><path d="M0 218q400-64 800 0v282H0Z" fill="url(#job-earth)"/><path d="M0 206h800M0 226h800" stroke="#dfc59a" stroke-width="9"/><g stroke="#b28c5d" stroke-width="9">${Array.from({ length: 17 }, (_, i) => `<path d="M${i * 50} 187v60"/>`).join("")}</g><g fill="none" stroke="#84623f" stroke-width="16" opacity=".55"><path d="M350 237 25 500m369-263L260 500m177-263 100 263m-55-263 300 263"/></g><g fill="#5e913e" stroke="#4c7936" stroke-width="3">${Array.from(
         { length: 30 },
@@ -55,7 +58,7 @@ const JobArt = (() => {
       "0 0 800 500",
     );
   }
-  function jones() {
+  function legacyJones() {
     return svg(
       `<ellipse cx="105" cy="278" rx="66" ry="11" fill="#584e32" opacity=".22"/><g class="jones-body"><path d="m73 201-7 65q-25 2-25 13h52l10-67m16-11 8 65q29 0 28 13h-49l-9-65" fill="#506c79" stroke="#3f5357" stroke-width="4"/><path d="M46 123q57-29 105 6l-6 83H59Z" fill="#d7a276" stroke="#8d644a" stroke-width="3"/><path d="M48 128q10-18 25-17l-1 65-28 3Zm80-15q24 0 29 23l3 43-28-3Z" fill="#b96750" stroke="#884b3f" stroke-width="3"/><path d="M71 122v33h59v-32l9 80q-42 30-79 0Z" fill="#769aaa" stroke="#486775" stroke-width="3"/><path d="M84 159h32v25q-17 12-32-1Z" fill="#597f91" stroke="#aac0bd" stroke-width="2"/><circle cx="78" cy="148" r="4" fill="#d9bd66"/><circle cx="127" cy="148" r="4" fill="#d9bd66"/><g class="jones-arm"><path d="M145 135q25 24 1 49l-21-8" fill="none" stroke="#b96750" stroke-width="20" stroke-linecap="round"/><path class="jones-held-carrot" d="m112 171-10 27-7-30Z" fill="#ef9847" stroke="#ab6437" stroke-width="2"/><path class="jones-held-carrot" d="m100 169-12-13 14 6 4-15 4 17 12-6-12 15" fill="#79a34c" stroke="#50743b" stroke-width="2"/><path d="m128 177-17-10" stroke="#dfaf83" stroke-width="15" stroke-linecap="round"/></g><path d="M53 141q-19 16-6 37l16 7" fill="none" stroke="#b96750" stroke-width="18" stroke-linecap="round"/><ellipse cx="102" cy="76" rx="42" ry="50" fill="#e3b78a" stroke="#9c7050" stroke-width="3"/><ellipse cx="59" cy="80" rx="8" ry="13" fill="#dba77a"/><ellipse cx="144" cy="80" rx="8" ry="13" fill="#dba77a"/><path d="M63 82q-9-52 40-48 47-1 38 49l-10-29-21-6-34 8Z" fill="#b6aaa0"/><path d="M47 43q53-28 109 0l10 13Q100 75 35 54Z" fill="#dcc28c" stroke="#97764e" stroke-width="3"/><path d="m67 40 9-30q26-12 53 1l12 30" fill="#e5cf9a" stroke="#a5895c" stroke-width="3"/><path d="M71 33q34 8 64 0" stroke="#aa7550" stroke-width="7"/><g class="jones-eyes" fill="#514c3c"><ellipse cx="84" cy="79" rx="4" ry="5"/><ellipse cx="120" cy="79" rx="4" ry="5"/></g><path class="jones-normal-smile" d="M95 86q-8 16 7 13m-22 11q21 15 40-1" fill="none" stroke="#a56e52" stroke-width="3" stroke-linecap="round"/><path class="jones-proud-smile" d="M84 111q18 26 35-1-17 9-35 1Z" fill="#a3664c"/><path d="M77 103q10-9 24 0 14-10 26 0-12 15-26 5-12 10-24-5" fill="#e0d1b6"/><g fill="#ed9e7e" opacity=".5"><ellipse cx="75" cy="95" rx="10" ry="5"/><ellipse cx="130" cy="95" rx="9" ry="5"/></g></g>`,
       "0 0 200 290",
@@ -82,13 +85,18 @@ const JobArt = (() => {
       `<path d="M100 187 90 219m10-31 13 31m-13-28-24 17m26-16 25 18" fill="none" stroke="#c5a376" stroke-width="3"/><path d="M100 185V44m0 113-41-19 12-11-30-29 31 1-13-31 41 21 24-38 2 42 33-6-20 32 12 10-51 26" fill="${harder ? "#b6ae65" : "#d5c26b"}" stroke="#8b7f3e" stroke-width="4"/><path d="m99 117-24-16m26 46 24-19" stroke="#f0dfa0" stroke-width="3"/>`,
     );
   }
-  function magee() {
+  function legacyMagee() {
     return svg(
       `<defs><linearGradient id="magee-apron" x2="1" y2="1"><stop stop-color="#e3b489"/><stop offset="1" stop-color="#c88c70"/></linearGradient></defs><ellipse cx="111" cy="275" rx="70" ry="12" fill="#6a513533"/><path d="m73 229-7 36-17 9h43l7-43m20 1 6 32 28 10h-48l-5-41" fill="#71584d" stroke="#55453c" stroke-width="3"/><path d="M56 124q52-27 101 3l16 107q-59 29-128 0Z" fill="#a37ca2" stroke="#795c7b" stroke-width="3"/><path d="M58 128q-18 5-25 37l15 19m104-55q23 12 19 43l-20 14" fill="none" stroke="#ab85ad" stroke-width="19" stroke-linecap="round"/><path d="m46 178 20 9m89-6-15 7" stroke="#e2b58f" stroke-width="14" stroke-linecap="round"/><path d="M79 124v37h54v-37m-55 30-17 75q45 20 89 0l-18-75" fill="url(#magee-apron)" stroke="#a47359" stroke-width="3"/><path d="M87 183h38v26q-17 12-38 0Z" fill="#deb28c" stroke="#ab8063" stroke-width="3"/><path d="M96 193q6-13 13 0m-5 0v14" fill="none" stroke="#a27c4f" stroke-width="3"/><circle cx="118" cy="17" r="20" fill="#ddd5c7" stroke="#afa69a" stroke-width="3"/><path d="M65 92q-24-63 23-69 63-17 62 70" fill="#d7d0c4" stroke="#aaa197" stroke-width="3"/><ellipse cx="105" cy="79" rx="42" ry="49" fill="#e6bc97" stroke="#a87f60" stroke-width="3"/><path d="M64 68q-13-50 30-43 50-13 54 44-23-7-30-26-18 27-54 25" fill="#e1d9cb" stroke="#b7ada1" stroke-width="3"/><g fill="none" stroke="#796e64" stroke-width="3"><ellipse cx="88" cy="81" rx="15" ry="13"/><ellipse cx="123" cy="81" rx="15" ry="13"/><path d="M102 80h7m-36-2-10-2m76 3 10-1"/></g><g fill="none" stroke="#b9afa1" stroke-width="2"><path d="M71 51q7-22 22-19"/><path d="M84 47q14-18 24-14"/><path d="M121 38q15 8 19 21"/></g><path d="M77 66q9-5 17-1m20 0q9-4 17 2" stroke="#a09387" stroke-width="3" fill="none"/><path d="m64 205-6 21m94-21 6 21m-61 4h25" stroke="#e1bd93" stroke-width="3" fill="none"/><g fill="#554d3f"><circle cx="89" cy="82" r="3"/><circle cx="121" cy="82" r="3"/></g><path d="M103 90q-6 10 4 10m-18 9q17 16 34-1" stroke="#ab745a" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#dca086" opacity=".65"><ellipse cx="77" cy="99" rx="9" ry="5"/><ellipse cx="133" cy="99" rx="8" ry="5"/></g><path d="m77 120 28 16 28-17-12 23-17-5-16 5Z" fill="#f3d49e" stroke="#c49f72" stroke-width="2"/>`,
       "0 0 210 290",
       "Mrs. Magee, a smiling gardener with silver hair, glasses and a flower apron",
     );
   }
+  const basket = () => JobPolishArt.svg("basket", "0 0 200 130");
+  const jones = () => JobPolishArt.character("jones");
+  const magee = () => JobPolishArt.character("magee");
+  const field = () => JobPolishArt.field();
+  const flower = (done, variant) => JobPolishArt.flower(done, variant);
   return {
     basket,
     plant,
