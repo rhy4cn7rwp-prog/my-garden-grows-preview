@@ -8,6 +8,10 @@ jobs and the guidebook's description of them. Main Garden weeding is separate.
 `assets/job-pictures/source/hidden` and `source/sliding` preserve sixty distinct
 original PNG illustrations. Each was generated separately for its own composition.
 `provenance.json` records their dimensions, SHA-256 hashes, and delivery copies.
+The overhead carrot bed also has a separately illustrated transparent carrot-top
+sprite and preserved source in `assets/job-garden`. Its plants, grassy weeds and
+soil are separate interactive elements.
+
 Thumbnails, cropped checklist pictures, and puzzle tiles are derivatives, not
 additional original illustrations.
 

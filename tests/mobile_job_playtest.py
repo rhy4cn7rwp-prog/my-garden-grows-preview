@@ -80,7 +80,7 @@ try:
     i=page.evaluate('(wanted)=>state.jobs.active.data.items.findIndex(x=>x.kind===wanted)',desired)
     source=page.locator(f'[data-job-drag="chore"][data-item="{i}"]');source.scroll_into_view_if_needed();before_scroll=row.evaluate('(e)=>e.scrollLeft');source.tap();assert page.evaluate('state.jobs.active.score')==1
     page.wait_for_timeout(400);assert abs(row.evaluate('(e)=>e.scrollLeft')-before_scroll)<2
-    assert page.locator('.job-row-station,.overhead-cluster').count()>=4;assert page.locator('.job-crop-stalk svg,.carrot-healthy svg').count()>=4
+    assert page.locator('.job-row-station,.overhead-cluster').count()>=4;assert page.locator('.job-crop-stalk svg,.carrot-healthy svg,.carrot-healthy img').count()>=4
     page.screenshot(path=f'/tmp/playtest-refined-{job}-{w}.png')
     state_before=page.evaluate('state.jobs.active');page.evaluate('Neighborhood.stop();save()');page.reload();assert page.evaluate('state.jobs.active.data')==state_before['data'];page.evaluate("go('jobs')");assert row.evaluate('(e)=>e.scrollLeft')>=0
    # Exactly 36 plots, comfortable hit areas, distinct dry/wet flower illustrations.

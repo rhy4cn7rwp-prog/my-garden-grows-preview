@@ -401,8 +401,8 @@
   display: block;
 }
 .overhead-pick.carrot-healthy {
-  width: 110px;
-  height: 110px;
+  width: 142px;
+  height: 142px;
   z-index: 2;
   filter: drop-shadow(2px 4px 2px #35271955);
 }
@@ -553,4 +553,148 @@
   .seek-world {
     height: calc(100dvh - var(--jobs-hud-height, 56px) - 245px);
   }
+}
+
+.sliding-preview {
+  position: static;
+  width: 44px;
+  height: 44px;
+  transform: none;
+  pointer-events: none;
+  z-index: auto;
+  flex: none;
+}
+/* Keep the seek controls clear of the fixed action bar, including safe areas. */
+.jobs-game .seek-job {
+  height: calc(var(--visible-height, 100dvh) - var(--jobs-hud-height, 56px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+  padding-bottom: calc(70px + var(--viewport-safe-bottom, 0px));
+}
+.seek-job > header,
+.seek-job > .job-status,
+.seek-job > .job-feedback {
+  flex: none;
+}
+.seek-job .job-play-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.seek-job .seek-checklist,
+.seek-job .picture-tools {
+  flex: none;
+}
+.seek-job .seek-world {
+  flex: 1;
+  height: auto;
+  min-height: 85px;
+  max-height: none;
+}
+.seek-job .job-feedback {
+  font-size: 11px;
+  line-height: 1.1;
+  min-height: 13px;
+}
+.sliding-info {
+  gap: 3px;
+}
+.sliding-info b {
+  font-size: 11px;
+  flex: 1;
+  min-width: 34px;
+}
+.sliding-info .btn {
+  margin: 1px;
+  font-size: 12px;
+  line-height: 1.1;
+  padding: 3px 5px;
+  min-width: 44px;
+}
+.sliding-info .sliding-preview {
+  width: 38px;
+  height: 38px;
+}
+.picture-sliding {
+  min-width: 182px;
+}
+
+.overhead-pick img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.overhead-soil {
+  background: radial-gradient(ellipse at 40% 35%, #a47b50, #785034 90%);
+}
+.bed-earth {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.jobs-game .picture-prestart {
+  height: calc(var(--visible-height, 100dvh) - var(--jobs-hud-height, 56px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+  padding-bottom: calc(70px + var(--viewport-safe-bottom, 0px));
+}
+.picture-prestart > header,
+.picture-prestart > .job-status,
+.picture-prestart > .job-feedback {
+  flex: none;
+}
+.picture-prestart .job-play-area {
+  flex: 1;
+  min-height: 0;
+}
+.picture-preparation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-height: 0;
+}
+.picture-preparation > img {
+  flex: 1;
+  min-height: 35px;
+  height: 0;
+  max-height: 230px;
+  width: min(100%, 300px);
+  object-fit: contain;
+}
+.picture-preparation > h2,
+.picture-preparation > p,
+.picture-prepare-actions {
+  flex: none;
+}
+.picture-preparation > p {
+  font-size: 12px;
+  line-height: 1.2;
+  margin: 3px 0;
+}
+.picture-preparation > h2 {
+  font-size: 16px;
+  margin: 3px;
+}
+.picture-prepare-actions {
+  display: flex;
+  gap: 4px;
+}
+.picture-prepare-actions .btn {
+  font-size: 13px;
+  padding: 5px 8px;
+  margin: 3px 1px;
+}
+
+.compact-job .job-main-actions .btn:last-child {
+  font-size: 11px;
+  padding: 3px 1px;
 }
