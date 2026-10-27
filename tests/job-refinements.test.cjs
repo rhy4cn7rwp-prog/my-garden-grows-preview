@@ -182,7 +182,7 @@ test("mower reaches all connected lawn cells without teleporting or crossing obs
 });
 test("all ten jobs keep personal records per mode/settings, first $1 and improved $3 total, ties $1, persisted cooldown, no double claim", () => {
   for (const mode of ["little", "growing"])
-    for (const { id } of J.catalog) {
+    for (const { id } of J.catalog.filter(j=>!["hidden","sliding"].includes(j.id))) {
       const s = start(id, mode),
         a = s.jobs.active;
       J.tick(s, 10000);

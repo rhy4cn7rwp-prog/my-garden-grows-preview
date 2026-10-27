@@ -1,0 +1,249 @@
+/* Original picture activities: screen gestures are separate from saved rules. */
+const JobPictureGames = (() => {
+  const views = new Map(),
+    pointers = new Map();
+  let mouseTap = false;
+  let gesture = null,
+    readyKey = "";
+  const current = () => state.jobs?.active;
+  const key = (a) => `${a.serial}:${a.seed}:${a.id}:${a.data.scene}`;
+  const sceneData = (a) => JobGallery[a.id][a.data.scene];
+  const run = (action) =>
+    `onpointerup="TouchActions.run(event,()=>Neighborhood.act(${action}))" onclick="Neighborhood.act(${action})"`;
+  const button = (text, action) =>
+    `<button class="btn alt" ${run(action)}>${text}</button>`;
+  function thumbnail(id) {
+    return `<img class="job-picture-thumbnail" src="assets/job-pictures/thumbs/${id}.webp" alt="${id === "hidden" ? "A detailed barnyard to explore" : "A red tractor picture puzzle"}" loading="lazy"/>`;
+  }
+  function complete(a) {
+    return `<img class="job-picture-complete" src="${sceneData(a).file}" alt="${sceneData(a).title}, complete!"/>${a.id === "sliding" ? `<p>${a.data.moves} moves · Picture complete!</p>` : ""}`;
+  }
+  function scene(a) {
+    const d = a.data,
+      s = sceneData(a);
+    if (!d.started)
+      return `<div class="picture-preparation"><img data-picture-load src="${s.file}" alt="${a.id === "sliding" ? s.title : "Your next hidden-picture scene"}" class="${a.id === "hidden" ? "seek-covered" : ""}"/><h2>${s.title}</h2><p>${a.id === "hidden" ? "Find " + d.targets.length + " real objects in this picture. You can zoom, look around and ask for hints." : "Slide a piece next to the empty space. Rebuild this " + d.size + " × " + d.size + " picture."}</p><p data-picture-loading role="status">Loading your illustration…</p><div class="picture-prepare-actions"><button class="btn" data-picture-begin disabled ${run("{type:'pictureBegin'}")}>${a.id === "hidden" ? "Start Finding" : "Start Puzzle"}</button>${button("New Picture", "{type:'nextPicture'}")}</div></div>`;
+    if (a.id === "hidden")
+      return `<div class="seek-checklist ${a.mode === "little" ? "picture-list" : ""}" aria-label="Objects to find">${d.targets
+        .map((i) => {
+          const o = s.objects[i];
+          return `<button class="${d.found.includes(i) ? "found" : ""}" onclick="Neighborhood.read('${o.name}')" aria-label="${o.name}${d.found.includes(i) ? ", found" : ""}">${a.mode === "little" ? `<svg viewBox="${o.x * 1000} ${o.y * 1000} ${o.w * 1000} ${o.h * 1000}" aria-hidden="true"><image href="${s.file}" width="1000" height="1000"/></svg>` : ""}<span>${o.name}${d.found.includes(i) ? " ✓" : ""}</span></button>`;
+        })
+        .join(
+          "",
+        )}</div><div class="seek-world" data-picture-world tabindex="0" role="application" aria-label="${s.title}. Drag to explore, pinch or use buttons to zoom. Tap objects to find them."><div class="seek-canvas"><img src="${s.file}" alt="${s.title}" draggable="false"/>${d.found
+        .map((i) => {
+          const o = s.objects[i];
+          return `<span class="seek-found" style="left:${(o.x + o.w / 2) * 100}%;top:${(o.y + o.h / 2) * 100}%" aria-hidden="true">✦</span>`;
+        })
+        .join(
+          "",
+        )}${d.hint !== undefined ? hintRegion(s.objects[d.hint]) : ""}</div></div><div class="picture-tools"><button class="btn alt" onpointerup="TouchActions.run(event,()=>JobPictureGames.zoom(1.4))" onclick="JobPictureGames.zoom(1.4)" aria-label="Zoom in">＋</button><button class="btn alt" onpointerup="TouchActions.run(event,()=>JobPictureGames.zoom(1/1.4))" onclick="JobPictureGames.zoom(1/1.4)" aria-label="Zoom out">−</button><button class="btn alt" onpointerup="TouchActions.run(event,()=>JobPictureGames.fit())" onclick="JobPictureGames.fit()">Fit</button>${button("Hint", "{type:'pictureHint'}")}</div>`;
+    const n = d.size;
+    return `<div class="sliding-info"><b>${d.moves} moves</b>${d.preview ? `<img class="sliding-preview" src="${s.file}" alt="Completed ${s.title}"/>` : ""}${button(d.preview ? "Hide Preview" : "Show Preview", "{type:'picturePreview'}")}${button("Restart", "{type:'pictureRestart'}")}${button("Hint", "{type:'pictureHint'}")}</div><div class="picture-sliding" style="--grid:${n}" aria-label="${n} by ${n} sliding picture puzzle">${d.tiles.map((tile, cell) => (tile === null ? `<span class="picture-empty" style="left:${((cell % n) * 100) / n}%;top:${(Math.floor(cell / n) * 100) / n}%" aria-label="Empty space"></span>` : `<button data-picture-tile="${cell}" class="picture-tile ${d.hintTile === tile ? "hint-tile" : ""} ${d.lastMove?.tile === tile ? "just-slid" : ""}" style="left:${((cell % n) * 100) / n}%;top:${(Math.floor(cell / n) * 100) / n}%;background-image:url('${s.file}');background-size:${n * 100}% ${n * 100}%;background-position:${((tile % n) * 100) / (n - 1)}% ${(Math.floor(tile / n) * 100) / (n - 1)}%;--slide-x:${d.lastMove?.tile === tile ? ((d.lastMove.from % n) - (cell % n)) * 100 : 0}%;--slide-y:${d.lastMove?.tile === tile ? (Math.floor(d.lastMove.from / n) - Math.floor(cell / n)) * 100 : 0}%" ${run(`{type:'slide',cell:${cell}}`)} aria-label="Picture piece ${tile + 1}, row ${Math.floor(cell / n) + 1}, column ${(cell % n) + 1}${JobPictureRules.adjacent(n, d.tiles.indexOf(null)).includes(cell) ? ", can slide" : ""}"></button>`)).join("")}</div>${d.hintTile !== undefined ? `<p class="tile-hint">Piece ${d.hintTile + 1} belongs in row ${Math.floor(d.hintTile / n) + 1}, column ${(d.hintTile % n) + 1}.</p>` : ""}`;
+  }
+  function hintRegion(o) {
+    const col = Math.min(2, Math.floor((o.x + o.w / 2) * 3)),
+      row = Math.min(2, Math.floor((o.y + o.h / 2) * 3));
+    return `<span class="seek-hint" style="left:${(col * 100) / 3}%;top:${(row * 100) / 3}%" aria-label="Look in the ${["top", "middle", "bottom"][row]} ${["left", "center", "right"][col]} area"></span>`;
+  }
+  function allowed() {
+    return (
+      typeof view !== "undefined" &&
+      view === "jobs" &&
+      !document.querySelector(".job-play.is-paused") &&
+      current()?.id === "hidden" &&
+      current().data.started &&
+      !current().ended
+    );
+  }
+  function geometry() {
+    const el = document.querySelector("[data-picture-world]");
+    if (!el) return null;
+    const rect = el.getBoundingClientRect(),
+      a = current(),
+      v = views.get(key(a)) || { scale: 1, x: 0, y: 0 };
+    views.set(key(a), v);
+    const base = Math.min(rect.width, rect.height);
+    return { el, rect, v, base };
+  }
+  function paint() {
+    const g = geometry();
+    if (!g) return;
+    const { el, rect, v, base } = g,
+      size = base * v.scale;
+    v.x = Math.max(
+      -Math.max(0, (size - rect.width) / 2),
+      Math.min(Math.max(0, (size - rect.width) / 2), v.x),
+    );
+    v.y = Math.max(
+      -Math.max(0, (size - rect.height) / 2),
+      Math.min(Math.max(0, (size - rect.height) / 2), v.y),
+    );
+    const canvas = el.querySelector(".seek-canvas");
+    Object.assign(canvas.style, {
+      width: base + "px",
+      height: base + "px",
+      transform: `translate(${v.x}px,${v.y}px) scale(${v.scale})`,
+    });
+  }
+  function zoom(factor) {
+    if (!allowed()) return;
+    const g = geometry();
+    if (!g) return;
+    g.v.scale = Math.max(1, Math.min(4, g.v.scale * factor));
+    paint();
+  }
+  function fit() {
+    if (!allowed()) return;
+    const g = geometry();
+    if (!g) return;
+    Object.assign(g.v, { scale: 1, x: 0, y: 0 });
+    paint();
+  }
+  function hit(x, y) {
+    const g = geometry();
+    if (!g) return;
+    const { rect, v, base } = g,
+      a = current(),
+      s = sceneData(a),
+      size = base * v.scale,
+      nx = (x - rect.x - rect.width / 2 - v.x) / size + 0.5,
+      ny = (y - rect.y - rect.height / 2 - v.y) / size + 0.5;
+    if (nx < 0 || nx > 1 || ny < 0 || ny > 1) return;
+    let candidates = [];
+    for (const i of a.data.targets) {
+      if (a.data.found.includes(i)) continue;
+      const o = s.objects[i];
+      for (const [ox, oy, ow, oh] of [
+        [o.x, o.y, o.w, o.h],
+        ...(o.regions || []),
+      ]) {
+        const cx = ox + ow / 2,
+          cy = oy + oh / 2,
+          hw = Math.max(ow / 2, 22 / size),
+          hh = Math.max(oh / 2, 22 / size);
+        if (Math.abs(nx - cx) <= hw && Math.abs(ny - cy) <= hh)
+          candidates.push({
+            i,
+            dist: Math.hypot((nx - cx) / hw, (ny - cy) / hh),
+          });
+      }
+    }
+    candidates.sort((a, b) => a.dist - b.dist);
+    if (candidates.length)
+      Neighborhood.act({ type: "findObject", item: candidates[0].i });
+    else {
+      const el = g.el;
+      el.classList.remove("seek-try");
+      void el.offsetWidth;
+      el.classList.add("seek-try");
+      Neighborhood.pictureFeedback("Keep looking. Nothing is lost!");
+    }
+  }
+  function sync() {
+    const a = current();
+    if (!a || !["hidden", "sliding"].includes(a.id)) return;
+    const img = document.querySelector("[data-picture-load]");
+    if (img) {
+      const loaded = () => {
+        if (!img.isConnected) return;
+        const b = document.querySelector("[data-picture-begin]"),
+          label = document.querySelector("[data-picture-loading]");
+        if (img.naturalWidth) {
+          b.disabled = false;
+          label.textContent = "Ready when you are. Your timer has not started.";
+        } else {
+          label.innerHTML =
+            "The picture could not load. <button class=\"btn alt\" onclick=\"this.closest('.picture-preparation').querySelector('img').src += '?retry='+Date.now()\">Try loading again</button>";
+        }
+      };
+      img.onload = loaded;
+      img.onerror = loaded;
+      if (img.complete) loaded();
+    }
+    if (a.id === "hidden" && a.data.started) paint();
+    if (readyKey !== key(a)) {
+      pointers.clear();
+      gesture = null;
+      readyKey = key(a);
+    }
+  }
+  document.addEventListener("pointerdown", (e) => {
+    if (!allowed() || !e.target.closest("[data-picture-world]")) return;
+    const g = geometry();
+    mouseTap = false;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    g.el.setPointerCapture(e.pointerId);
+    if (pointers.size === 1)
+      gesture = {
+        x: e.clientX,
+        y: e.clientY,
+        panX: g.v.x,
+        panY: g.v.y,
+        moved: false,
+      };
+    else if (pointers.size === 2) {
+      const [p, q] = [...pointers.values()];
+      gesture = {
+        pinch: true,
+        moved: true,
+        distance: Math.hypot(p.x - q.x, p.y - q.y),
+        scale: g.v.scale,
+      };
+    }
+    e.preventDefault();
+  });
+  document.addEventListener(
+    "pointermove",
+    (e) => {
+      if (!pointers.has(e.pointerId) || !allowed() || !gesture) return;
+      const g = geometry();
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2 && gesture.pinch) {
+        const [p, q] = [...pointers.values()];
+        g.v.scale = Math.max(
+          1,
+          Math.min(
+            4,
+            (gesture.scale * Math.hypot(p.x - q.x, p.y - q.y)) /
+              gesture.distance,
+          ),
+        );
+      } else if (!gesture.pinch) {
+        if (Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) > 7)
+          gesture.moved = true;
+        if (gesture.moved) {
+          g.v.x = gesture.panX + e.clientX - gesture.x;
+          g.v.y = gesture.panY + e.clientY - gesture.y;
+        }
+      }
+      paint();
+      e.preventDefault();
+    },
+    { passive: false },
+  );
+  function release(e, cancel = false) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    if (!cancel && allowed() && gesture && !gesture.moved && !gesture.pinch) {
+      if (e.pointerType === "touch")
+        TouchActions.run(e, () => hit(e.clientX, e.clientY));
+      else mouseTap = true;
+    }
+    if (!pointers.size) gesture = null;
+  }
+  document.addEventListener("pointerup", (e) => release(e));
+  document.addEventListener("pointercancel", (e) => release(e, true));
+  document.addEventListener("click", (e) => {
+    if (mouseTap && allowed() && e.target.closest("[data-picture-world]")) {
+      mouseTap = false;
+      e.preventDefault();
+      hit(e.clientX, e.clientY);
+    }
+  });
+  addEventListener("resize", () => {
+    if (allowed()) paint();
+  });
+  return { scene, complete, thumbnail, sync, zoom, fit };
+})();

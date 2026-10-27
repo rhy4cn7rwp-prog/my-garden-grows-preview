@@ -1,0 +1,700 @@
+/* Picture games and the deeper stack layout share a compact phone viewport. */
+.job-picture-thumbnail {
+  width: 100%;
+  height: 112px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+.job-picture-complete {
+  width: min(100%, 420px);
+  max-height: 42dvh;
+  object-fit: contain;
+  border-radius: 12px;
+  display: block;
+  margin: auto;
+  animation: picture-complete 0.6s ease-out;
+}
+.compact-job .job-record-strip {
+  display: none;
+}
+.compact-job .job-main-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px max(5px, env(safe-area-inset-right))
+    calc(5px + var(--viewport-safe-bottom, env(safe-area-inset-bottom)));
+}
+.compact-job .job-main-actions .btn {
+  font-size: 12px;
+  padding: 5px 2px;
+  min-width: 0;
+  min-height: 44px;
+  line-height: 1.1;
+}
+.compact-job > header h1 {
+  font-size: 20px;
+  line-height: 1.1;
+  margin: 3px 0;
+}
+.compact-job > header .job-instructions {
+  font-size: 13px;
+  line-height: 1.2;
+  margin: 4px 0;
+}
+.compact-job .job-status {
+  font-size: 12px;
+  min-height: 22px;
+  gap: 5px;
+  margin: 2px 0;
+}
+.compact-job .job-feedback {
+  font-size: 12px;
+  margin: 4px 0;
+  line-height: 1.2;
+  min-height: 16px;
+}
+.job-play-area {
+  position: relative;
+}
+.deep-stacks .job-play-area > p {
+  font-size: 12px;
+  margin: 3px 0;
+}
+.deep-stacks .job-stacks {
+  gap: 4px;
+  margin: 5px 0;
+  display: grid;
+  grid-template-columns: repeat(var(--crates, 6), minmax(0, 1fr));
+  align-items: end;
+}
+.deep-stacks .job-stack {
+  width: 100%;
+  min-width: 44px;
+  max-width: none;
+  padding: 2px;
+  gap: 0;
+  border-width: 2px;
+  border-radius: 9px 9px 5px 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  min-height: 0;
+}
+.deep-stacks .job-stack span {
+  height: clamp(
+    17px,
+    calc((100dvh - var(--jobs-hud-height, 60px) - 225px) / 8),
+    34px
+  );
+  min-height: 0;
+  width: 100%;
+  display: block;
+}
+.deep-stacks .job-stack span svg {
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+}
+.deep-stacks .job-stack b {
+  font-size: 11px;
+  line-height: 13px;
+}
+.deep-stacks .job-stack.selected {
+  outline: 3px solid #6e953f;
+  outline-offset: 0;
+}
+.deep-stacks .job-actions {
+  margin: 3px 0;
+  gap: 5px;
+}
+.deep-stacks .job-actions .btn {
+  min-height: 44px;
+  padding: 5px 12px;
+}
+.picture-preparation {
+  text-align: center;
+}
+.picture-preparation > img {
+  height: min(31dvh, 250px);
+  width: min(100%, 300px);
+  object-fit: contain;
+  border-radius: 10px;
+}
+.picture-preparation .seek-covered {
+  filter: blur(18px);
+}
+.picture-preparation:has(.seek-covered) {
+  background: radial-gradient(ellipse at 50% 15%, #c5dab0, transparent 65%);
+}
+.picture-preparation h2 {
+  font-size: 18px;
+  margin: 4px;
+}
+.picture-preparation p {
+  font-size: 13px;
+  margin: 5px 0;
+}
+.picture-preparation .btn {
+  margin: 4px;
+  min-height: 44px;
+}
+.seek-checklist {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  margin: 4px 0;
+}
+.seek-checklist button {
+  border: 1px solid #b79b6b;
+  border-radius: 7px;
+  background: #fff7dc;
+  color: #513a25;
+  min-height: 44px;
+  font: 600 11px/1.1 inherit;
+  padding: 3px;
+  overflow: hidden;
+}
+.seek-checklist button span {
+  display: block;
+  font-size: 11px;
+  line-height: 1.15;
+}
+.seek-checklist button.found {
+  background: #d5e8bd;
+  color: #385b29;
+}
+.seek-checklist.picture-list {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.seek-checklist svg {
+  width: 100%;
+  height: 38px;
+  display: block;
+}
+.seek-checklist.picture-list button {
+  min-height: 65px;
+}
+.seek-world {
+  height: clamp(
+    125px,
+    calc(100dvh - var(--jobs-hud-height, 60px) - 330px),
+    430px
+  );
+  overflow: hidden;
+  position: relative;
+  background: #55432e;
+  border-radius: 11px;
+  touch-action: none;
+  overscroll-behavior: contain;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.seek-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: 0;
+  margin-top: 0;
+  transform-origin: center;
+  translate: -50% -50%;
+  will-change: transform;
+}
+.seek-canvas > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.seek-found {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #fff6a0;
+  text-shadow:
+    0 1px 3px #6c551b,
+    0 0 8px #ffc700;
+  font-size: clamp(14px, 4vw, 25px);
+  pointer-events: none;
+  animation: picture-complete 0.4s ease-out;
+}
+.seek-hint {
+  position: absolute;
+  width: 33.334%;
+  height: 33.334%;
+  background: #ffeeb155;
+  border: 3px solid #fff1a9;
+  box-sizing: border-box;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: hint-glow 2s ease-in-out infinite alternate;
+}
+.picture-tools {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 4px 0;
+}
+.picture-tools .btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 5px 12px;
+  font-size: 14px;
+}
+.picture-paused {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #f8edce;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 15px;
+  font-size: 24px;
+  border-radius: 12px;
+}
+.sliding-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  margin: 3px 0;
+}
+.sliding-info .btn {
+  min-height: 44px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.sliding-preview {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  position: absolute;
+  right: 3px;
+  top: 47px;
+  z-index: 2;
+  pointer-events: none;
+  border: 2px solid #f9efcd;
+  border-radius: 5px;
+  transform: translateY(-100%);
+}
+.picture-sliding {
+  position: relative;
+  width: min(100%, calc(100dvh - var(--jobs-hud-height, 60px) - 275px));
+  aspect-ratio: 1;
+  margin: 4px auto;
+  background: #715a40;
+  border: 3px solid #946f47;
+  border-radius: 9px;
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+.picture-tile,
+.picture-empty {
+  position: absolute;
+  width: calc(100% / var(--grid));
+  height: calc(100% / var(--grid));
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border-radius: 3px;
+  border: 1px solid #fff4d788;
+  box-shadow: inset 0 0 2px #302311;
+  touch-action: manipulation;
+}
+.picture-empty {
+  background: #573d2b;
+  box-shadow: inset 0 0 10px #21180e;
+}
+.picture-tile.just-slid {
+  animation: tile-slide 0.14s ease-out;
+}
+.picture-tile.hint-tile {
+  outline: 3px solid #f7d76c;
+  outline-offset: -4px;
+  z-index: 1;
+}
+.tile-hint {
+  font-size: 12px !important;
+  line-height: 1.2;
+  margin: 3px 0 !important;
+}
+.seek-try {
+  animation: seek-try 0.35s ease-out;
+}
+@keyframes tile-slide {
+  from {
+    transform: translate(var(--slide-x), var(--slide-y));
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+@keyframes picture-complete {
+  from {
+    opacity: 0.45;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes hint-glow {
+  to {
+    background: #ffeeb122;
+  }
+}
+@keyframes seek-try {
+  50% {
+    box-shadow: 0 0 0 3px #edcd85;
+  }
+}
+/* Rich soil remains visible when each individually rendered weed is removed. */
+.overhead-bed {
+  height: clamp(190px, 40dvh, 360px);
+  background: #765335;
+  border: 8px solid #a58255;
+  box-shadow: inset 0 0 18px #3b261a66;
+  overflow: auto;
+  touch-action: none;
+}
+.overhead-soil {
+  position: relative;
+  width: calc(180px + var(--clusters) * 155px);
+  height: 430px;
+  background:
+    radial-gradient(ellipse at 15% 33%, #b18c5b 0 1px, transparent 3px),
+    radial-gradient(ellipse at 70% 70%, #4f3827 0 2px, transparent 4px),
+    repeating-linear-gradient(171deg, #815c3c44 0 2px, transparent 3px 7px),
+    #8e6743;
+  background-size:
+    23px 29px,
+    41px 37px,
+    100% 100%,
+    100% 100%;
+  box-shadow: inset 0 0 45px #4b3529;
+}
+.overhead-cluster {
+  position: absolute;
+  width: 190px;
+  height: 210px;
+  transform: translate(-40%, -35%);
+}
+.overhead-pick {
+  position: absolute;
+  left: var(--plant-x);
+  top: var(--plant-y);
+  width: 73px;
+  height: 92px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  transform: rotate(var(--plant-turn));
+  touch-action: none;
+  filter: drop-shadow(2px 3px 2px #35271966);
+}
+.overhead-pick svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.overhead-pick.carrot-healthy {
+  width: 142px;
+  height: 142px;
+  z-index: 2;
+  filter: drop-shadow(2px 4px 2px #35271955);
+}
+.overhead-pick.picked {
+  visibility: hidden;
+  pointer-events: none;
+}
+.soil-stone {
+  position: absolute;
+  width: 17px;
+  height: 9px;
+  border-radius: 50%;
+  background: #b3a080;
+  box-shadow: 2px 2px 2px #473826;
+}
+@media (max-width: 350px) {
+  .compact-job > header h1 {
+    font-size: 18px;
+  }
+  .picture-job .job-instructions {
+    display: none;
+  }
+  .seek-checklist button span {
+    font-size: 10px;
+  }
+  .seek-world {
+    height: calc(100dvh - var(--jobs-hud-height, 60px) - 275px);
+  }
+  .picture-sliding {
+    width: min(100%, calc(100dvh - var(--jobs-hud-height, 60px) - 240px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .picture-tile.just-slid,
+  .seek-found,
+  .seek-hint,
+  .job-picture-complete,
+  .seek-try {
+    animation: none;
+  }
+  .seek-canvas {
+    will-change: auto;
+  }
+}
+/* Keep the whole eight-deep puzzle above Safari's usable-height footer. */
+.jobs-game .deep-stacks {
+  height: calc(var(--visible-height, 100dvh) - var(--jobs-hud-height, 56px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding-top: 5px;
+  padding-bottom: 70px;
+}
+.jobs-game .deep-stacks > header .job-instructions {
+  display: none;
+}
+.jobs-game .deep-stacks > header {
+  flex: none;
+}
+.jobs-game .deep-stacks .job-play-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.jobs-game .deep-stacks .job-stacks {
+  flex: 1;
+  min-height: 0;
+  padding: 3px 0;
+  align-items: stretch;
+}
+.jobs-game .deep-stacks .job-stack {
+  min-height: 44px;
+}
+.jobs-game .deep-stacks .job-stack span {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+}
+.jobs-game .deep-stacks .job-stack b {
+  padding: 0;
+  flex: none;
+}
+.jobs-game .deep-stacks .job-feedback {
+  flex: none;
+  min-height: 14px;
+}
+.jobs-game .compact-job > header h1 {
+  font-size: 20px;
+  margin: 1px 0 3px;
+}
+.jobs-game .compact-job > header .job-instructions {
+  font-size: 12px;
+  line-height: 1.2;
+  margin: 3px 0;
+}
+.jobs-game .compact-job .job-play-area > p {
+  font-size: 12px;
+  line-height: 1.2;
+  margin: 3px 0;
+}
+.seek-checklist:not(.picture-list) {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 3px;
+  touch-action: pan-x;
+}
+.seek-checklist:not(.picture-list) button {
+  flex: 0 0 82px;
+  min-width: 0;
+}
+.seek-world {
+  height: clamp(
+    145px,
+    calc(100dvh - var(--jobs-hud-height, 56px) - 245px),
+    460px
+  );
+}
+@media (max-width: 350px) {
+  .picture-job header .job-instructions {
+    display: none !important;
+  }
+  .seek-world {
+    height: calc(100dvh - var(--jobs-hud-height, 56px) - 220px);
+  }
+}
+@media (min-height: 650px) {
+  .jobs-game .deep-stacks {
+    padding-bottom: calc(75px + var(--viewport-safe-bottom, 0px));
+  }
+}
+.overhead-soil {
+  width: calc(180px + var(--clusters) * 210px);
+}
+.overhead-pick {
+  z-index: 3;
+}
+
+.seek-world {
+  height: clamp(
+    120px,
+    calc(100dvh - var(--jobs-hud-height, 56px) - 275px),
+    430px
+  );
+}
+@media (max-width: 350px) {
+  .seek-world {
+    height: calc(100dvh - var(--jobs-hud-height, 56px) - 245px);
+  }
+}
+
+.sliding-preview {
+  position: static;
+  width: 44px;
+  height: 44px;
+  transform: none;
+  pointer-events: none;
+  z-index: auto;
+  flex: none;
+}
+/* Keep the seek controls clear of the fixed action bar, including safe areas. */
+.jobs-game .seek-job {
+  height: calc(var(--visible-height, 100dvh) - var(--jobs-hud-height, 56px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+  padding-bottom: calc(70px + var(--viewport-safe-bottom, 0px));
+}
+.seek-job > header,
+.seek-job > .job-status,
+.seek-job > .job-feedback {
+  flex: none;
+}
+.seek-job .job-play-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.seek-job .seek-checklist,
+.seek-job .picture-tools {
+  flex: none;
+}
+.seek-job .seek-world {
+  flex: 1;
+  height: auto;
+  min-height: 85px;
+  max-height: none;
+}
+.seek-job .job-feedback {
+  font-size: 11px;
+  line-height: 1.1;
+  min-height: 13px;
+}
+.sliding-info {
+  gap: 3px;
+}
+.sliding-info b {
+  font-size: 11px;
+  flex: 1;
+  min-width: 34px;
+}
+.sliding-info .btn {
+  margin: 1px;
+  font-size: 12px;
+  line-height: 1.1;
+  padding: 3px 5px;
+  min-width: 44px;
+}
+.sliding-info .sliding-preview {
+  width: 38px;
+  height: 38px;
+}
+.picture-sliding {
+  min-width: 182px;
+}
+
+.overhead-pick img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.overhead-soil {
+  background: radial-gradient(ellipse at 40% 35%, #a47b50, #785034 90%);
+}
+.bed-earth {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.jobs-game .picture-prestart {
+  height: calc(var(--visible-height, 100dvh) - var(--jobs-hud-height, 56px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+  padding-bottom: calc(70px + var(--viewport-safe-bottom, 0px));
+}
+.picture-prestart > header,
+.picture-prestart > .job-status,
+.picture-prestart > .job-feedback {
+  flex: none;
+}
+.picture-prestart .job-play-area {
+  flex: 1;
+  min-height: 0;
+}
+.picture-preparation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-height: 0;
+}
+.picture-preparation > img {
+  flex: 1;
+  min-height: 35px;
+  height: 0;
+  max-height: 230px;
+  width: min(100%, 300px);
+  object-fit: contain;
+}
+.picture-preparation > h2,
+.picture-preparation > p,
+.picture-prepare-actions {
+  flex: none;
+}
+.picture-preparation > p {
+  font-size: 12px;
+  line-height: 1.2;
+  margin: 3px 0;
+}
+.picture-preparation > h2 {
+  font-size: 16px;
+  margin: 3px;
+}
+.picture-prepare-actions {
+  display: flex;
+  gap: 4px;
+}
+.picture-prepare-actions .btn {
+  font-size: 13px;
+  padding: 5px 8px;
+  margin: 3px 1px;
+}
+
+.compact-job .job-main-actions .btn:last-child {
+  font-size: 11px;
+  padding: 3px 1px;
+}

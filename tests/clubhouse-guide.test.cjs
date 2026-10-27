@@ -47,7 +47,7 @@ test("six-page guide teaches currently playable shopping, growing, bagging and m
     guide.pages.map((p) => p.text.join("\n\n")),
     [
       "Choose Little or Growing Gardener in Settings. Both share your farm and rewards! Visit the Dream Shop to pick a savings goal. Buying your dream later puts it in your Clubhouse.",
-      "New farms start with $0. Collect free starter planting supplies at Seed & Feed. Help neighbors at the Job Board to earn $1 per job. Each neighbor rests for five minutes after paying you.",
+      "New farms start with $0. Collect free starter planting supplies at Seed & Feed. Choose from 12 Job Board activities, including Hidden Treasures and Piece It Together! Help neighbors to earn $1 per job. Each neighbor rests for five minutes after paying you.",
       "Tap a plot, choose a crop, then Plant Plan. Water with the can or Water All. Only End Day advances farming days and grows watered plants. Tap plants for growth pictures. Farming never ends!",
       "Pick ripe crops or use Harvest All. Optional weeding every five days gives each planted crop 1 extra item or pound. Little Gardeners pull unwanted weeds; Growing Gardeners find wrong answers.",
       "New farmers save $20 for a table, scale, cash register and bags at Market Supplies. Then arrange your harvest. Selling is optional; neighborhood jobs can fund your dreams too!",

@@ -12,6 +12,14 @@
     typeof module !== "undefined"
       ? require("./job-records.js")
       : root.JobRecords;
+  const Pictures =
+    typeof module !== "undefined"
+      ? require("./job-picture-rules.js")
+      : root.JobPictureRules;
+  const Stacks =
+    typeof module !== "undefined"
+      ? require("./job-stack-puzzles.js")
+      : root.JobStackPuzzles;
   const names = [
     [
       "words",
@@ -74,6 +82,20 @@
       "Mow the lawn, rake the clippings into piles, then put them in the compost bin.",
     ],
   ];
+  names.push(
+    [
+      "hidden",
+      "Hidden Treasures of the Farm",
+      "Picture adventure",
+      "Find every object on your list. Zoom and pan to explore. Hints are always available.",
+    ],
+    [
+      "sliding",
+      "Piece It Together",
+      "Sliding picture puzzle",
+      "Tap a piece beside the empty space to slide it. Rebuild the picture.",
+    ],
+  );
   const catalog = names.map(([id, name, type, instructions]) => ({
     id,
     name,
@@ -109,6 +131,9 @@
       best: {},
       records: {},
       wordHistory: { little: [], growing: [] },
+      completed: {},
+      pictureHistory: { hidden: [], sliding: [] },
+      pictureCompleted: { hidden: [], sliding: [] },
       active: null,
     };
   }
@@ -116,6 +141,22 @@
     const out = empty();
     if (raw?.version !== 1) return out;
     out.records = Records.recover(raw.records);
+    for (const id of ["hidden", "sliding"])
+      for (const field of ["pictureHistory", "pictureCompleted"])
+        out[field][id] = Array.isArray(raw[field]?.[id])
+          ? raw[field][id]
+              .filter(
+                (n) => Number.isInteger(n) && n >= 0 && n < Pictures.count(id),
+              )
+              .slice(-Pictures.count(id))
+          : [];
+    for (const j of catalog)
+      for (const mode of ["little", "growing"]) {
+        const key = j.id + "|" + mode,
+          v = raw.completed?.[key];
+        if (Number.isSafeInteger(v) && v >= 0) out.completed[key] = v;
+      }
+
     for (const mode of ["little", "growing"])
       out.wordHistory[mode] = Array.isArray(raw.wordHistory?.[mode])
         ? raw.wordHistory[mode].filter((w) => V.all.includes(w)).slice(-24)
@@ -152,8 +193,9 @@
           a.mode,
           a.seed,
           a.serial,
-          [2, 3].includes(a.rulesVersion) ? a.rulesVersion : 1,
+          [2, 3, 4].includes(a.rulesVersion) ? a.rulesVersion : 1,
           a.wordPlan,
+          { picturePlan: a.picturePlan, stackLevel: a.stackLevel },
         );
         for (const entry of a.log) {
           if (entry.type === "tick") tickActive(restored, entry.ms);
@@ -197,9 +239,28 @@
       s.learningExperience === "little" ? "little" : "growing",
       seed >>> 0 || 1,
       s.jobs.sequence,
-      3,
+      ["weeds", "tomatoes", "stacks", "hidden", "sliding"].includes(id) ? 4 : 3,
       plan,
+      {
+        picturePlan: ["hidden", "sliding"].includes(id)
+          ? Pictures.plan(id, seed, s.jobs.pictureHistory?.[id] || [])
+          : undefined,
+        stackLevel:
+          mode === "little"
+            ? Math.min(
+                2,
+                Math.floor((s.jobs.completed?.["stacks|little"] || 0) / 3),
+              )
+            : 0,
+      },
     );
+    if (["hidden", "sliding"].includes(id)) {
+      s.jobs.pictureHistory ||= { hidden: [], sliding: [] };
+      s.jobs.pictureHistory[id] = [
+        ...(s.jobs.pictureHistory[id] || []),
+        s.jobs.active.data.scene,
+      ].slice(-(Pictures.count(id) - 1));
+    }
     if (plan) {
       s.jobs.wordHistory ||= { little: [], growing: [] };
       s.jobs.wordHistory[mode] = [
@@ -209,7 +270,15 @@
     }
     return s.jobs.active;
   }
-  function make(id, mode, seed, serial, rulesVersion = 3, wordPlan) {
+  function make(
+    id,
+    mode,
+    seed,
+    serial,
+    rulesVersion = 3,
+    wordPlan,
+    options = {},
+  ) {
     const r = rng(seed),
       little = mode === "little",
       n = little ? 2 : 4;
@@ -229,6 +298,22 @@
     if (rulesVersion >= 3 && ["words", "labels"].includes(id)) {
       requireRule(V.valid(wordPlan, mode, id), "This word plan is incomplete.");
       a.wordPlan = wordPlan.slice();
+    }
+    if (["hidden", "sliding"].includes(id)) {
+      requireRule(
+        rulesVersion >= 4 && Pictures.validPlan(id, options.picturePlan),
+        "Choose a valid picture collection.",
+      );
+      a.picturePlan = options.picturePlan.slice();
+      a.data = Pictures.make(id, mode, seed, a.picturePlan);
+      return a;
+    }
+    if (id === "stacks" && rulesVersion >= 4) {
+      a.stackLevel = Number.isInteger(options.stackLevel)
+        ? Math.max(0, Math.min(2, options.stackLevel))
+        : 0;
+      a.data = Stacks.make(seed, mode, a.stackLevel);
+      return a;
     }
     if (id === "words") {
       const words =
@@ -398,16 +483,31 @@
               target: little ? 5 : 7,
             };
     } else if (id === "tomatoes") {
-      a.data = {
-        items: shuffle(
-          Array.from({ length: 12 }, (_, i) => ({
-            kind: i < 8 ? "ripe" : "green",
-            done: false,
-          })),
-          r,
-        ),
-        target: little ? 4 : 6,
-      };
+      a.data =
+        rulesVersion >= 4
+          ? {
+              target: 20,
+              items: [0, 3, 2, 4, 1, 0, 4, 1, 2, 3].flatMap((count, plant) =>
+                shuffle(
+                  Array.from({ length: 4 }, (_, slot) => ({
+                    kind: slot < count ? "ripe" : "green",
+                    done: false,
+                    plant,
+                  })),
+                  r,
+                ),
+              ),
+            }
+          : {
+              items: shuffle(
+                Array.from({ length: 12 }, (_, i) => ({
+                  kind: i < 8 ? "ripe" : "green",
+                  done: false,
+                })),
+                r,
+              ),
+              target: little ? 4 : 6,
+            };
     } else if (id === "flowers") {
       a.data = {
         items: Array.from(
@@ -573,6 +673,7 @@
     );
     if (a.ended) return;
     const before = a.elapsed;
+    if (["hidden", "sliding"].includes(a.id) && !a.data.started) return;
     a.elapsed = Math.min(clockLimit(a) || 1e9, a.elapsed + ms);
     if (a.id === "catch") {
       for (let i = 0; i < Math.ceil(60000 / a.data.launchEvery); i++) {
@@ -604,6 +705,7 @@
   function apply(a, e) {
     requireRule(!a.ended, "This round has finished.");
     const d = a.data;
+    if (["hidden", "sliding"].includes(a.id)) return Pictures.apply(a, e);
     if (a.rulesVersion >= 3 && a.id === "tidy") return Lawn.apply(a, e);
     if (
       a.rulesVersion >= 3 &&
@@ -701,7 +803,7 @@
       )
         return false;
       d.undo.push(copy(d.crates));
-      if (d.undo.length > 100) d.undo.shift();
+      if (d.undo.length > (a.rulesVersion >= 4 ? 500 : 100)) d.undo.shift();
       to.push(from.pop());
       a.won = sorted(d.crates, d.cap);
       a.score++;
@@ -833,7 +935,14 @@
     requireRule(a, "Start a job first.");
     requireRule(a.log.length < 3000, "Take a break and restart this activity.");
     const success = apply(a, e);
-    if (success) a.log.push(copy(e));
+    if (success) {
+      a.log.push(copy(e));
+      if (e.type === "nextPicture")
+        s.jobs.pictureHistory[a.id] = [
+          ...(s.jobs.pictureHistory[a.id] || []),
+          a.data.scene,
+        ].slice(-(Pictures.count(a.id) - 1));
+    }
     return success;
   }
   function tick(s, ms) {
@@ -852,6 +961,16 @@
     requireRule(a?.won && a.ended, "Finish this job first.");
     requireRule(!available(s, a.id, now), "This job has already paid.");
     const record = Records.record(s.jobs, a, now);
+    s.jobs.completed ||= {};
+    const completeKey = a.id + "|" + a.mode;
+    s.jobs.completed[completeKey] = (s.jobs.completed[completeKey] || 0) + 1;
+    if (["hidden", "sliding"].includes(a.id)) {
+      s.jobs.pictureCompleted ||= { hidden: [], sliding: [] };
+      s.jobs.pictureCompleted[a.id] = [
+        ...new Set([...(s.jobs.pictureCompleted[a.id] || []), a.data.scene]),
+      ];
+    }
+
     s.cash = (Math.round(s.cash * 100) + record.rewardCents) / 100;
     s.jobs.cooldowns[a.id] = now + cooldownMs;
     s.jobs.best[a.id] = Math.max(s.jobs.best[a.id] || 0, a.score);
