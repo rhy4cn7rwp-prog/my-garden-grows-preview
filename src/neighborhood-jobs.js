@@ -867,7 +867,16 @@
   function quit(s) {
     if (s.jobs) s.jobs.active = null;
   }
+  function instructions(a) {
+    if (a.id === "tidy" && a.rulesVersion < 3)
+      return "Move leaves and sticks into their matching containers.";
+    const text = catalog.find((j) => j.id === a.id)?.instructions || "";
+    return a.id === "match" && a.rulesVersion < 3
+      ? text.replace("ninety seconds", "two minutes")
+      : text;
+  }
   const api = {
+    instructions,
     clockLimit,
     recordSpec: Records.spec,
     result: Records.assess,

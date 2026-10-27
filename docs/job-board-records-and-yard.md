@@ -50,7 +50,7 @@ messages saying jobs pay **at least** $1, reflecting the new bonus.
 
 ## Validation
 
-- `npm test`: **256 passing** rule/regression tests, including 2,000 seeded word-job
+- `npm test`: **257 passing** rule/regression tests, including 2,000 seeded word-job
   plans across both experiences, valid grids, exact tile multisets,
   arbitrary placement/swap/return, connected mower paths, both lawn stages,
   fair record buckets, genuine improved points/time, ties, integer-cent payouts,

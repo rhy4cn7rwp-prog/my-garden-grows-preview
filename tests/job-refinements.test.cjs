@@ -320,3 +320,14 @@ test("completion-time records use the displayed hundredth-second precision so a 
   A.equal(J.result(s.jobs).value, 10000);
   A.equal(J.result(s.jobs).rewardCents, 100);
 });
+
+test("saved-job spoken instructions retain the original timing and yard rules", () => {
+  const old = require("./fixtures/pre-record-jobs.json");
+  for (const s of old) {
+    const a = s.jobs.active;
+    if (a.id === "match") A.match(J.instructions(a), /two minutes/);
+    if (a.id === "tidy") A.match(J.instructions(a), /leaves and sticks/);
+  }
+  A.match(J.instructions(start("match").jobs.active), /ninety seconds/);
+  A.match(J.instructions(start("tidy").jobs.active), /Mow the lawn/);
+});
