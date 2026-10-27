@@ -8,15 +8,17 @@
   function spec(a) {
     const d = a.data;
     let setting = "";
-    if(a.id==='hidden')setting=`${d.scene}-${d.targets.length}-${d.targets.reduce((mask,i)=>mask|(1<<i),0)}-${d.assisted?1:0}`;
-    else if(a.id==='sliding')setting=`${d.scene}-${d.size}-${Math.floor(d.minimumDistance/4)}-${d.assisted?1:0}`;
+    if (a.id === "hidden")
+      setting = `${d.scene}-${d.targets.length}-${d.targets.reduce((mask, i) => mask | (1 << i), 0)}-${d.assisted ? 1 : 0}`;
+    else if (a.id === "sliding")
+      setting = `${d.scene}-${d.size}-${Math.floor(d.minimumDistance / 4)}-${d.assisted ? 1 : 0}`;
     else if (["words", "labels"].includes(a.id))
       setting = d.words
         .map((w) => w.length)
         .sort((a, b) => a - b)
         .join("-");
     else if (a.id === "stacks")
-      setting = `${d.cap}-${d.crates.length}-${a.rulesVersion>=4?Math.ceil(d.transitions/4):Math.ceil(d.solution.length / 10)}`;
+      setting = `${d.cap}-${d.crates.length}-${a.rulesVersion >= 4 ? Math.ceil(d.transitions / 4) : Math.ceil(d.solution.length / 10)}`;
     else if (a.id === "match") setting = `${d.types}-${d.target}`;
     else if (a.id === "catch") setting = `${d.width}-${d.launchEvery}`;
     else setting = String(d.target || d.items?.length || 0);
@@ -49,11 +51,13 @@
       won: a.won,
       score: a.score,
       elapsed: a.elapsed,
-      ...(a.id==='sliding'?{moves:dMoves(a)}:{}),
+      ...(a.id === "sliding" ? { moves: dMoves(a) } : {}),
       rewardCents: a.won ? (a.rulesVersion >= 3 && newBest ? 300 : 100) : 0,
     };
   }
-  function dMoves(a){return a.data.moves;}
+  function dMoves(a) {
+    return a.data.moves;
+  }
   function record(jobs, a, date) {
     const result = assess(jobs, a);
     jobs.records ||= {};
@@ -106,7 +110,9 @@
           score: l.score,
           elapsed: l.elapsed,
           rewardCents: l.rewardCents,
-          ...(Number.isSafeInteger(l.moves)&&l.moves>=0?{moves:l.moves}:{}),
+          ...(Number.isSafeInteger(l.moves) && l.moves >= 0
+            ? { moves: l.moves }
+            : {}),
           date: Number.isSafeInteger(l.date) ? l.date : 0,
         },
       };

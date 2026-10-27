@@ -45,7 +45,8 @@ const Neighborhood = (() => {
     return who === "magee" ? JobArt.magee() : JobArt.jones();
   }
   function jobArt(id) {
-    if (["hidden", "sliding"].includes(id)) return JobPictureGames.thumbnail(id);
+    if (["hidden", "sliding"].includes(id))
+      return JobPictureGames.thumbnail(id);
     if (id === "labels") return person("magee");
     if (id === "catch") return person("jones");
     if (id === "words") return icon("sun");
@@ -77,13 +78,13 @@ const Neighborhood = (() => {
       result = J.result(state.jobs, a),
       reward = result.rewardCents / 100;
     if (a.ended)
-      return `<section class="job-results">${["hidden","sliding"].includes(a.id) && a.won ? JobPictureGames.complete(a) : jobArt(a.id)}<h1>${result.newBest && reward === 3 ? "New Personal Best!" : a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}${a.won && ["weeds", "tomatoes", "flowers"].includes(a.id) ? `<p>${a.id === "flowers" ? "Every flower is blooming!" : a.id === "tomatoes" ? "End of the row — your harvest basket is full!" : "End of the row — the healthy plants have room to grow!"}</p>` : ""}<p>Your result: ${recordText(result.value, result.kind)} · ${recordIndicator(a.id, a)}</p><p>${a.won ? `Your neighbor has $${reward} total ready for you.${result.newBest && reward === 3 ? " You beat your own record!" : ""}` : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onpointerup="Neighborhood.touchResult(event,'${a.won ? "collect" : "retry"}')" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? `Collect $${reward}` : "Try again"}</button><button class="btn alt" onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? `Thank you for helping! Your reward is ${reward === 1 ? "one dollar" : "three dollars"}.` : "That was good practice. You can try again."}')">Read to Me</button></section>`;
+      return `<section class="job-results">${["hidden", "sliding"].includes(a.id) && a.won ? JobPictureGames.complete(a) : jobArt(a.id)}<h1>${result.newBest && reward === 3 ? "New Personal Best!" : a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}${a.won && ["weeds", "tomatoes", "flowers"].includes(a.id) ? `<p>${a.id === "flowers" ? "Every flower is blooming!" : a.id === "tomatoes" ? "End of the row — your harvest basket is full!" : "End of the row — the healthy plants have room to grow!"}</p>` : ""}<p>Your result: ${recordText(result.value, result.kind)} · ${recordIndicator(a.id, a)}</p><p>${a.won ? `Your neighbor has $${reward} total ready for you.${result.newBest && reward === 3 ? " You beat your own record!" : ""}` : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onpointerup="Neighborhood.touchResult(event,'${a.won ? "collect" : "retry"}')" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? `Collect $${reward}` : "Try again"}</button><button class="btn alt" onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? `Thank you for helping! Your reward is ${reward === 1 ? "one dollar" : "three dollars"}.` : "That was good practice. You can try again."}')">Read to Me</button></section>`;
     let body = "";
     if (a.id === "words")
       body = `<ul class="job-word-list">${d.words.map((w) => `<li class="${d.found.includes(w) ? "found" : ""}">${a.mode === "little" ? icon(w.toLowerCase()) : ""}<button onclick="Neighborhood.read('${w}')">${w}${d.found.includes(w) ? " ✓" : ""}</button></li>`).join("")}</ul><div class="job-word-grid" style="--size:${d.size}">${d.grid.map((v, i) => `<button data-letter="${i}" onclick="Neighborhood.letterCell(${i})" class="${d.found.some((w) => d.paths[w].includes(i)) ? "found" : ""}" aria-label="Letter ${v}, row ${Math.floor(i / d.size) + 1}, column ${(i % d.size) + 1}">${v}</button>`).join("")}</div>`;
     if (a.id === "packing") body = JobScenes.packing(a, ui.selected);
     if (a.id === "stacks")
-      body = `<p>Choose a top vegetable, then an empty or matching crate.</p><div class="job-stacks" style="--depth:${d.cap}">${d.crates
+      body = `<p>Choose a top vegetable, then an empty or matching crate.</p><div class="job-stacks" style="--depth:${d.cap};--crates:${d.crates.length}">${d.crates
         .map(
           (c, i) =>
             `<button class="job-stack ${ui.selected === i ? "selected" : ""}" data-job-drag="stack" data-item="${i}" data-job-drop="stack-${i}" aria-label="Crate ${i + 1}: ${c.join(", ") || "empty"}" aria-pressed="${ui.selected === i}" onpointerup="Neighborhood.stackTouch(event,${i})" onclick="Neighborhood.stack(${i})">${Array.from(
@@ -115,9 +116,9 @@ const Neighborhood = (() => {
     if (a.id === "tidy" && a.rulesVersion >= 3) body = JobLawnScene.scene(a);
     if (["weeds", "tomatoes"].includes(a.id)) body = JobScenes.rows(a);
     if (a.id === "weeds" && a.rulesVersion >= 4) body = JobGardenScenes.bed(a);
-    if (["hidden","sliding"].includes(a.id)) body = JobPictureGames.scene(a);
+    if (["hidden", "sliding"].includes(a.id)) body = JobPictureGames.scene(a);
     if (a.id === "flowers") body = JobScenes.flowers(a, ui.selected);
-    return `<section class="job-play ${["hidden","sliding","stacks"].includes(a.id)?"compact-job":""} ${a.id=== "stacks"?"deep-stacks":""} ${["hidden","sliding"].includes(a.id)?"picture-job":""} ${ui.paused ? "is-paused" : ""} ${["packing", "weeds", "tomatoes", "flowers", "tidy"].includes(a.id) ? "illustrated-chore" : ""}"><header><h1>${j.name}</h1><p class="job-instructions">${J.instructions(a)}</p></header><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-record-strip"><small>${recordIndicator(a.id, a)}</small><button onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button></div><div class="job-actions job-main-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button>${["hidden","sliding","stacks"].includes(a.id)?`<button class="btn alt" onclick="Neighborhood.leaderboard('${a.id}')">Records</button>`:""}</div><div class="job-play-area">${body}${ui.paused && ["hidden","sliding"].includes(a.id)?`<div class="picture-paused">Paused<br><button class="btn" onclick="Neighborhood.pause()">Resume</button></div>`:""}</div><p class="job-feedback" role="status">${ui.lastWord ? `<strong class="job-word-success">${ui.lastWord}</strong> ` : ""}${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
+    return `<section class="job-play ${["hidden", "sliding", "stacks"].includes(a.id) ? "compact-job" : ""} ${a.id === "stacks" ? "deep-stacks" : ""} ${["hidden", "sliding"].includes(a.id) ? "picture-job" : ""} ${ui.paused ? "is-paused" : ""} ${["packing", "weeds", "tomatoes", "flowers", "tidy"].includes(a.id) ? "illustrated-chore" : ""}"><header><h1>${j.name}</h1><p class="job-instructions">${J.instructions(a)}</p></header><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-record-strip"><small>${recordIndicator(a.id, a)}</small><button onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button></div><div class="job-actions job-main-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button>${["hidden", "sliding", "stacks"].includes(a.id) ? `<button class="btn alt" onclick="Neighborhood.leaderboard('${a.id}')">Records</button>` : ""}</div><div class="job-play-area">${body}${ui.paused && ["hidden", "sliding"].includes(a.id) ? `<div class="picture-paused">Paused<br><button class="btn" onclick="Neighborhood.pause()">Resume</button></div>` : ""}</div><p class="job-feedback" role="status">${ui.lastWord ? `<strong class="job-word-success">${ui.lastWord}</strong> ` : ""}${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
   }
   function read(text, who = "guide") {
     Narration.speak(text, who, true);
@@ -277,6 +278,8 @@ const Neighborhood = (() => {
 
       save();
       if (!(e.type === "swap" && ok)) render();
+      if (["pictureBegin", "nextPicture"].includes(e.type))
+        document.querySelector("#app").scrollTop = 0;
       if (
         ok &&
         e.type === "chore" &&
@@ -422,8 +425,18 @@ const Neighborhood = (() => {
   function difficultyLabel(key) {
     const [id, mode, version, settings] = key.split("|"),
       parts = settings.split("-").map(Number);
-    const prefix = ["v3","v4"].includes(version) ? "" : "Earlier saved game · ";
-    if (["hidden","sliding"].includes(id)) return JobGallery[id][parts[0]].title + " · " + (id === "hidden" ? parts[1]+" objects" : parts[1]+" × "+parts[1]) + (parts.at(-1)?" · hints / preview":" · no hints");
+    const prefix = ["v3", "v4"].includes(version)
+      ? ""
+      : "Earlier saved game · ";
+    if (["hidden", "sliding"].includes(id))
+      return (
+        JobGallery[id][parts[0]].title +
+        " · " +
+        (id === "hidden"
+          ? parts[1] + " objects"
+          : parts[1] + " × " + parts[1]) +
+        (parts.at(-1) ? " · hints / preview" : " · no hints")
+      );
     if (["words", "labels"].includes(id))
       return (
         prefix +
@@ -454,7 +467,7 @@ const Neighborhood = (() => {
       );
     const name = J.catalog.find((j) => j.id === id).name;
     show(
-      `<h2>${name} · Personal Leaderboard</h2><p>${mode === "little" ? "Little Gardener" : "Growing Gardener"} records stay on this device. ${["match", "catch"].includes(id) ? "More points is better." : "Less active time is better. There is no time limit."}</p><p>Compare the same experience and difficulty. First finish: $1. Beat an existing best: $3 total. Ties: $1.</p>${Number.isFinite(state.jobs.best[id]) && !Object.keys(state.jobs.records || {}).some((key) => key.startsWith(id + "|")) ? `<p>Earlier saved best score: ${state.jobs.best[id]}. New records compare matching experiences and challenges.</p>` : ""}${entries.length ? entries.map(([key, r]) => `<section class="job-local-record"><strong>${difficultyLabel(key)}</strong><p>Personal best: ${recordText(r.best, r.last.kind)}</p><p>Previous best: ${recordText(r.last.previousBest, r.last.kind)}</p><p>Latest result: ${recordText(r.last.value, r.last.kind)}${Number.isFinite(r.last.moves)?` · ${r.last.moves} moves`:""}${r.last.won ? " · completed" : " · practice"} · $${r.last.rewardCents / 100}</p></section>`).join("") : "<p>Finish this job to set your first record!</p>"}${a?.id === id && a.ended ? `<p>Current result: ${recordText(J.result(state.jobs, a).value, J.result(state.jobs, a).kind)}. Collect your reward to save a successful record.</p>` : ""}`,
+      `<h2>${name} · Personal Leaderboard</h2><p>${mode === "little" ? "Little Gardener" : "Growing Gardener"} records stay on this device. ${["match", "catch"].includes(id) ? "More points is better." : "Less active time is better. There is no time limit."}</p><p>Compare the same experience and difficulty. First finish: $1. Beat an existing best: $3 total. Ties: $1.</p>${Number.isFinite(state.jobs.best[id]) && !Object.keys(state.jobs.records || {}).some((key) => key.startsWith(id + "|")) ? `<p>Earlier saved best score: ${state.jobs.best[id]}. New records compare matching experiences and challenges.</p>` : ""}${entries.length ? entries.map(([key, r]) => `<section class="job-local-record"><strong>${difficultyLabel(key)}</strong><p>Personal best: ${recordText(r.best, r.last.kind)}</p><p>Previous best: ${recordText(r.last.previousBest, r.last.kind)}</p><p>Latest result: ${recordText(r.last.value, r.last.kind)}${Number.isFinite(r.last.moves) ? ` · ${r.last.moves} moves` : ""}${r.last.won ? " · completed" : " · practice"} · $${r.last.rewardCents / 100}</p></section>`).join("") : "<p>Finish this job to set your first record!</p>"}${a?.id === id && a.ended ? `<p>Current result: ${recordText(J.result(state.jobs, a).value, J.result(state.jobs, a).kind)}. Collect your reward to save a successful record.</p>` : ""}`,
       "job-records",
     );
   }
@@ -760,11 +773,18 @@ const Neighborhood = (() => {
       const d = ui.drag;
       if (!d || d.id !== e.pointerId) return;
       if (d.kind === "row") {
-        if (Math.hypot(e.clientX - d.x, d.el.hasAttribute("data-job-bed") ? e.clientY-d.y : 0) > 8) d.moved = true;
+        if (
+          Math.hypot(
+            e.clientX - d.x,
+            d.el.hasAttribute("data-job-bed") ? e.clientY - d.y : 0,
+          ) > 8
+        )
+          d.moved = true;
         if (d.moved) {
           e.preventDefault();
           d.el.scrollLeft = d.scrollStart + d.x - e.clientX;
-          if(d.el.hasAttribute("data-job-bed"))d.el.scrollTop=d.scrollTopStart+d.y-e.clientY;
+          if (d.el.hasAttribute("data-job-bed"))
+            d.el.scrollTop = d.scrollTopStart + d.y - e.clientY;
         }
         return;
       }
@@ -891,7 +911,11 @@ const Neighborhood = (() => {
     }
   });
   window.addEventListener("pagehide", stop);
-  function pictureFeedback(text){ui.feedback=text;const el=document.querySelector(".job-feedback");if(el)el.textContent=text;}
+  function pictureFeedback(text) {
+    ui.feedback = text;
+    const el = document.querySelector(".job-feedback");
+    if (el) el.textContent = text;
+  }
   return {
     pictureFeedback,
     scene,

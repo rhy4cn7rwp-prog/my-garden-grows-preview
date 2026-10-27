@@ -15,7 +15,7 @@ for row in data['hidden']:
  if not args.partial:assert all(key in mapped for key in names),row['id']
  for key,name in names.items():
   if key not in mapped:continue
-  x,y,w,h=mapped[key][:4];assert 0<x<1 and 0<y<1 and 0<w<1 and 0<h<1,(row['id'],key)
+  x,y,w,h=mapped[key][:4];w=min(w,1-x);h=min(h,1-y);assert 0<x<1 and 0<y<1 and 0<w<1 and 0<h<1,(row['id'],key)
   obj={'id':mapped.get('_ids',{}).get(key,key),'name':mapped.get('_names',{}).get(key,name),'x':x,'y':y,'w':w,'h':h}
   if len(mapped[key])>4:obj['regions']=mapped[key][4]
   row['objects'].append(obj)

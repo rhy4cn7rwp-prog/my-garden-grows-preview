@@ -20,7 +20,7 @@ try:
    page.goto(os.environ.get('PREVIEW_URL',f'http://127.0.0.1:{server.server_port}/'))
    page.get_by_role('button',name=re.compile("^I'm still learning to read!")).tap()
    page.evaluate("()=>{state.cash=77.37;state.inventory.carrot=8;go('jobs')}")
-   assert page.locator('[data-records]').count()==10
+   assert page.locator('[data-records]').count()==12
    for id,art in [('labels','magee'),('catch','jones')]:
     assert page.locator(f'[data-job-card="{id}"] svg').get_attribute('aria-label')
     assert page.locator(f'[data-job-card="{id}"] path').count()>=15
@@ -68,9 +68,9 @@ try:
     for n in range(1,11):touch('touchMove',x+n*14,y);page.wait_for_timeout(15)
     touch('touchEnd');page.wait_for_timeout(80);assert row.evaluate('(e)=>e.scrollLeft')<left
     i=page.evaluate("()=>{const a=state.jobs.active;return a.data.items.findIndex(v=>v.kind===(a.id==='weeds'?'weed':'ripe'))}")
-    item=page.locator(f'.job-row-pick[data-item="{i}"]');item.scroll_into_view_if_needed();before=row.evaluate('(e)=>e.scrollLeft');item.tap();page.wait_for_timeout(250)
+    item=page.locator(f'[data-job-drag="chore"][data-item="{i}"]');item.scroll_into_view_if_needed();before=row.evaluate('(e)=>e.scrollLeft');item.tap();page.wait_for_timeout(250)
     assert page.evaluate('state.jobs.active.score')==1;assert abs(row.evaluate('(e)=>e.scrollLeft')-before)<1
-    assert page.locator(f'.job-row-pick[data-item="{i}"]').evaluate('(e)=>getComputedStyle(e.querySelector("svg")).opacity')=='0'
+    assert page.locator(f'[data-job-drag="chore"][data-item="{i}"]').evaluate('(e)=>getComputedStyle(e).visibility==="hidden" || getComputedStyle(e.querySelector("svg")).opacity==="0"')
     if id=='weeds':assert page.locator('.yellow-weed').count()==16;assert page.locator('.carrot-healthy').count()==4
     page.screenshot(path=f'/tmp/jobs-refined-{id}-{w}.png')
    print(f'PASS manually controlled forward/back row pans, no drift/auto advance, carrot bed and ripe picks {w}x{h}',flush=True)
