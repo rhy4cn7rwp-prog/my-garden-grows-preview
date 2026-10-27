@@ -1,0 +1,144 @@
+/* Job Board-only visual layers; controls and collision geometry stay unchanged. */
+.job-notice > .job-polished-thumbnail {
+  width: 100%;
+  height: 112px;
+  border-radius: 10px;
+  display: block;
+  overflow: hidden;
+  filter: drop-shadow(0 2px 1px #73503033);
+}
+.job-notice > .polished-job-character {
+  height: 112px;
+  width: 90px;
+  display: block;
+  margin: auto;
+  filter: drop-shadow(1px 2px 1px #684c3033);
+}
+.job-magee-intro > .polished-job-character {
+  height: 110px;
+  width: 76px;
+  flex: none;
+  object-fit: contain;
+}
+.job-three-belts {
+  background: url("../assets/job-polish/packing-shed.webp") center/cover;
+  border: 4px solid #a97b43;
+  box-shadow: inset 0 0 15px #51351c55;
+  padding: 12px 6px;
+}
+.job-lane {
+  box-shadow: 3px 3px 6px #362c2755;
+  border-color: #91794f;
+  background: #efe1bd44;
+}
+.job-bushels > button {
+  background: #f6e7c5;
+  box-shadow: 1px 3px 5px #51351c33;
+}
+.job-stacks {
+  background:
+    linear-gradient(#fff4de77, #fff4de44),
+    url("../assets/job-polish/packing-shed.webp") center/cover;
+  border-radius: 10px;
+}
+.jobs-game .job-stack {
+  background-image:
+    url("../assets/job-polish/crate.webp"),
+    linear-gradient(90deg, #c49660, #efd4a0 35%, #d5ad79 70%, #af7c47);
+  background-size:
+    100% 32px,
+    100% 100%;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 1px 0 3px #66432255,
+    2px 2px 3px #76523333;
+}
+.job-stack b {
+  position: relative;
+  z-index: 1;
+  color: #4e321c;
+  text-shadow: 0 1px #fff1ca;
+}
+.job-stack .seed-produce-art,
+.job-match-grid .seed-produce-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 1px 1px #5e462b44);
+}
+.job-row-window:not(.overhead-bed) {
+  background: url("../assets/job-polish/catch-garden.webp") center/cover;
+}
+.job-crop-stalk .polished-job-art {
+  height: 100%;
+  width: 100%;
+  filter: drop-shadow(2px 3px 2px #37522c55);
+}
+.row-tomato > svg {
+  filter: drop-shadow(1px 2px 1px #3d512b66);
+}
+.job-flower-grid {
+  background: radial-gradient(ellipse at 30% 30%, #aed083, #749f51);
+  box-shadow: inset 0 0 18px #45673155;
+  border: 4px solid #b9976c;
+}
+.job-flower-bed {
+  background: radial-gradient(
+    ellipse at 50% 85%,
+    #96724e 0 25%,
+    transparent 65%
+  );
+}
+.job-flower-bed .polished-flower {
+  height: 100%;
+  width: 100%;
+  filter: drop-shadow(1px 2px 1px #3c592f44);
+}
+.polished-flower.thirsty image {
+  opacity: 0.87;
+}
+.job-flower-bed.blooming {
+  background: radial-gradient(
+    ellipse at 50% 85%,
+    #765034 0 30%,
+    transparent 65%
+  );
+}
+.job-lawn-world {
+  background: radial-gradient(ellipse at 30% 35%, #a7c46e, #7ea84d 85%);
+  box-shadow: inset 0 0 18px #476d2e55;
+  border-color: #b49362;
+}
+.lawn-patch.obstacle {
+  background: none;
+  pointer-events: none;
+}
+.lawn-patch.obstacle > svg {
+  filter: drop-shadow(1px 2px 1px #3f5f2d55);
+}
+.living-catch .job-jones {
+  top: 6%;
+  height: 53%;
+  width: 33%;
+  left: 2%;
+}
+.living-catch .job-jones .polished-job-character {
+  filter: drop-shadow(3px 3px 2px #4d482b44);
+}
+.living-catch .job-catching-basket {
+  filter: drop-shadow(1px 3px 2px #48381e55);
+}
+.job-play.is-paused .polished-job-character {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .polished-job-character,
+  .polished-job-character * {
+    animation: none !important;
+  }
+}
+.job-notice > svg.job-polished-thumbnail[role="img"] {
+  width: 100%;
+  height: 112px;
+}

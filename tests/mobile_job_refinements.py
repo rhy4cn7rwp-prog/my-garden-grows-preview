@@ -23,7 +23,7 @@ try:
    assert page.locator('[data-records]').count()==12
    for id,art in [('labels','magee'),('catch','jones')]:
     assert page.locator(f'[data-job-card="{id}"] svg').get_attribute('aria-label')
-    assert page.locator(f'[data-job-card="{id}"] path').count()>=15
+    assert page.locator(f'[data-job-card="{id}"] image').get_attribute('href').startswith('assets/job-polish/')
    def tap(name):page.get_by_role('button',name=name,exact=True).tap()
    def start(id,mode='little',seed=97):
     page.evaluate("([id,mode,seed])=>{Neighborhood.stop();NeighborhoodJobs.quit(state);closeDialog();state.jobs.cooldowns[id]=0;Game.chooseExperience(state,mode);go('jobs');const r=Math.random;Math.random=()=>(seed-1)/0xffffffff;try{Neighborhood.start(id)}finally{Math.random=r}}",[id,mode,seed])

@@ -54,7 +54,7 @@ try:
        if not page.evaluate('i=>state.jobs.active.data.found.includes(i)',item):
         page.screenshot(path='/tmp/picture-hit-failure.png');print(page.evaluate("xy=>({scene:state.jobs.active.data.scene,found:state.jobs.active.data.found,world:document.querySelector('.seek-world').getBoundingClientRect().toJSON(),canvas:document.querySelector('.seek-canvas').getBoundingClientRect().toJSON(),target:document.elementFromPoint(...xy)?.outerHTML,transform:document.querySelector('.seek-canvas').style.transform})",xy),flush=True);raise AssertionError((w,mode,item,xy))
      else:
-      assert page.locator('.picture-tile').count()==(8 if mode=='little' else 15)
+      assert page.locator('.picture-tile').count()==(5 if mode=='little' else 8)
       box=page.locator('.picture-sliding').bounding_box();assert box['y']+box['height']<=page.locator('.job-main-actions').bounding_box()['y']+1
       assert page.locator('.picture-tile').first.bounding_box()['width']>=43
       initial=page.evaluate('state.jobs.active.data.tiles');moves=page.evaluate('state.jobs.active.data.solution')
@@ -84,7 +84,7 @@ try:
       xy=page.evaluate("i=>{const a=state.jobs.active,o=JobGallery.hidden[a.data.scene].objects[i],r=document.querySelector('.seek-canvas').getBoundingClientRect();return [r.x+(o.x+o.w/2)*r.width,r.y+(o.y+o.h/2)*r.height]}",item);page.touchscreen.tap(*xy)
       assert page.evaluate('i=>state.jobs.active.data.found.includes(i)',item),(scene,item)
      assert page.evaluate('state.jobs.active.won')
-     start('sliding','little',scene);page.locator('[data-picture-begin]').tap();assert page.locator('.picture-tile').count()==8
+     start('sliding','little',scene);page.locator('[data-picture-begin]').tap();assert page.locator('.picture-tile').count()==5
      assert page.evaluate("()=>[...document.images].every(i=>i.complete&&i.naturalWidth)")
      print(f'PASS original scene pair {scene+1}/30',flush=True)
    assert not errors,errors

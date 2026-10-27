@@ -37,7 +37,7 @@ Append new scenes. Original files should remain intact.
 - Hints identify a broad region, never find an object automatically. Pinch,
   zoom buttons and panning do not count as finds. Touch hit regions expand to
   at least 44 screen pixels, choosing the closest requested object if needed.
-- Sliding grids are 3×3 or 4×4 according to learning mode, with legal move
+- New sliding grids are 2 columns × 3 rows or 3×3 according to learning mode, with legal move
   scrambles and enforced minimum distance/misplacement. A verified fallback seed
   prevents an unusually unlucky random scramble from abandoning a session.
 - Restart restores the same scramble without resetting active time. A new picture
@@ -54,7 +54,8 @@ Append new scenes. Original files should remain intact.
 Save keys remain `mgg10` and `mgg10-backup`. Job schema version remains 1 with
 additive histories, completion counts and record entries. New overhead weeding,
 20-tomato picking, deeper stacks and both picture games use immutable activity
-rules version 4. Existing unfinished versions 1–3 replay under their original
+rules version 4. New gentler sliding puzzles and flower-reset lawns use version 5;
+  older unfinished square puzzles and lawns keep their original rules. Existing unfinished versions 1–3 replay under their original
 rules, puzzles, timers and reward eligibility. No farm reset or save import is
 introduced.
 

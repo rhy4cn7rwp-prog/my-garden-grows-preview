@@ -32,7 +32,8 @@ try:
    session=page.context.new_cdp_session(page)
    def touch(kind,x=0,y=0):session.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[] if kind=='touchEnd' else [{'x':x,'y':y}]})
    def drag(source,target):
-    source.scroll_into_view_if_needed()
+    # Conveyor produce moves continuously; scroll its stationary lane instead.
+    (source.locator('..') if source.get_attribute('data-pack-item') is not None else source).scroll_into_view_if_needed()
     target.scroll_into_view_if_needed()
     # Center the pair in the reading viewport without changing the game state.
     a=source.bounding_box();b=target.bounding_box();middle=(a['y']+a['height']/2+b['y']+b['height']/2)/2

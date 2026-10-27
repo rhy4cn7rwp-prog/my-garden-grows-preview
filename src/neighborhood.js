@@ -18,11 +18,12 @@ const Neighborhood = (() => {
   const J = NeighborhoodJobs,
     kinds = J.kinds;
   function icon(kind, cls = "") {
+    if (CROPS.some((c) => c.id === kind)) return seedProduceArt(kind);
     const picture =
       typeof JobWordPictures !== "undefined" ? JobWordPictures.art(kind) : null;
     if (picture) return picture;
     if (kind === "tomato-ripe" || kind === "tomato-green")
-      return `<svg class="job-symbol" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 25C13 13 10 69 30 83Q51 96 72 82C94 62 85 16 50 25Z" fill="${kind === "tomato-ripe" ? "#e45c42" : "#80ad5a"}" stroke="${kind === "tomato-ripe" ? "#ab4935" : "#56783d"}" stroke-width="3"/><path d="m31 27 18-4 4-15 4 15 17 5-17 3-7 12-3-13-17 7Z" fill="#4f7b3e"/><ellipse cx="33" cy="42" rx="7" ry="10" fill="${kind === "tomato-ripe" ? "#f8ad78" : "#bdd98c"}"/></svg>`;
+      return JobPolishArt.tomato(kind === "tomato-green");
     if (CROPS.some((c) => c.id === kind)) return seedProduceArt(kind);
     if (kind === "harvest") return gardenBasketArt();
     const paths = {
@@ -47,15 +48,7 @@ const Neighborhood = (() => {
   function jobArt(id) {
     if (["hidden", "sliding"].includes(id))
       return JobPictureGames.thumbnail(id);
-    if (id === "labels") return person("magee");
-    if (id === "catch") return person("jones");
-    if (id === "words") return icon("sun");
-    if (id === "flowers") return icon("flower");
-    if (id === "weeds") return icon("weed");
-    if (id === "tidy") return JobLawnScene.mower();
-    return icon(
-      id === "packing" ? "corn" : id === "stacks" ? "cucumber" : "tomato",
-    );
+    return JobPolishArt.thumbnail(id);
   }
   const countdown = (ms) =>
     `${Math.ceil(ms / 1000 / 60) - (Math.ceil(ms / 1000) % 60 === 0 ? 0 : 1)}:${String(Math.ceil(ms / 1000) % 60).padStart(2, "0")}`;
@@ -340,14 +333,24 @@ const Neighborhood = (() => {
     if (ui.selected !== null) act({ type: "returnLetter", tile: ui.selected });
   }
   function lawnAct(event) {
+    if ((ui.lawnResetUntil || 0) > Date.now()) return;
     if (ui.paused) return;
     checkpoint();
     const a = state.jobs.active;
     if (a?.id !== "tidy" || a.rulesVersion < 3 || a.ended) return;
-    const stage = a.data.stage;
+    const stage = a.data.stage,
+      resets = a.data.resets || 0;
     const ok = J.action(state, event);
     if (!ok) return;
     save();
+    if ((a.data.resets || 0) > resets) {
+      ui.drag = null;
+      ui.lawnResetUntil = Date.now() + 650;
+      ui.feedback =
+        "Oops, that's a flower! Let's start mowing again and steer around the flowers.";
+      const feedback = document.querySelector(".job-feedback");
+      if (feedback) feedback.textContent = ui.feedback;
+    }
     if (stage !== a.data.stage || a.ended) {
       clear();
       render();
@@ -364,6 +367,7 @@ const Neighborhood = (() => {
     lawnAct({ type: "mow", cell: d.mower + delta });
   }
   function lawnTap(e) {
+    if ((ui.lawnResetUntil || 0) > Date.now()) return;
     const world = document.querySelector(".job-lawn-world"),
       a = state.jobs.active;
     if (!world || !a) return;
@@ -425,7 +429,7 @@ const Neighborhood = (() => {
   function difficultyLabel(key) {
     const [id, mode, version, settings] = key.split("|"),
       parts = settings.split("-").map(Number);
-    const prefix = ["v3", "v4"].includes(version)
+    const prefix = ["v3", "v4", "v5"].includes(version)
       ? ""
       : "Earlier saved game · ";
     if (["hidden", "sliding"].includes(id))
@@ -434,7 +438,7 @@ const Neighborhood = (() => {
         " · " +
         (id === "hidden"
           ? parts[1] + " objects"
-          : parts[1] + " × " + parts[1]) +
+          : parts[1] + " × " + (version === "v5" ? parts[2] : parts[1])) +
         (parts.at(-1) ? " · hints / preview" : " · no hints")
       );
     if (["words", "labels"].includes(id))
@@ -713,6 +717,7 @@ const Neighborhood = (() => {
     () => {
       ui.resultTouchUntil = 0;
       ui.suppress = 0;
+      ui.lawnResetUntil = 0;
     },
     true,
   );

@@ -32,13 +32,13 @@
       p.every((i) => Number.isInteger(i) && i >= 0 && i < Gallery[id].length)
     );
   }
-  function adjacent(size, cell) {
+  function adjacent(size, cell, rows = size) {
     return [
       cell % size ? cell - 1 : -1,
       cell % size < size - 1 ? cell + 1 : -1,
       cell - size,
       cell + size,
-    ].filter((i) => i >= 0 && i < size * size);
+    ].filter((i) => i >= 0 && i < size * rows);
   }
   function distance(tiles, size) {
     return tiles.reduce(
@@ -87,7 +87,36 @@
     // An exceptionally unlucky seed falls back without losing the session.
     return scramble(1, size);
   }
-  function make(id, mode, seed, picturePlan, choice = 0) {
+  // Only new rule-version-five games use these gentler rectangular scrambles.
+  function rectangularScramble(seed, cols, rows) {
+    const r = random(seed),
+      count = cols * rows,
+      steps = cols === 2 ? 12 : 24;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const tiles = Array.from({ length: count }, (_, i) =>
+          i === count - 1 ? null : i,
+        ),
+        solution = [];
+      let hole = count - 1,
+        last = -1;
+      for (let k = 0; k < steps; k++) {
+        const options = adjacent(cols, hole, rows).filter((i) => i !== last),
+          from = options[Math.floor(r() * options.length)];
+        [tiles[hole], tiles[from]] = [tiles[from], tiles[hole]];
+        solution.unshift(hole);
+        last = hole;
+        hole = from;
+      }
+      const minimumDistance = distance(tiles, cols);
+      if (
+        minimumDistance >= (cols === 2 ? 4 : 6) &&
+        minimumDistance <= (cols === 2 ? 8 : 12)
+      )
+        return { tiles, initial: tiles.slice(), solution, minimumDistance };
+    }
+    return rectangularScramble(1, cols, rows);
+  }
+  function make(id, mode, seed, picturePlan, choice = 0, rulesVersion = 4) {
     if (!validPlan(id, picturePlan))
       throw Error("The picture collection is not ready.");
     const scene = picturePlan[choice % picturePlan.length],
@@ -112,11 +141,22 @@
         found: [],
       };
     }
-    const size = mode === "little" ? 3 : 4;
+    const modern = rulesVersion >= 5;
+    const size = modern
+      ? mode === "little"
+        ? 2
+        : 3
+      : mode === "little"
+        ? 3
+        : 4;
+    const rows = modern ? 3 : size;
     return {
       ...base,
       size,
-      ...scramble(seed + choice * 3547, size),
+      ...(modern
+        ? rectangularScramble(seed + choice * 3547, size, rows)
+        : scramble(seed + choice * 3547, size)),
+      ...(modern ? { cols: size, rows } : {}),
       moves: 0,
       lastMove: null,
       preview: mode === "little",
@@ -132,7 +172,14 @@
     }
     if (e.type === "nextPicture") {
       if (d.started) return false;
-      a.data = make(a.id, a.mode, a.seed, a.picturePlan, d.choice + 1);
+      a.data = make(
+        a.id,
+        a.mode,
+        a.seed,
+        a.picturePlan,
+        d.choice + 1,
+        a.rulesVersion,
+      );
       a.score = 0;
       return true;
     }
@@ -171,7 +218,8 @@
     } else if (e.type === "slide") {
       if (a.id !== "sliding" || !Number.isInteger(e.cell)) return false;
       const hole = d.tiles.indexOf(null);
-      if (!adjacent(d.size, hole).includes(e.cell)) return false;
+      if (!adjacent(d.cols || d.size, hole, d.rows || d.size).includes(e.cell))
+        return false;
       const tile = d.tiles[e.cell];
       [d.tiles[hole], d.tiles[e.cell]] = [d.tiles[e.cell], d.tiles[hole]];
       d.moves++;
@@ -200,6 +248,7 @@
     adjacent,
     distance,
     scramble,
+    rectangularScramble,
   };
   if (typeof module !== "undefined") module.exports = api;
   root.JobPictureRules = api;

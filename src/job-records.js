@@ -11,7 +11,10 @@
     if (a.id === "hidden")
       setting = `${d.scene}-${d.targets.length}-${d.targets.reduce((mask, i) => mask | (1 << i), 0)}-${d.assisted ? 1 : 0}`;
     else if (a.id === "sliding")
-      setting = `${d.scene}-${d.size}-${Math.floor(d.minimumDistance / 4)}-${d.assisted ? 1 : 0}`;
+      setting =
+        a.rulesVersion >= 5
+          ? `${d.scene}-${d.cols}-${d.rows}-${Math.floor(d.minimumDistance / 4)}-${d.assisted ? 1 : 0}`
+          : `${d.scene}-${d.size}-${Math.floor(d.minimumDistance / 4)}-${d.assisted ? 1 : 0}`;
     else if (["words", "labels"].includes(a.id))
       setting = d.words
         .map((w) => w.length)
@@ -74,7 +77,7 @@
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
     for (const [key, r] of Object.entries(raw)) {
       if (
-        !/^[a-z]+\|(little|growing)\|v[1234]\|[\d.\-]+$/.test(key) ||
+        !/^[a-z]+\|(little|growing)\|v[12345]\|[\d.\-]+$/.test(key) ||
         !ids.includes(key.split("|")[0]) ||
         !r ||
         !(r.best === null || (Number.isSafeInteger(r.best) && r.best >= 0))
