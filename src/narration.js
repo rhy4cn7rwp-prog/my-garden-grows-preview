@@ -43,7 +43,7 @@ const Narration = (() => {
   }
   function phoneme(letter) {
     stop();
-    if (!"sunpotmdig".includes(letter.toLowerCase())) return;
+    if (!/^[a-z]$/i.test(letter)) return;
     soundFile(`assets/neighborhood/phonics/${letter.toLowerCase()}.wav`);
   }
   function soundFile(path) {

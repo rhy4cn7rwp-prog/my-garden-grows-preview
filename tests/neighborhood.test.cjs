@@ -28,7 +28,7 @@ function solve(s) {
       break;
     case "labels":
       while (!a.won) {
-        const next = d.words[d.round][d.slots.length],
+        const next = d.words[d.round][a.rulesVersion>=3?d.slots.indexOf(null):d.slots.length],
           tile = d.tiles.findIndex(
             (v, i) => v === next && !d.slots.includes(i),
           );
@@ -51,6 +51,9 @@ function solve(s) {
         J.tick(s, landing - a.elapsed);
       }
       J.tick(s, 60000 - a.elapsed);
+      break;
+    case "tidy":
+      require('./job-test-helpers.cjs').solveLawn(s);
       break;
     default:
       for (let item = 0; item < d.items.length && !a.won; item++) {
@@ -127,13 +130,13 @@ test("word search puzzles always contain their words, short easy direction for L
         if (mode === "little") {
           const delta = d.paths[w][1] - d.paths[w][0];
           A.ok([1, d.size].includes(delta));
-          A.ok(w.length <= 3);
+          A.ok(w.length <= 4);
         }
       }
     }
   A.ok(seen.size > 100);
 });
-test("match-four rejects 3/diagonal/nonadjacent swaps, keeps playable boards, waits exactly 120000 active ms and restores clock/board", () => {
+test("match-four rejects 3/diagonal/nonadjacent swaps, keeps playable boards, waits exactly 90000 active ms and restores clock/board", () => {
   A.deepEqual(J.matches([0, 0, 0, 1, 1, 2, 1, 2, 0], 3), []);
   A.deepEqual(
     J.matches([0, 1, 2, 3, 0, 2, 3, 1, 2, 0, 1, 2, 3, 1, 0, 3], 4),
@@ -151,11 +154,11 @@ test("match-four rejects 3/diagonal/nonadjacent swaps, keeps playable boards, wa
       A.equal(J.matches(a.data.grid).length, 0);
     }
     A.ok(a.score >= a.data.target);
-    J.tick(s, 119999);
+    J.tick(s, 89999);
     A.equal(a.ended, false);
     A.throws(() => J.claim(s));
     const r = G.recover(JSON.stringify(s));
-    A.equal(r.jobs.active.elapsed, 119999);
+    A.equal(r.jobs.active.elapsed, 89999);
     A.deepEqual(r.jobs.active.data.grid, a.data.grid);
     J.tick(r, 1);
     A.equal(r.jobs.active.won, true);
@@ -201,7 +204,7 @@ test("wrong sorting/healthy plants/unripe tomatoes leave progress and farm uncha
         type: "chore",
         item: a.data.items.findIndex((v) => v.kind === "green"),
       };
-    if (id === "tidy") e = { type: "chore", item: 0, target: "nothing" };
+    if (id === "tidy") e = { type: "mow", cell: 10 };
     if (e) {
       A.equal(J.action(s, e), false);
       A.equal(JSON.stringify(a.data), old);

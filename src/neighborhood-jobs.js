@@ -2,6 +2,16 @@
    payouts, absolute cooldowns and explicit active-play clocks. No DOM/audio. */
 (function (root) {
   "use strict";
+  const V =
+    typeof module !== "undefined"
+      ? require("./job-vocabulary.js")
+      : root.JobVocabulary;
+  const Lawn =
+    typeof module !== "undefined" ? require("./job-lawn.js") : root.JobLawn;
+  const Records =
+    typeof module !== "undefined"
+      ? require("./job-records.js")
+      : root.JobRecords;
   const names = [
     [
       "words",
@@ -31,7 +41,7 @@
       "match",
       "Veggie Match",
       "Match-four puzzle",
-      "Swap neighbors to make a row of four. Reach your goal and play for two minutes.",
+      "Swap neighbors to make a row of four. Reach your goal and play for ninety seconds.",
     ],
     [
       "catch",
@@ -43,7 +53,7 @@
       "weeds",
       "Pull Neighborhood Weeds",
       "Garden chore",
-      "Pull the unwanted weeds with jagged leaves. Keep the healthy round-leaf plants.",
+      "Pull yellow jagged weeds. Leave the green feathery carrot tops.",
     ],
     [
       "tomatoes",
@@ -59,9 +69,9 @@
     ],
     [
       "tidy",
-      "Tidy the Yard",
-      "Cleanup chore",
-      "Move leaves and sticks into their matching containers.",
+      "Tidy the Yard — Mow & Rake",
+      "Lawn-care adventure",
+      "Mow the lawn, rake the clippings into piles, then put them in the compost bin.",
     ],
   ];
   const catalog = names.map(([id, name, type, instructions]) => ({
@@ -72,7 +82,7 @@
     rewardCents: 100,
   }));
   const kinds = ["carrot", "corn", "tomato", "cucumber", "onion"];
-  const duration = { match: 120000, catch: 60000 },
+  const duration = { match: 90000, catch: 60000 },
     cooldownMs = 300000;
   const requireRule = (yes, msg) => {
     if (!yes) throw Error(msg);
@@ -92,11 +102,24 @@
     return a;
   }
   function empty() {
-    return { version: 1, sequence: 0, cooldowns: {}, best: {}, active: null };
+    return {
+      version: 1,
+      sequence: 0,
+      cooldowns: {},
+      best: {},
+      records: {},
+      wordHistory: { little: [], growing: [] },
+      active: null,
+    };
   }
   function recover(raw) {
     const out = empty();
     if (raw?.version !== 1) return out;
+    out.records = Records.recover(raw.records);
+    for (const mode of ["little", "growing"])
+      out.wordHistory[mode] = Array.isArray(raw.wordHistory?.[mode])
+        ? raw.wordHistory[mode].filter((w) => V.all.includes(w)).slice(-24)
+        : [];
     out.sequence =
       Number.isSafeInteger(raw.sequence) && raw.sequence >= 0
         ? raw.sequence
@@ -129,7 +152,8 @@
           a.mode,
           a.seed,
           a.serial,
-          a.rulesVersion === 2 ? 2 : 1,
+          [2, 3].includes(a.rulesVersion) ? a.rulesVersion : 1,
+          a.wordPlan,
         );
         for (const entry of a.log) {
           if (entry.type === "tick") tickActive(restored, entry.ms);
@@ -164,15 +188,28 @@
     if (s.jobs.active?.id === id) return s.jobs.active;
     requireRule(!s.jobs.active, "Resume your current job or leave it first.");
     s.jobs.sequence++;
+    const mode = s.learningExperience === "little" ? "little" : "growing";
+    const plan = ["words", "labels"].includes(id)
+      ? V.choose(mode, id, seed, s.jobs.wordHistory?.[mode] || [])
+      : undefined;
     s.jobs.active = make(
       id,
       s.learningExperience === "little" ? "little" : "growing",
       seed >>> 0 || 1,
       s.jobs.sequence,
+      3,
+      plan,
     );
+    if (plan) {
+      s.jobs.wordHistory ||= { little: [], growing: [] };
+      s.jobs.wordHistory[mode] = [
+        ...(s.jobs.wordHistory[mode] || []),
+        ...plan,
+      ].slice(-24);
+    }
     return s.jobs.active;
   }
-  function make(id, mode, seed, serial, rulesVersion = 2) {
+  function make(id, mode, seed, serial, rulesVersion = 3, wordPlan) {
     const r = rng(seed),
       little = mode === "little",
       n = little ? 2 : 4;
@@ -189,14 +226,25 @@
       ended: false,
       data: {},
     };
+    if (rulesVersion >= 3 && ["words", "labels"].includes(id)) {
+      requireRule(V.valid(wordPlan, mode, id), "This word plan is incomplete.");
+      a.wordPlan = wordPlan.slice();
+    }
     if (id === "words") {
-      const words = little
-          ? ["SUN", "POT", "MUD"]
-          : shuffle(
-              ["CARROT", "GARDEN", "TOMATO", "HARVEST", "BEANS", "CORN"],
-              r,
-            ).slice(0, 4),
-        size = little ? 5 : 8,
+      const words =
+          rulesVersion >= 3
+            ? wordPlan.slice()
+            : little
+              ? ["SUN", "POT", "MUD"]
+              : shuffle(
+                  ["CARROT", "GARDEN", "TOMATO", "HARVEST", "BEANS", "CORN"],
+                  r,
+                ).slice(0, 4),
+        size = little
+          ? 5
+          : rulesVersion >= 3
+            ? Math.max(8, ...words.map((w) => w.length))
+            : 8,
         grid = Array(size * size).fill(""),
         paths = {};
       const dirs = little
@@ -299,12 +347,15 @@
         solution: reverse,
       };
     } else if (id === "labels") {
-      const words = shuffle(
-        little
-          ? ["SUN", "POT", "MUD", "DIG"]
-          : ["CORN", "BEANS", "CARROT", "TOMATO", "GARDEN", "HARVEST"],
-        r,
-      ).slice(0, little ? 2 : 3);
+      const words =
+        rulesVersion >= 3
+          ? wordPlan.slice()
+          : shuffle(
+              little
+                ? ["SUN", "POT", "MUD", "DIG"]
+                : ["CORN", "BEANS", "CARROT", "TOMATO", "GARDEN", "HARVEST"],
+              r,
+            ).slice(0, little ? 2 : 3);
       a.data = { words, round: 0, tiles: [], slots: [], hints: 0 };
       letterRound(a, r);
     } else if (id === "match") {
@@ -326,16 +377,26 @@
         launchEvery: little ? 2300 : 1500,
       };
     } else if (id === "weeds") {
-      a.data = {
-        items: shuffle(
-          Array.from({ length: little ? 10 : 14 }, (_, i) => ({
-            kind: i % 2 ? "plant" : "weed",
-            done: false,
-          })),
-          r,
-        ),
-        target: little ? 5 : 7,
-      };
+      a.data =
+        rulesVersion >= 3
+          ? {
+              items: Array.from({ length: little ? 20 : 25 }, (_, i) => ({
+                kind: i % 5 === 4 ? "plant" : "weed",
+                done: false,
+                cluster: Math.floor(i / 5),
+              })),
+              target: little ? 16 : 20,
+            }
+          : {
+              items: shuffle(
+                Array.from({ length: little ? 10 : 14 }, (_, i) => ({
+                  kind: i % 2 ? "plant" : "weed",
+                  done: false,
+                })),
+                r,
+              ),
+              target: little ? 5 : 7,
+            };
     } else if (id === "tomatoes") {
       a.data = {
         items: shuffle(
@@ -359,16 +420,19 @@
         target: rulesVersion >= 2 ? (little ? 9 : 12) : little ? 4 : 6,
       };
     } else if (id === "tidy") {
-      a.data = {
-        items: shuffle(
-          Array.from({ length: little ? 6 : 10 }, (_, i) => ({
-            kind: i % 2 ? "stick" : "leaf",
-            done: false,
-          })),
-          r,
-        ),
-        target: little ? 6 : 10,
-      };
+      a.data =
+        rulesVersion >= 3
+          ? Lawn.make(mode)
+          : {
+              items: shuffle(
+                Array.from({ length: little ? 6 : 10 }, (_, i) => ({
+                  kind: i % 2 ? "stick" : "leaf",
+                  done: false,
+                })),
+                r,
+              ),
+              target: little ? 6 : 10,
+            };
     }
     return a;
   }
@@ -381,7 +445,7 @@
     const word = a.data.words[a.data.round];
     a.data.tiles = shuffle([...word], r);
     if (a.data.tiles.join("") === word) a.data.tiles.push(a.data.tiles.shift());
-    a.data.slots = [];
+    a.data.slots = a.rulesVersion >= 3 ? Array(word.length).fill(null) : [];
     a.data.hints = 0;
   }
   function matches(grid, size = 6) {
@@ -497,6 +561,11 @@
           a.data.width * 0.41 + (c.big ? 0.05 : 0.035)
       : Math.abs(a.data.basket - c.end) < a.data.width / 2 + 0.04;
   }
+  function clockLimit(a) {
+    return a.id === "match" && a.rulesVersion < 3
+      ? 120000
+      : duration[a.id] || 0;
+  }
   function tickActive(a, ms) {
     requireRule(
       Number.isInteger(ms) && ms >= 0 && ms <= 120000,
@@ -504,7 +573,7 @@
     );
     if (a.ended) return;
     const before = a.elapsed;
-    a.elapsed = Math.min(duration[a.id] || 1e9, a.elapsed + ms);
+    a.elapsed = Math.min(clockLimit(a) || 1e9, a.elapsed + ms);
     if (a.id === "catch") {
       for (let i = 0; i < Math.ceil(60000 / a.data.launchEvery); i++) {
         const c = carrot(a, i);
@@ -527,7 +596,7 @@
           a.data.missed.push(i);
       }
     }
-    if (duration[a.id] && a.elapsed >= duration[a.id]) {
+    if (clockLimit(a) && a.elapsed >= clockLimit(a)) {
       a.ended = true;
       a.won = a.score >= a.data.target;
     }
@@ -535,6 +604,53 @@
   function apply(a, e) {
     requireRule(!a.ended, "This round has finished.");
     const d = a.data;
+    if (a.rulesVersion >= 3 && a.id === "tidy") return Lawn.apply(a, e);
+    if (
+      a.rulesVersion >= 3 &&
+      a.id === "labels" &&
+      ["letter", "removeLetter", "returnLetter"].includes(e.type)
+    ) {
+      if (e.type === "removeLetter") {
+        requireRule(
+          Number.isInteger(e.slot) && e.slot >= 0 && e.slot < d.slots.length,
+          "Choose a letter slot.",
+        );
+        if (d.slots[e.slot] === null) return false;
+        d.slots[e.slot] = null;
+      } else {
+        requireRule(
+          Number.isInteger(e.tile) && e.tile >= 0 && e.tile < d.tiles.length,
+          "Choose a letter.",
+        );
+        const from = d.slots.indexOf(e.tile);
+        if (e.type === "returnLetter") {
+          if (from < 0) return false;
+          d.slots[from] = null;
+          return true;
+        }
+        const slot = e.slot === undefined ? d.slots.indexOf(null) : e.slot;
+        requireRule(
+          Number.isInteger(slot) && slot >= 0 && slot < d.slots.length,
+          "Choose a letter slot.",
+        );
+        if (from === slot) return false;
+        const other = d.slots[slot];
+        if (from >= 0) d.slots[from] = other;
+        d.slots[slot] = e.tile;
+      }
+      if (
+        d.slots.every((x) => x !== null) &&
+        d.slots.map((i) => d.tiles[i]).join("") === d.words[d.round]
+      ) {
+        a.score++;
+        d.round++;
+        if (d.round === d.words.length) {
+          a.won = true;
+          a.ended = true;
+        } else letterRound(a);
+      }
+      return true;
+    }
     if (e.type === "word") {
       requireRule(
         a.id === "words" && Array.isArray(e.path),
@@ -709,7 +825,7 @@
       a.score++;
       a.won = a.score === d.target;
     } else throw Error("Unknown job action.");
-    if (a.won && !duration[a.id]) a.ended = true;
+    if (a.won && !clockLimit(a)) a.ended = true;
     return true;
   }
   function action(s, e) {
@@ -726,6 +842,7 @@
     ms = Math.max(0, Math.min(120000, Math.round(ms)));
     tickActive(a, ms);
     if (a.ended) s.jobs.best[a.id] = Math.max(s.jobs.best[a.id] || 0, a.score);
+    if (a.ended && !a.won) Records.record(s.jobs, a, Date.now());
     const last = a.log.at(-1);
     if (last?.type === "tick" && last.ms + ms <= 120000) last.ms += ms;
     else a.log.push({ type: "tick", ms });
@@ -734,10 +851,16 @@
     const a = s.jobs?.active;
     requireRule(a?.won && a.ended, "Finish this job first.");
     requireRule(!available(s, a.id, now), "This job has already paid.");
-    s.cash = (Math.round(s.cash * 100) + 100) / 100;
+    const record = Records.record(s.jobs, a, now);
+    s.cash = (Math.round(s.cash * 100) + record.rewardCents) / 100;
     s.jobs.cooldowns[a.id] = now + cooldownMs;
     s.jobs.best[a.id] = Math.max(s.jobs.best[a.id] || 0, a.score);
-    const result = { id: a.id, score: a.score, best: s.jobs.best[a.id] };
+    const result = {
+      id: a.id,
+      score: a.score,
+      best: s.jobs.best[a.id],
+      ...record,
+    };
     s.jobs.active = null;
     return result;
   }
@@ -745,6 +868,9 @@
     if (s.jobs) s.jobs.active = null;
   }
   const api = {
+    clockLimit,
+    recordSpec: Records.spec,
+    result: Records.assess,
     kinds,
     packingFronts,
     packingProgress,

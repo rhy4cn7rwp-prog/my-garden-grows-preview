@@ -261,7 +261,7 @@
     const total = marketSetupTotal(s);
     requireRule(
       total > 0 && s.cash >= total,
-      "Save enough for your remaining equipment first. Neighborhood jobs always pay $1.",
+      "Save enough for your remaining equipment first. Neighborhood jobs pay at least $1.",
     );
     const cart = {};
     if (!s.owned.table) cart.table = 1;
@@ -1045,7 +1045,7 @@
     return false;
   }
   function openMarket(s, now = Date.now()) {
-    requireRule(!s.newEconomy || (s.owned.table && s.owned.scale && s.cashRegister && bagsRemaining(s)>0), "Collect any missing table, scale, cash register and bags at Market Supplies before opening. Neighborhood jobs always pay $1.");
+    requireRule(!s.newEconomy || (s.owned.table && s.owned.scale && s.cashRegister && bagsRemaining(s)>0), "Collect any missing table, scale, cash register and bags at Market Supplies before opening. Neighborhood jobs pay at least $1.");
     requireRule(
       !s.marketPlayed && !s.marketOpen,
       "Your market has already opened today. End the farming day before opening again.",
