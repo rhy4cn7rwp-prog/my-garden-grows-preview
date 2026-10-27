@@ -1,4 +1,5 @@
-/* Original lightweight vector scenery. All geometry is local to each SVG. */
+/* Earlier vector artwork is preserved below. Current painted layers use
+   JobPolishArt; legacy garden symbols remain available to older activities. */
 const JobArt = (() => {
   const svg = (body, box = "0 0 200 240", label = "") =>
     `<svg viewBox="${box}" ${label ? `role="img" aria-label="${label}"` : 'aria-hidden="true"'}>${body}</svg>`;

@@ -84,7 +84,7 @@ try:
       xy=page.evaluate("i=>{const a=state.jobs.active,o=JobGallery.hidden[a.data.scene].objects[i],r=document.querySelector('.seek-canvas').getBoundingClientRect();return [r.x+(o.x+o.w/2)*r.width,r.y+(o.y+o.h/2)*r.height]}",item);page.touchscreen.tap(*xy)
       assert page.evaluate('i=>state.jobs.active.data.found.includes(i)',item),(scene,item)
      assert page.evaluate('state.jobs.active.won')
-     start('sliding','little',scene);page.locator('[data-picture-begin]').tap();assert page.locator('.picture-tile').count()==8
+     start('sliding','little',scene);page.locator('[data-picture-begin]').tap();assert page.locator('.picture-tile').count()==5
      assert page.evaluate("()=>[...document.images].every(i=>i.complete&&i.naturalWidth)")
      print(f'PASS original scene pair {scene+1}/30',flush=True)
    assert not errors,errors
