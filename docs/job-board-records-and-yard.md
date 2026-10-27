@@ -50,7 +50,7 @@ messages saying jobs pay **at least** $1, reflecting the new bonus.
 
 ## Validation
 
-- `npm test`: **257 passing** rule/regression tests, including 2,000 seeded word-job
+- `npm test`: **258 passing** rule/regression tests, including 2,000 seeded word-job
   plans across both experiences, valid grids, exact tile multisets,
   arbitrary placement/swap/return, connected mower paths, both lawn stages,
   fair record buckets, genuine improved points/time, ties, integer-cent payouts,
@@ -71,3 +71,8 @@ simulated safe areas in existing suites. Native iPhone Safari, VoiceOver, and th
 subjective feel of synthesized letter hints/illustration/dragging still need
 family playtesting. Narrow phones allow vertical scrolling to retain readable
 text and comfortable controls. No actual Safari hardware result is claimed.
+
+Final picture-clue review: all early-reader words retain matching pictures.
+Longer words without a dedicated illustration keep pronunciation and spelling
+hints instead of inheriting the generic flower fallback. An all-vocabulary
+rendering test guards this educational accuracy.
