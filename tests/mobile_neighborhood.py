@@ -23,12 +23,12 @@ try:
    assert page.evaluate('state.cash')==0
    page.get_by_role('button',name=re.compile("^I'm still learning to read!")).tap()
    assert page.evaluate('state.learningExperience')=='little'
-   page.evaluate("go('jobs')");assert page.locator('[data-job-card]').count()==10
+   page.evaluate("go('jobs')");assert page.locator('[data-job-card]').count()==12
    if w==428:page.screenshot(path='/tmp/phase9-job-board-iphone.png',full_page=True)
    # Every card is available, readable and has original artwork.
    for card in page.locator('[data-job-card]').all():
     assert card.is_enabled();b=card.bounding_box();assert b['width']>=120 and b['height']>=140
-    assert card.locator('svg').count()>0
+    assert card.locator('svg,img').count()>0
    session=page.context.new_cdp_session(page)
    def touch(kind,x=0,y=0):session.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':[] if kind=='touchEnd' else [{'x':x,'y':y}]})
    def drag(source,target):

@@ -12,6 +12,14 @@ function solve(s) {
   const a = s.jobs.active,
     d = a.data;
   switch (a.id) {
+    case "hidden":
+      J.action(s,{type:"pictureBegin"});
+      for(const item of d.targets)J.action(s,{type:"findObject",item});
+      break;
+    case "sliding":
+      J.action(s,{type:"pictureBegin"});
+      for(const cell of d.solution){if(a.ended)break;J.action(s,{type:"slide",cell});}
+      break;
     case "words":
       for (const w of d.words) J.action(s, { type: "word", path: d.paths[w] });
       break;

@@ -1,0 +1,306 @@
+{
+  "hidden": [
+    {
+      "id": "barnyard",
+      "title": "Busy Barnyard",
+      "file": "assets/job-pictures/hidden/barnyard.webp"
+    },
+    {
+      "id": "vegetable-garden",
+      "title": "Vegetable Garden",
+      "file": "assets/job-pictures/hidden/vegetable-garden.webp"
+    },
+    {
+      "id": "apple-orchard",
+      "title": "Apple Orchard",
+      "file": "assets/job-pictures/hidden/apple-orchard.webp"
+    },
+    {
+      "id": "greenhouse",
+      "title": "Sunny Greenhouse",
+      "file": "assets/job-pictures/hidden/greenhouse.webp"
+    },
+    {
+      "id": "farmers-market",
+      "title": "Farmers Market",
+      "file": "assets/job-pictures/hidden/farmers-market.webp"
+    },
+    {
+      "id": "farm-pond",
+      "title": "Farm Pond",
+      "file": "assets/job-pictures/hidden/farm-pond.webp"
+    },
+    {
+      "id": "chicken-coop",
+      "title": "Chicken Coop",
+      "file": "assets/job-pictures/hidden/chicken-coop.webp"
+    },
+    {
+      "id": "pumpkin-patch",
+      "title": "Pumpkin Patch",
+      "file": "assets/job-pictures/hidden/pumpkin-patch.webp"
+    },
+    {
+      "id": "tractor-shed",
+      "title": "Tractor Shed",
+      "file": "assets/job-pictures/hidden/tractor-shed.webp"
+    },
+    {
+      "id": "sunflower-field",
+      "title": "Sunflower Field",
+      "file": "assets/job-pictures/hidden/sunflower-field.webp"
+    },
+    {
+      "id": "horse-stable",
+      "title": "Horse Stable",
+      "file": "assets/job-pictures/hidden/horse-stable.webp"
+    },
+    {
+      "id": "berry-garden",
+      "title": "Berry Garden",
+      "file": "assets/job-pictures/hidden/berry-garden.webp"
+    },
+    {
+      "id": "farm-kitchen",
+      "title": "Farm Kitchen",
+      "file": "assets/job-pictures/hidden/farm-kitchen.webp"
+    },
+    {
+      "id": "seed-store",
+      "title": "Seed and Feed Shop",
+      "file": "assets/job-pictures/hidden/seed-store.webp"
+    },
+    {
+      "id": "hay-barn",
+      "title": "Hay Barn",
+      "file": "assets/job-pictures/hidden/hay-barn.webp"
+    },
+    {
+      "id": "flower-garden",
+      "title": "Flower Garden",
+      "file": "assets/job-pictures/hidden/flower-garden.webp"
+    },
+    {
+      "id": "beehive-garden",
+      "title": "Beehive Garden",
+      "file": "assets/job-pictures/hidden/beehive-garden.webp"
+    },
+    {
+      "id": "cornfield",
+      "title": "Cornfield",
+      "file": "assets/job-pictures/hidden/cornfield.webp"
+    },
+    {
+      "id": "farm-picnic",
+      "title": "Farm Picnic",
+      "file": "assets/job-pictures/hidden/farm-picnic.webp"
+    },
+    {
+      "id": "roadside-stand",
+      "title": "Country Roadside Stand",
+      "file": "assets/job-pictures/hidden/roadside-stand.webp"
+    },
+    {
+      "id": "harvest-festival",
+      "title": "Harvest Festival",
+      "file": "assets/job-pictures/hidden/harvest-festival.webp"
+    },
+    {
+      "id": "farm-workshop",
+      "title": "Farm Workshop",
+      "file": "assets/job-pictures/hidden/farm-workshop.webp"
+    },
+    {
+      "id": "irrigation-pond",
+      "title": "Irrigation Pond",
+      "file": "assets/job-pictures/hidden/irrigation-pond.webp"
+    },
+    {
+      "id": "garden-tool-shed",
+      "title": "Garden Tool Shed",
+      "file": "assets/job-pictures/hidden/garden-tool-shed.webp"
+    },
+    {
+      "id": "packing-room",
+      "title": "Vegetable Packing Room",
+      "file": "assets/job-pictures/hidden/packing-room.webp"
+    },
+    {
+      "id": "spring-planting",
+      "title": "Spring Planting Day",
+      "file": "assets/job-pictures/hidden/spring-planting.webp"
+    },
+    {
+      "id": "autumn-harvest",
+      "title": "Autumn Harvest",
+      "file": "assets/job-pictures/hidden/autumn-harvest.webp"
+    },
+    {
+      "id": "rainy-greenhouse",
+      "title": "Rainy-day Greenhouse",
+      "file": "assets/job-pictures/hidden/rainy-greenhouse.webp"
+    },
+    {
+      "id": "orchard-picnic",
+      "title": "Orchard Picnic",
+      "file": "assets/job-pictures/hidden/orchard-picnic.webp"
+    },
+    {
+      "id": "sunset-farmyard",
+      "title": "Sunset Farmyard",
+      "file": "assets/job-pictures/hidden/sunset-farmyard.webp"
+    }
+  ],
+  "sliding": [
+    {
+      "id": "red-tractor",
+      "title": "Red Farm Tractor",
+      "file": "assets/job-pictures/sliding/red-tractor.webp"
+    },
+    {
+      "id": "sunflower-bouquet",
+      "title": "Sunflower Bouquet",
+      "file": "assets/job-pictures/sliding/sunflower-bouquet.webp"
+    },
+    {
+      "id": "baby-calf",
+      "title": "Baby Calf",
+      "file": "assets/job-pictures/sliding/baby-calf.webp"
+    },
+    {
+      "id": "vegetable-basket",
+      "title": "Basket of Vegetables",
+      "file": "assets/job-pictures/sliding/vegetable-basket.webp"
+    },
+    {
+      "id": "red-barn",
+      "title": "Red Barn",
+      "file": "assets/job-pictures/sliding/red-barn.webp"
+    },
+    {
+      "id": "farm-kitten",
+      "title": "Playful Farm Kitten",
+      "file": "assets/job-pictures/sliding/farm-kitten.webp"
+    },
+    {
+      "id": "farm-puppy",
+      "title": "Farm Puppy",
+      "file": "assets/job-pictures/sliding/farm-puppy.webp"
+    },
+    {
+      "id": "pasture-horse",
+      "title": "Horse in Pasture",
+      "file": "assets/job-pictures/sliding/pasture-horse.webp"
+    },
+    {
+      "id": "hens-and-chicks",
+      "title": "Chickens and Chicks",
+      "file": "assets/job-pictures/sliding/hens-and-chicks.webp"
+    },
+    {
+      "id": "pumpkin-garden",
+      "title": "Pumpkin Patch Picture",
+      "file": "assets/job-pictures/sliding/pumpkin-garden.webp"
+    },
+    {
+      "id": "apple-tree",
+      "title": "Apple Tree",
+      "file": "assets/job-pictures/sliding/apple-tree.webp"
+    },
+    {
+      "id": "watering-can",
+      "title": "Garden Watering Can",
+      "file": "assets/job-pictures/sliding/watering-can.webp"
+    },
+    {
+      "id": "strawberry-basket",
+      "title": "Strawberry Basket",
+      "file": "assets/job-pictures/sliding/strawberry-basket.webp"
+    },
+    {
+      "id": "corn-harvest",
+      "title": "Corn Harvest",
+      "file": "assets/job-pictures/sliding/corn-harvest.webp"
+    },
+    {
+      "id": "scarecrow",
+      "title": "Friendly Scarecrow",
+      "file": "assets/job-pictures/sliding/scarecrow.webp"
+    },
+    {
+      "id": "wheelbarrow",
+      "title": "Farmer's Wheelbarrow",
+      "file": "assets/job-pictures/sliding/wheelbarrow.webp"
+    },
+    {
+      "id": "beehive-flowers",
+      "title": "Beehive and Flowers",
+      "file": "assets/job-pictures/sliding/beehive-flowers.webp"
+    },
+    {
+      "id": "country-windmill",
+      "title": "Country Windmill",
+      "file": "assets/job-pictures/sliding/country-windmill.webp"
+    },
+    {
+      "id": "greenhouse-plants",
+      "title": "Greenhouse Plants",
+      "file": "assets/job-pictures/sliding/greenhouse-plants.webp"
+    },
+    {
+      "id": "duck-pond",
+      "title": "Farm Pond with Ducks",
+      "file": "assets/job-pictures/sliding/duck-pond.webp"
+    },
+    {
+      "id": "market-stall",
+      "title": "Vegetable Market Stand",
+      "file": "assets/job-pictures/sliding/market-stall.webp"
+    },
+    {
+      "id": "boots-and-tools",
+      "title": "Garden Boots and Tools",
+      "file": "assets/job-pictures/sliding/boots-and-tools.webp"
+    },
+    {
+      "id": "piglets",
+      "title": "Piglets in the Yard",
+      "file": "assets/job-pictures/sliding/piglets.webp"
+    },
+    {
+      "id": "meadow-sheep",
+      "title": "Sheep in a Meadow",
+      "file": "assets/job-pictures/sliding/meadow-sheep.webp"
+    },
+    {
+      "id": "hay-wagon",
+      "title": "Hay Wagon",
+      "file": "assets/job-pictures/sliding/hay-wagon.webp"
+    },
+    {
+      "id": "carrot-harvest",
+      "title": "Carrot Harvest",
+      "file": "assets/job-pictures/sliding/carrot-harvest.webp"
+    },
+    {
+      "id": "flower-bicycle",
+      "title": "Flower-filled Bicycle",
+      "file": "assets/job-pictures/sliding/flower-bicycle.webp"
+    },
+    {
+      "id": "orchard-ladder",
+      "title": "Orchard Ladder",
+      "file": "assets/job-pictures/sliding/orchard-ladder.webp"
+    },
+    {
+      "id": "farm-rainbow",
+      "title": "Rainbow over the Farm",
+      "file": "assets/job-pictures/sliding/farm-rainbow.webp"
+    },
+    {
+      "id": "cozy-farmhouse",
+      "title": "Cozy Farmhouse",
+      "file": "assets/job-pictures/sliding/cozy-farmhouse.webp"
+    }
+  ]
+}

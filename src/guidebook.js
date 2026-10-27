@@ -10,7 +10,7 @@ const GUIDEBOOK_PAGES = [
   {
     heading: "Shop for Your Garden!",
     text: [
-      "New farms start with $0. Collect free starter planting supplies at Seed & Feed. Help neighbors at the Job Board to earn $1 per job. Each neighbor rests for five minutes after paying you.",
+      "New farms start with $0. Collect free starter planting supplies at Seed & Feed. Choose from 12 Job Board activities, including Hidden Treasures and Piece It Together! Help neighbors to earn $1 per job. Each neighbor rests for five minutes after paying you.",
     ],
     illustration: "shopping",
   },
