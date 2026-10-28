@@ -22,7 +22,7 @@ try:
      page.locator(f'[data-letter="{path[0]}"]').tap();page.locator(f'[data-letter="{path[-1]}"]').tap()
     assert page.evaluate('state.jobs.active.won');tap('Collect $1');page.wait_for_function('state.cash===77.35');print('PASS eight selectable words, marks, completion reward',mode,w,flush=True)
     start('hidden',mode);page.locator('[data-picture-begin]').tap();assert page.locator('.isolated-job-clue').count()==page.evaluate('state.jobs.active.data.targets.length');assert page.locator('.seek-checklist svg').count()==0
-    assert page.evaluate("()=>[...document.querySelectorAll('.isolated-job-clue')].every(i=>i.complete&&i.naturalWidth&&i.getAttribute('src').startsWith('assets/job-clues/'))")
+    page.wait_for_function("()=>[...document.querySelectorAll('.isolated-job-clue')].every(i=>i.complete&&i.naturalWidth&&i.getAttribute('src').startsWith('assets/job-clues/'))")
     print('PASS clean isolated object clues',mode,w,flush=True)
     start('tidy',mode);buttons={n:page.get_by_role('button',name='Mow '+n,exact=True).bounding_box() for n in ['up','left','down','right']};assert buttons['up']['y']<buttons['down']['y'];assert abs(buttons['up']['x']-buttons['down']['x'])<1;assert abs(buttons['left']['y']-buttons['right']['y'])<1
     assert max(r['y']+r['height'] for r in buttons.values())<=page.locator('.job-main-actions').bounding_box()['y']+1
