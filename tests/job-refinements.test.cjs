@@ -42,7 +42,7 @@ function solve(s, catchLimit = Infinity) {
     }
     J.tick(s, J.clockLimit(a) - a.elapsed);
   } else if (a.id === "catch") {
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < J.carrotCount(a); i++) {
       const c = J.carrot(a, i),
         t = J.catchTime(a, c);
       if (t > 60000) break;
@@ -102,7 +102,7 @@ test("vocabulary has 100+ unique curated words, short illustrated early words, v
         const s = start(id, mode, seed),
           a = s.jobs.active,
           d = a.data;
-        A.ok(V.valid(a.wordPlan, mode, id));
+        A.ok(V.valid(a.wordPlan, mode, id, a.rulesVersion));
         if (id === "words")
           for (const w of d.words) {
             A.equal(d.paths[w].map((i) => d.grid[i]).join(""), w);
@@ -123,9 +123,10 @@ test("shared recent vocabulary history rotates sessions without erasing farms or
     const seen = new Set(s.jobs.active.wordPlan);
     for (let round = 0; round < 5; round++) {
       J.quit(s);
+      const recent=new Set(s.jobs.wordHistory[mode]);
       J.start(s, round % 2 ? "words" : "labels", 0, round + 3);
       for (const w of s.jobs.active.wordPlan) {
-        A.ok(!seen.has(w), w);
+        A.ok(!recent.has(w), w);
         seen.add(w);
       }
       const r = G.recover(JSON.stringify(s));

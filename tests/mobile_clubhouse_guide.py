@@ -102,7 +102,9 @@ try:
    assert page.evaluate('Game.marketTime(state).elapsedMs')==paused
    page.evaluate("()=>{Object.defineProperty(document,'hidden',{value:false,configurable:true});document.dispatchEvent(new Event('visibilitychange'))}")
    assert page.evaluate('Game.marketTime(state).elapsedMs')<paused+500
-   page.evaluate('pauseHiddenMarket()');saved=page.evaluate('JSON.stringify(state)');page.reload()
+   # Capture the actual hidden-page checkpoint atomically; a visible market
+   # may resume on its next one-second tick between separate evaluations.
+   saved=page.evaluate("()=>{Object.defineProperty(document,'hidden',{value:true,configurable:true});document.dispatchEvent(new Event('visibilitychange'));pauseHiddenMarket();return JSON.stringify(state)}");page.reload()
    assert page.evaluate('view')=='clubhouse'
    assert page.evaluate('(old)=>JSON.stringify(Game.recover(old))',saved)==snapshot()
    # Recovered payment customer can finish farewell and still welcome the next.
@@ -110,11 +112,11 @@ try:
    page.evaluate("()=>{Game.advanceCustomer(state,'good');render()}")
    assert page.evaluate('state.marketOpen') is True
    assert page.evaluate('state.customer') is None
-   page.evaluate("pauseHiddenMarket()")
-   frozen=snapshot()
+   frozen=page.evaluate("()=>{Object.defineProperty(document,'hidden',{value:true,configurable:true});document.dispatchEvent(new Event('visibilitychange'));pauseHiddenMarket();return JSON.stringify(state)}")
    page.evaluate("window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))")
    assert page.evaluate('view')=='clubhouse' and page.evaluate('marketAwaitingResume') is True
    assert snapshot()==frozen
+   page.evaluate("()=>{Object.defineProperty(document,'hidden',{value:false,configurable:true});document.dispatchEvent(new Event('visibilitychange'))}")
    tap('Resume Market');assert page.evaluate('view')=='market'
    assert not errors,errors
    print(f'PASS home/startup, six illustrated guide pages, exact save recovery, market resume/sale and hidden pause {w}x{h}',flush=True)

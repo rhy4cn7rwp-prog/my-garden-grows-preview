@@ -1,0 +1,114 @@
+[
+  {
+    "id": "key",
+    "source": "source/key.png",
+    "file": "key.webp",
+    "sourceSha256": "ed709c3c899e4b83d8ab32b2266e4b2f56860718c1a947656da400d18e6891fc",
+    "deliverySha256": "fc0b8b4b14c26a049368134feb53c1b0a4685c7af847824c1f6b6032b8856973",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "can",
+    "source": "source/can.png",
+    "file": "can.webp",
+    "sourceSha256": "a24a72b4eb948d958f757b3cdc820d8b5c381d2a33002e6de4987b3f1862aba6",
+    "deliverySha256": "c89a71282ccf8b35611dfee8ef8bb3932dec5434ee4503b53df6cb039aa516c6",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "glove",
+    "source": "source/glove.png",
+    "file": "glove.webp",
+    "sourceSha256": "89c51067f747ee622facfa31a298cdeffeba2ac8f520afb8e401a82e352960db",
+    "deliverySha256": "07202bc03419dc22daf512864b289961c907af7c08c572531a6a3feb3838f77e",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "rake",
+    "source": "source/rake.png",
+    "file": "rake.webp",
+    "sourceSha256": "246202c4590c1d6758ba95d4707dc9a6062892268670773358a21a51f4a27681",
+    "deliverySha256": "c78ea8d1439b4960b6ca142d47825f0d375f5ac465fe150c6df372ecee8fe1c4",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "horseshoe",
+    "source": "source/horseshoe.png",
+    "file": "horseshoe.webp",
+    "sourceSha256": "88a169219158fa7491da1228e09b3a0e9c6f9de98ee3c196db6767519344d545",
+    "deliverySha256": "ac07548508f51a0a176d62699d2278a3a53eae77c61befa3ccccabb58b1f86df",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "carrot",
+    "source": "source/carrot.png",
+    "file": "carrot.webp",
+    "sourceSha256": "a5aa24248e983301a4b34fcff0e86c22b39d1398d8bdcc84b042f3e5352efb46",
+    "deliverySha256": "0d6780e139655baf18947e088255af97be1cf33e8b6842a7844b7070768478e6",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "seeds",
+    "source": "source/seeds.png",
+    "file": "seeds.webp",
+    "sourceSha256": "2b7cde18af5d235835ab7a274b0a4c25988a4b7c2567f3961b75824652b9e452",
+    "deliverySha256": "35dda01ee19ffd3f6f9ef2a10a4217a5e85dbdb4edc67f94c59b303232ac5155",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "nest",
+    "source": "source/nest.png",
+    "file": "nest.webp",
+    "sourceSha256": "3da908674c3dd19144ca4504aa3d4ca78bfca66ff4d151d9c765e947bd2b0460",
+    "deliverySha256": "5e7eadc69d86f2e3263e2ea76cdabae094e83033735a03f0c1729d8a7b3eeb11",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "strawberry",
+    "source": "source/strawberry.png",
+    "file": "strawberry.webp",
+    "sourceSha256": "be1e52a2e914a00442c56a1651cbc427e2a66b0771254f6ae4a57e7ded444a94",
+    "deliverySha256": "50f15f8ae74563ead314d765b60dc3522ca3eaf855cd6c3f846a65ffed9ce808",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "butterfly",
+    "source": "source/butterfly.png",
+    "file": "butterfly.webp",
+    "sourceSha256": "b51959d2dead51399fcd49cc5fc0b47975f209b3fe339e8b71764d4007590475",
+    "deliverySha256": "7e819f27acf33af13756b6b385c6827fcd09f4c6e1e191eef13cce522bd0de44",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "fork",
+    "source": "source/fork.png",
+    "file": "fork.webp",
+    "sourceSha256": "f8644fecd1170baa2b09f48f03882243b82b11114fc7dfde1bcfe3964d28455d",
+    "deliverySha256": "45309149f4445911555c1cf68196d55a09151f5d4cedcc03749e1d2005968fd8",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "ladybug",
+    "source": "source/ladybug.png",
+    "file": "ladybug.webp",
+    "sourceSha256": "9f0d095bd6b2ae0e3d87a17b53d341ec50fdcf03cc157db3201d106b93c9d9e0",
+    "deliverySha256": "7d4c231fe896002f6f17a3627fcec20fe337b5ddc3fb1b657f5e34aeeb5dd285",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "shovel",
+    "source": "source/shovel.png",
+    "file": "shovel.webp",
+    "sourceSha256": "e0e4635cfe1544dd95d805643260f907a8980f74cf1cedc08b2a95916035f6c8",
+    "deliverySha256": "1c8e0c66f8da6ca85c85ce7c567c4ddcdd37bf974dacbcb37065fe11483c2722",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  },
+  {
+    "id": "mug",
+    "source": "source/mug.png",
+    "file": "mug.webp",
+    "sourceSha256": "a875c7bb2ed15256f08f363dd8f3a82acf777f956bf56825c1bd9d0dec9b815a",
+    "deliverySha256": "5ff5c8ab7fcb4480864bb0a8ccbc621affcbca715c660075ab54fc03a1299463",
+    "origin": "Original generated transparent object illustration, existing hidden-scene reference."
+  }
+]

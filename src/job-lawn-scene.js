@@ -1,5 +1,9 @@
 /* A continuous illustrated yard with invisible cell geometry for safe movement. */
 const JobLawnScene = (() => {
+  function homeowner() {
+    return `<div class="lawn-homeowner" role="dialog" aria-label="The homeowner comes outside"><div class="homeowner-door" aria-hidden="true"></div><div class="homeowner-person">${JobArt.magee()}</div><div class="homeowner-words"><p>You mowed my flowers!</p><button class="btn" onpointerup="event.stopPropagation();TouchActions.run(event,()=>Neighborhood.retryMow())" onclick="event.stopPropagation();Neighborhood.retryMow()">Try Again</button></div></div>`;
+  }
+
   function mower() {
     return `<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="82" rx="43" ry="10" fill="#40583344"/><path d="M35 54 20 14h48L62 56" fill="none" stroke="#667f78" stroke-width="7"/><rect x="18" y="9" width="54" height="10" rx="5" fill="#77543e"/><rect x="11" y="61" width="17" height="30" rx="7" fill="#4e594f"/><rect x="72" y="61" width="17" height="30" rx="7" fill="#4e594f"/><path d="M24 52q29-13 53 1l8 28H16Z" fill="#cf7451" stroke="#89553a" stroke-width="4"/><rect x="32" y="43" width="34" height="25" rx="6" fill="#e5c177" stroke="#9c7a45" stroke-width="3"/><path d="M38 47h22m-22 6h22" stroke="#b6945c" stroke-width="3"/></svg>`;
   }
@@ -25,25 +29,29 @@ const JobLawnScene = (() => {
       raked = d.cells.filter((c) => c.raked).length,
       stage = d.stage;
     const instruction =
-      stage === "mow"
-        ? `Mow every grassy patch: ${cut} / ${d.target}. Steer around the flowerbeds.`
-        : stage === "rake"
-          ? `Rake the clippings: ${raked} / ${d.target}. Sweep the rake across the cut lawn.`
-          : `Put all three piles in the compost bin: ${d.collected.filter(Boolean).length} / 3.`;
-    return `<p class="lawn-task" role="status"><strong>${stage === "mow" ? "1. Mow the lawn" : "2. Rake and compost"}</strong><br>${instruction}</p><div class="job-lawn-world ${stage}" data-job-drag="lawn" aria-label="Illustrated lawn; steer the mower or sweep the rake" onpointerup="TouchActions.run(event,()=>Neighborhood.lawnTap(event))" onclick="Neighborhood.lawnTap(event)" style="--lawn-cols:${d.width};--lawn-rows:${d.height}"><div class="lawn-fence"></div>${d.cells.map((c, i) => `<div class="lawn-patch ${c.blocked ? "obstacle" : c.cut ? "cut" : "tall"} ${c.raked ? "raked" : ""} ${c.cleared ? "cleared" : ""}" data-lawn-cell="${i}" style="left:${((i % d.width) / d.width) * 100}%;top:${(Math.floor(i / d.width) / d.height) * 100}%;width:${100 / d.width}%;height:${100 / d.height}%">${c.blocked ? c.obstacle==="tree" ? JobArt.ground("tree") : c.obstacle==="bed" ? JobArt.ground("bed") : JobArt.flower(true, i) : `<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M0 50 5 19l9 19 8-32 10 29 9-20 8 24 9-12 2 33H0Z" fill="${c.cut ? "#9fbd68" : "#749f4f"}"/><path d="m4 43 8-13m5 13 6-18m9 20 4-16m8 17 7-9" stroke="${c.cut ? "#b5cf83" : "#9fbf69"}" stroke-width="3"/></svg>${'<span class="lawn-clippings">⌁ ⌁</span>'}`}</div>`).join("")}<div class="lawn-tool ${stage === "mow" ? "mower" : "rake"}" style="left:${((((stage === "mow" ? d.mower : d.rake) % d.width) + 0.5) / d.width) * 100}%;top:${((Math.floor((stage === "mow" ? d.mower : d.rake) / d.width) + 0.5) / d.height) * 100}%">${stage === "mow" ? mower() : rake()}</div><div class="lawn-piles" data-lawn-piles>${pileButtons(d)}</div></div>${
-      stage === "mow"
-        ? `<div class="lawn-steering" aria-label="Mower directions">${[
-            ["up", "↑"],
-            ["left", "←"],
-            ["down", "↓"],
-            ["right", "→"],
-          ]
-            .map(
-              ([dir, label]) =>
-                `<button class="btn" onclick="Neighborhood.lawnStep('${dir}')" onpointerup="TouchActions.run(event,()=>Neighborhood.lawnStep('${dir}'))" aria-label="Mow ${dir}">${label}</button>`,
-            )
-            .join("")}</div>`
-        : `<div class="lawn-rake-help">${rake()}<span>${stage === "rake" ? "Sweep across the lawn, or tap clippings." : "Choose a pile, then tap the compost bin."}</span><button class="lawn-compost" data-job-drop="compost" onclick="Neighborhood.compost()" onpointerup="TouchActions.run(event,()=>Neighborhood.compost())" aria-label="Compost bin">${compost()}<b>Compost</b></button></div>`
+      stage === "flowerPause"
+        ? "The mower has stopped. Try again when you are ready."
+        : stage === "mow"
+          ? `Mow every grassy patch: ${cut} / ${d.target}. Steer around the flowerbeds.`
+          : stage === "rake"
+            ? `Rake the clippings: ${raked} / ${d.target}. Sweep the rake across the cut lawn.`
+            : `Put all three piles in the compost bin: ${d.collected.filter(Boolean).length} / 3.`;
+    return `<p class="lawn-task" role="status"><strong>${["mow", "flowerPause"].includes(stage) ? "1. Mow the lawn" : "2. Rake and compost"}</strong><br>${instruction}</p><div class="job-lawn-world ${stage}" data-job-drag="lawn" aria-label="Illustrated lawn; steer the mower or sweep the rake" onpointerup="TouchActions.run(event,()=>Neighborhood.lawnTap(event))" onclick="Neighborhood.lawnTap(event)" style="--lawn-cols:${d.width};--lawn-rows:${d.height}"><div class="lawn-fence"></div>${d.cells.map((c, i) => `<div class="lawn-patch ${c.blocked ? "obstacle" : c.cut ? "cut" : "tall"} ${c.raked ? "raked" : ""} ${c.cleared ? "cleared" : ""}" data-lawn-cell="${i}" style="left:${((i % d.width) / d.width) * 100}%;top:${(Math.floor(i / d.width) / d.height) * 100}%;width:${100 / d.width}%;height:${100 / d.height}%">${c.blocked ? (c.obstacle === "tree" ? JobArt.ground("tree") : c.obstacle === "bed" ? JobArt.ground("bed") : JobArt.flower(true, i)) : `<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M0 50 5 19l9 19 8-32 10 29 9-20 8 24 9-12 2 33H0Z" fill="${c.cut ? "#9fbd68" : "#749f4f"}"/><path d="m4 43 8-13m5 13 6-18m9 20 4-16m8 17 7-9" stroke="${c.cut ? "#b5cf83" : "#9fbf69"}" stroke-width="3"/></svg>${'<span class="lawn-clippings">⌁ ⌁</span>'}`}</div>`).join("")}<div class="lawn-tool ${["mow", "flowerPause"].includes(stage) ? "mower" : "rake"}" style="left:${((((["mow", "flowerPause"].includes(stage) ? d.mower : d.rake) % d.width) + 0.5) / d.width) * 100}%;top:${((Math.floor((["mow", "flowerPause"].includes(stage) ? d.mower : d.rake) / d.width) + 0.5) / d.height) * 100}%">${["mow", "flowerPause"].includes(stage) ? mower() : rake()}</div>${stage === "flowerPause" ? homeowner() : ""}<div class="lawn-piles" data-lawn-piles>${pileButtons(d)}</div></div>${
+      stage === "flowerPause"
+        ? '<p class="lawn-flower-pause">The mower has stopped. Try again when you are ready.</p>'
+        : stage === "mow"
+          ? `<div class="lawn-steering" aria-label="Mower directions">${[
+              ["up", "↑"],
+              ["left", "←"],
+              ["down", "↓"],
+              ["right", "→"],
+            ]
+              .map(
+                ([dir, label]) =>
+                  `<button class="btn" onclick="Neighborhood.lawnStep('${dir}')" onpointerup="TouchActions.run(event,()=>Neighborhood.lawnStep('${dir}'))" aria-label="Mow ${dir}">${label}</button>`,
+              )
+              .join("")}</div>`
+          : `<div class="lawn-rake-help">${rake()}<span>${stage === "rake" ? "Sweep across the lawn, or tap clippings." : "Choose a pile, then tap the compost bin."}</span><button class="lawn-compost" data-job-drop="compost" onclick="Neighborhood.compost()" onpointerup="TouchActions.run(event,()=>Neighborhood.compost())" aria-label="Compost bin">${compost()}<b>Compost</b></button></div>`
     }`;
   }
   function paint(a) {
@@ -58,7 +66,7 @@ const JobLawnScene = (() => {
       el.classList.toggle("cleared", c.cleared);
     });
     const tool = world.querySelector(".lawn-tool"),
-      cell = d.stage === "mow" ? d.mower : d.rake;
+      cell = ["mow", "flowerPause"].includes(d.stage) ? d.mower : d.rake;
     if (tool) {
       tool.style.left = (((cell % d.width) + 0.5) / d.width) * 100 + "%";
       tool.style.top =
@@ -67,8 +75,9 @@ const JobLawnScene = (() => {
     const count = d.cells.filter((c) =>
       d.stage === "mow" ? c.cut : c.raked,
     ).length;
-    document.querySelector(".lawn-task").innerHTML =
-      `<strong>${d.stage === "mow" ? "1. Mow the lawn" : "2. Rake and compost"}</strong><br>${d.stage === "mow" ? "Mow every grassy patch" : "Rake the clippings"}: ${count} / ${d.target}.`;
+    if (d.stage !== "flowerPause")
+      document.querySelector(".lawn-task").innerHTML =
+        `<strong>${d.stage === "mow" ? "1. Mow the lawn" : "2. Rake and compost"}</strong><br>${d.stage === "mow" ? "Mow every grassy patch" : "Rake the clippings"}: ${count} / ${d.target}.`;
     const piles = world.querySelector("[data-lawn-piles]");
     if (piles) piles.innerHTML = pileButtons(d);
   }

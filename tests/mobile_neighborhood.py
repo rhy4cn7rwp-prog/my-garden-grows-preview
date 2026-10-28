@@ -103,7 +103,7 @@ try:
       # Tap each lawn patch to sweep all required clippings, no deadline.
       for cell in page.evaluate('state.jobs.active.data.cells.map((c,i)=>c.blocked?-1:i).filter(i=>i>=0)'):
        el=page.locator(f'[data-lawn-cell="{cell}"]');el.scroll_into_view_if_needed();r=el.bounding_box();touch('touchStart',r['x']+r['width']/2,r['y']+r['height']/2);touch('touchEnd')
-      assert page.evaluate("state.jobs.active.data.stage==='compost'")
+      assert page.evaluate("state.jobs.active.data.stage==='compost'"),(w,mode,page.evaluate("state.jobs.active.data.cells.map((c,i)=>!c.blocked&&!c.raked?i:-1).filter(i=>i>=0)"),page.locator(".job-lawn-world").bounding_box())
       for pile in range(3):
        page.get_by_role('button',name=f'Grass pile {pile+1}',exact=True).tap()
        page.get_by_role('button',name='Compost bin',exact=True).tap()

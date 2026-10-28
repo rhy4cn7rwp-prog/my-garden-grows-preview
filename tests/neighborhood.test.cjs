@@ -51,7 +51,7 @@ function solve(s) {
       J.tick(s, 120000 - a.elapsed);
       break;
     case "catch":
-      for (let i = 0; i < Math.ceil(60000 / d.launchEvery); i++) {
+      for (let i = 0; i < J.carrotCount(a); i++) {
         const c = J.carrot(a, i),
           landing = c.launch + c.flight;
         if (landing > 60000) break;

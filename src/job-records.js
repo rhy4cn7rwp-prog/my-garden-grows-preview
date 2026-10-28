@@ -77,7 +77,7 @@
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
     for (const [key, r] of Object.entries(raw)) {
       if (
-        !/^[a-z]+\|(little|growing)\|v[12345]\|[\d.\-]+$/.test(key) ||
+        !/^[a-z]+\|(little|growing)\|v[123456]\|[\d.\-]+$/.test(key) ||
         !ids.includes(key.split("|")[0]) ||
         !r ||
         !(r.best === null || (Number.isSafeInteger(r.best) && r.best >= 0))

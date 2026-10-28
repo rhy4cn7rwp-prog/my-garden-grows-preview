@@ -119,9 +119,8 @@ const JobScenes = (() => {
       holder = document.querySelector(".job-carrots");
     let recent = false;
     if (holder)
-      holder.innerHTML = Array.from(
-        { length: Math.ceil(60000 / d.launchEvery) },
-        (_, i) => J.carrot(a, i),
+      holder.innerHTML = Array.from({ length: J.carrotCount(a) }, (_, i) =>
+        J.carrot(a, i),
       )
         .map((c) => {
           const age = a.elapsed - c.launch;
@@ -158,9 +157,8 @@ const JobScenes = (() => {
       }
     }
     const bubble = document.querySelector(".job-jones-bubble");
-    const big = Array.from(
-      { length: Math.ceil(60000 / d.launchEvery) },
-      (_, i) => J.carrot(a, i),
+    const big = Array.from({ length: J.carrotCount(a) }, (_, i) =>
+      J.carrot(a, i),
     ).some(
       (c) => c.big && a.elapsed >= c.launch && a.elapsed < c.launch + c.flight,
     );

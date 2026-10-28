@@ -22,7 +22,7 @@ try:
     page.screenshot(path=f'/tmp/polish-tomatoes-{mode}-{w}.png')
     print('PASS tomato labels absent; red/green and twenty-harvest data',mode,w,flush=True)
     start('hidden',mode);page.locator('[data-picture-begin]').tap()
-    assert page.evaluate("()=>{const a=state.jobs.active,s=JobGallery.hidden[a.data.scene];return [...document.querySelectorAll('.seek-checklist button')].every((b,n)=>{const o=s.objects[a.data.targets[n]],v=b.querySelector('svg');return b.getAttribute('aria-label').startsWith(o.name)&&v.querySelector('image').getAttribute('href')===s.file&&v.getAttribute('viewBox')===[o.x*1000,o.y*1000,o.w*1000,o.h*1000].join(' ')})}")
+    assert page.evaluate("()=>{const a=state.jobs.active,s=JobGallery.hidden[a.data.scene];return [...document.querySelectorAll('.seek-checklist button')].every((b,n)=>{const o=s.objects[a.data.targets[n]],image=b.querySelector('img');return b.getAttribute('aria-label').startsWith(o.name)&&image.getAttribute('src')===JobClues.file(o)})}")
     page.evaluate('()=>{window.spoken=[];Narration.speak=(text)=>window.spoken.push(text)}');page.locator('.seek-checklist button').first.tap();assert page.evaluate('window.spoken.length')==1,page.evaluate('window.spoken')
     for el in page.locator('.seek-checklist button').all():assert el.bounding_box()['width']>=44 and el.bounding_box()['height']>=44
     page.screenshot(path=f'/tmp/polish-hidden-{mode}-{w}.png')
@@ -42,10 +42,12 @@ try:
     for cell in route:
      cur=page.evaluate('state.jobs.active.data.mower');direction='right' if cell==cur+1 else 'left' if cell==cur-1 else 'down' if cell>cur else 'up';tap('Mow '+direction)
     el=page.locator(f'[data-lawn-cell="{flower}"]');el.scroll_into_view_if_needed();r=el.bounding_box();page.touchscreen.tap(r['x']+r['width']/2,r['y']+r['height']/2)
+    if page.evaluate("state.jobs.active.data.stage==='flowerPause'"):
+     assert page.get_by_text('You mowed my flowers!',exact=True).is_visible();tap('Try Again')
     assert page.evaluate('state.jobs.active.data.resets')==1
     assert page.evaluate('state.jobs.active.data.mower')==0
     assert page.evaluate('state.cash')==83.25
-    assert 'flower' in page.locator('.job-feedback').inner_text()
+    assert page.evaluate('state.jobs.active.data.stage')=='mow'
     page.evaluate('Neighborhood.stop();save()');saved=page.evaluate('state.jobs.active');page.reload();assert page.evaluate('state.jobs.active')==saved
     print('PASS touch flower collision resets mowing once; wallet and save intact',mode,w,flush=True)
    assert not errors,errors

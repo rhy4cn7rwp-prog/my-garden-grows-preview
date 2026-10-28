@@ -27,7 +27,7 @@ const JobPictureGames = (() => {
       return `<div class="seek-checklist picture-list ${d.targets.length > 6 ? "many-clues" : ""}" style="--clues:${Math.min(6, d.targets.length)}" aria-label="Objects to find">${d.targets
         .map((i) => {
           const o = s.objects[i];
-          return `<button class="${d.found.includes(i) ? "found" : ""}" onpointerup="TouchActions.run(event,()=>Neighborhood.read('${o.name}'))" onclick="Neighborhood.read('${o.name}')" aria-label="${o.name}${d.found.includes(i) ? ", found" : ""}">${`<svg viewBox="${o.x * 1000} ${o.y * 1000} ${o.w * 1000} ${o.h * 1000}" aria-hidden="true"><image href="${s.file}" width="1000" height="1000"/></svg>`}<span class="clue-name">${o.name}${d.found.includes(i) ? " ✓" : ""}</span></button>`;
+          return `<button class="${d.found.includes(i) ? "found" : ""}" onpointerup="TouchActions.run(event,()=>Neighborhood.read('${o.name}'))" onclick="Neighborhood.read('${o.name}')" aria-label="${o.name}${d.found.includes(i) ? ", found" : ""}">${JobClues.art(o)}<span class="clue-name">${o.name}${d.found.includes(i) ? " ✓" : ""}</span></button>`;
         })
         .join(
           "",

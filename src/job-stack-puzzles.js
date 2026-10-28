@@ -80,7 +80,115 @@
     const fallback = { 3: 11, 4: 49, 5: 98, 8: 42 }[cap];
     return attempt(fallback, cap, types);
   }
-  const api = { make };
+  /* Reverse moves may put a different color only onto an alternating destination.
+     Covering an existing equal pair would lock that pair below an irreversible
+     color boundary. Avoiding that trap permits fully alternating starts, while
+     the loop-erased reversed path proves every forward move is legal. */
+  function cleanAttempt(seed, cap, types, steps) {
+    let n = seed;
+    const rand = () =>
+        (n = (Math.imul(n, 1664525) + 1013904223) >>> 0) / 4294967296,
+      cs = Array.from({ length: types + 2 }, (_, i) =>
+        i < types ? Array(cap).fill(i) : [],
+      ),
+      path = [],
+      states = [JSON.stringify(cs)],
+      map = new Map([[states[0], 0]]);
+    let last = [],
+      best = null;
+    for (let k = 0; k < steps; k++) {
+      const ops = [];
+      for (let f = 0; f < cs.length; f++)
+        if (
+          cs[f].length &&
+          (cs[f].length === 1 || cs[f].at(-1) === cs[f].at(-2))
+        )
+          for (let t = 0; t < cs.length; t++)
+            if (
+              f !== t &&
+              cs[t].length < cap &&
+              !(last[0] === t && last[1] === f) &&
+              (!cs[t].length ||
+                cs[t].at(-1) === cs[f].at(-1) ||
+                cs[t].slice(1).every((v, i) => v !== cs[t][i]))
+            )
+              ops.push([f, t]);
+      if (!ops.length) break;
+      const [f, t] = ops[Math.floor(rand() * ops.length)];
+      cs[t].push(cs[f].pop());
+      last = [f, t];
+      const key = JSON.stringify(cs),
+        seen = map.get(key);
+      if (seen !== undefined) {
+        while (states.length > seen + 1) map.delete(states.pop());
+        path.length = seen;
+      } else {
+        path.push([f, t]);
+        states.push(key);
+        map.set(key, path.length);
+      }
+      const same = cs.reduce(
+          (sum, c) => sum + c.slice(1).filter((v, i) => v === c[i]).length,
+          0,
+        ),
+        runs = Math.max(
+          ...cs.map((c) => {
+            let max = 1,
+              r = 1;
+            for (let i = 1; i < c.length; i++) {
+              r = c[i] === c[i - 1] ? r + 1 : 1;
+              max = Math.max(max, r);
+            }
+            return max;
+          }),
+        );
+      if (
+        !best ||
+        same < best.same ||
+        (same === best.same && runs < best.runs)
+      ) {
+        best = {
+          same,
+          runs,
+          crates: cs.map((c) => c.slice()),
+          solution: path
+            .slice()
+            .reverse()
+            .map(([f, t]) => [t, f]),
+        };
+        if (same === 0) break;
+      }
+    }
+    return best;
+  }
+
+  function makeMixed(seed, mode, level = 0) {
+    const cap = mode === "growing" ? 8 : [3, 4, 5][level],
+      types = mode === "growing" ? 4 : level === 0 ? 2 : 3;
+    let board;
+    for (let i = 0; i < 24; i++) {
+      const d = cleanAttempt((seed + i * 179) >>> 0, cap, types, 10000);
+      if (d.same === 0) {
+        board = d;
+        break;
+      }
+    }
+    if (!board) board = cleanAttempt(cap === 8 ? 4 : 1, cap, types, 10000);
+    const crates = board.crates.map((c) => c.map((i) => kinds[i]));
+    return {
+      cap,
+      crates,
+      initial: crates.map((c) => c.slice()),
+      undo: [],
+      solution: board.solution,
+      transitions: crates.reduce(
+        (sum, c) => sum + c.slice(1).filter((v, i) => v !== c[i]).length,
+        0,
+      ),
+      mixed: crates.filter((c) => new Set(c).size > 1).length,
+    };
+  }
+  const api = { make, makeMixed };
   if (typeof module !== "undefined") module.exports = api;
   root.JobStackPuzzles = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

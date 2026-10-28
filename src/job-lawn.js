@@ -60,6 +60,23 @@
   }
   function apply(a, e) {
     const d = a.data;
+    if (e.type === "retryMow") {
+      if (a.rulesVersion < 6 || d.stage !== "flowerPause") return false;
+      d.cells.forEach((c, i) => {
+        c.cut = i === 0;
+        c.raked = false;
+        c.cleared = false;
+      });
+      d.mower = 0;
+      d.rake = 0;
+      d.piles = [0, 0, 0];
+      d.collected = [false, false, false];
+      d.resets++;
+      d.stage = "mow";
+      delete d.collision;
+      a.score = 0;
+      return true;
+    }
     if (e.type === "mow") {
       if (
         a.rulesVersion >= 5 &&
@@ -68,6 +85,12 @@
         adjacent(d, d.mower).includes(e.cell) &&
         d.cells[e.cell].obstacle === "flower"
       ) {
+        if (a.rulesVersion >= 6) {
+          d.mower = e.cell;
+          d.collision = e.cell;
+          d.stage = "flowerPause";
+          return true;
+        }
         d.cells.forEach((c, i) => {
           c.cut = i === 0;
           c.raked = false;

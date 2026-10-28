@@ -137,6 +137,7 @@ test("every new flower collision restarts only mowing, preserves elapsed time an
       for (const cell of route) J.action(s, { type: "mow", cell });
       J.tick(s, 3456);
       A.ok(J.action(s, { type: "mow", cell: flower }));
+      if(a.rulesVersion>=6){A.equal(d.stage,"flowerPause");A.equal(d.mower,flower);A.equal(d.resets,0);J.action(s,{type:"retryMow"});}
       A.equal(d.mower, 0);
       A.equal(d.stage, "mow");
       A.equal(d.resets, 1);

@@ -74,7 +74,7 @@ const Neighborhood = (() => {
       return `<section class="job-results">${["hidden", "sliding"].includes(a.id) && a.won ? JobPictureGames.complete(a) : jobArt(a.id)}<h1>${result.newBest && reward === 3 ? "New Personal Best!" : a.won ? "Wonderful helping!" : "Nice practice!"}</h1>${a.id === "labels" && a.won ? `<strong class="job-word-success">${d.words.at(-1)}</strong>` : ""}${a.won && ["weeds", "tomatoes", "flowers"].includes(a.id) ? `<p>${a.id === "flowers" ? "Every flower is blooming!" : a.id === "tomatoes" ? "End of the row — your harvest basket is full!" : "End of the row — the healthy plants have room to grow!"}</p>` : ""}<p>Your result: ${recordText(result.value, result.kind)} · ${recordIndicator(a.id, a)}</p><p>${a.won ? `Your neighbor has $${reward} total ready for you.${result.newBest && reward === 3 ? " You beat your own record!" : ""}` : "Try again whenever you like. No money or cooldown lost."}</p><button class="btn" onpointerup="Neighborhood.touchResult(event,'${a.won ? "collect" : "retry"}')" onclick="Neighborhood.${a.won ? "collect" : "retry"}()">${a.won ? `Collect $${reward}` : "Try again"}</button><button class="btn alt" onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button><button class="btn alt" onclick="Neighborhood.leave()">Job Board</button><button class="btn alt" onclick="Neighborhood.read('${a.won ? `Thank you for helping! Your reward is ${reward === 1 ? "one dollar" : "three dollars"}.` : "That was good practice. You can try again."}')">Read to Me</button></section>`;
     let body = "";
     if (a.id === "words")
-      body = `<ul class="job-word-list">${d.words.map((w) => `<li class="${d.found.includes(w) ? "found" : ""}">${a.mode === "little" ? icon(w.toLowerCase()) : ""}<button onclick="Neighborhood.read('${w}')">${w}${d.found.includes(w) ? " ✓" : ""}</button></li>`).join("")}</ul><div class="job-word-grid" style="--size:${d.size}">${d.grid.map((v, i) => `<button data-letter="${i}" onclick="Neighborhood.letterCell(${i})" class="${d.found.some((w) => d.paths[w].includes(i)) ? "found" : ""}" aria-label="Letter ${v}, row ${Math.floor(i / d.size) + 1}, column ${(i % d.size) + 1}">${v}</button>`).join("")}</div>`;
+      body = `<ul class="job-word-list" style="--word-cols:${a.mode === "little" ? 4 : 2}">${d.words.map((w) => `<li class="${d.found.includes(w) ? "found" : ""}">${a.mode === "little" ? icon(w.toLowerCase()) : ""}<button onclick="Neighborhood.read('${w}')">${w}${d.found.includes(w) ? " ✓" : ""}</button></li>`).join("")}</ul><div class="job-word-grid" style="--size:${d.size}">${d.grid.map((v, i) => `<button data-letter="${i}" onclick="Neighborhood.letterCell(${i})" class="${d.found.some((w) => d.paths[w].includes(i)) ? "found" : ""}" aria-label="Letter ${v}, row ${Math.floor(i / d.size) + 1}, column ${(i % d.size) + 1}">${v}</button>`).join("")}</div>`;
     if (a.id === "packing") body = JobScenes.packing(a, ui.selected);
     if (a.id === "stacks")
       body = `<p>Choose a top vegetable, then an empty or matching crate.</p><div class="job-stacks" style="--depth:${d.cap};--crates:${d.crates.length}">${d.crates
@@ -111,7 +111,7 @@ const Neighborhood = (() => {
     if (a.id === "weeds" && a.rulesVersion >= 4) body = JobGardenScenes.bed(a);
     if (["hidden", "sliding"].includes(a.id)) body = JobPictureGames.scene(a);
     if (a.id === "flowers") body = JobScenes.flowers(a, ui.selected);
-    return `<section class="job-play ${["hidden", "sliding"].includes(a.id) && !d.started ? "picture-prestart" : ""} ${["hidden", "sliding", "stacks"].includes(a.id) ? "compact-job" : ""} ${a.id === "stacks" ? "deep-stacks" : a.id === "hidden" ? "seek-job" : ""} ${["hidden", "sliding"].includes(a.id) ? "picture-job" : ""} ${ui.paused ? "is-paused" : ""} ${["packing", "weeds", "tomatoes", "flowers", "tidy"].includes(a.id) ? "illustrated-chore" : ""}"><header><h1>${j.name}</h1><p class="job-instructions">${J.instructions(a)}</p></header><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-record-strip"><small>${recordIndicator(a.id, a)}</small><button onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button></div><div class="job-actions job-main-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button>${["hidden", "sliding", "stacks"].includes(a.id) ? `<button class="btn alt" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button>` : ""}</div><div class="job-play-area">${body}${ui.paused && ["hidden", "sliding"].includes(a.id) ? `<div class="picture-paused">Paused<br><button class="btn" onclick="Neighborhood.pause()">Resume</button></div>` : ""}</div><p class="job-feedback" role="status">${ui.lastWord ? `<strong class="job-word-success">${ui.lastWord}</strong> ` : ""}${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
+    return `<section class="job-play ${["hidden", "sliding"].includes(a.id) && !d.started ? "picture-prestart" : ""} ${["hidden", "sliding", "stacks", "tidy"].includes(a.id) ? "compact-job" : ""} ${a.id === "stacks" ? "deep-stacks" : a.id === "hidden" ? "seek-job" : a.id === "tidy" ? "lawn-job" : ""} ${["hidden", "sliding"].includes(a.id) ? "picture-job" : ""} ${ui.paused ? "is-paused" : ""} ${["packing", "weeds", "tomatoes", "flowers", "tidy"].includes(a.id) ? "illustrated-chore" : ""}"><header><h1>${j.name}</h1><p class="job-instructions">${J.instructions(a)}</p></header><div class="job-status"><b>Score <output data-job-score>${a.score}</output></b>${timed ? `<b data-job-time>${countdown(timed - a.elapsed)}</b>` : ""}<span>${a.mode === "little" ? "Little Gardener" : "Growing Gardener"}</span></div><div class="job-record-strip"><small>${recordIndicator(a.id, a)}</small><button onpointerup="TouchActions.run(event,()=>Neighborhood.leaderboard('${a.id}'))" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button></div><div class="job-actions job-main-actions"><button class="btn alt" onclick="Neighborhood.readInstruction()">Read to Me</button><button class="btn" onclick="Neighborhood.pause()">${ui.paused ? "Play / Resume" : "Pause"}</button><button class="btn alt" onclick="Neighborhood.exit()">Leave job</button>${["hidden", "sliding", "stacks", "tidy"].includes(a.id) ? `<button class="btn alt" onclick="Neighborhood.leaderboard('${a.id}')">Leaderboard</button>` : ""}</div><div class="job-play-area">${body}${ui.paused && ["hidden", "sliding"].includes(a.id) ? `<div class="picture-paused">Paused<br><button class="btn" onclick="Neighborhood.pause()">Resume</button></div>` : ""}</div><p class="job-feedback" role="status">${ui.lastWord ? `<strong class="job-word-success">${ui.lastWord}</strong> ` : ""}${ui.paused ? "Paused. Tap Play / Resume when you are ready." : ui.feedback || "You can do it! Take your time."}</p></section>`;
   }
   function read(text, who = "guide") {
     Narration.speak(text, who, true);
@@ -119,6 +119,10 @@ const Neighborhood = (() => {
   function readInstruction() {
     const a = state.jobs.active,
       j = J.catalog.find((j) => j.id === a?.id);
+    if (a?.id === "tidy" && a.data.stage === "flowerPause") {
+      read("You mowed my flowers! Tap Try Again when you are ready.", "magee");
+      return;
+    }
     if (j)
       read(
         (a.id === "labels"
@@ -359,6 +363,11 @@ const Neighborhood = (() => {
       paint();
     }
   }
+  function retryMow() {
+    ui.paused = false;
+    ui.last = performance.now();
+    lawnAct({ type: "retryMow" });
+  }
   function lawnStep(dir) {
     const a = state.jobs.active;
     if (!a || a.id !== "tidy") return;
@@ -373,8 +382,11 @@ const Neighborhood = (() => {
     if (!world || !a) return;
     const d = a.data,
       r = world.getBoundingClientRect(),
-      x = Math.floor(((e.clientX - r.x) / r.width) * d.width),
-      y = Math.floor(((e.clientY - r.y) / r.height) * d.height);
+      border = getComputedStyle(world),
+      left = r.x + parseFloat(border.borderLeftWidth),
+      top = r.y + parseFloat(border.borderTopWidth),
+      x = Math.floor(((e.clientX - left) / world.clientWidth) * d.width),
+      y = Math.floor(((e.clientY - top) / world.clientHeight) * d.height);
     if (x < 0 || x >= d.width || y < 0 || y >= d.height) return;
     const cell = y * d.width + x;
     if (d.stage === "rake") lawnAct({ type: "rake", cell });
@@ -429,7 +441,7 @@ const Neighborhood = (() => {
   function difficultyLabel(key) {
     const [id, mode, version, settings] = key.split("|"),
       parts = settings.split("-").map(Number);
-    const prefix = ["v3", "v4", "v5"].includes(version)
+    const prefix = ["v3", "v4", "v5", "v6"].includes(version)
       ? ""
       : "Earlier saved game · ";
     if (["hidden", "sliding"].includes(id))
@@ -444,8 +456,12 @@ const Neighborhood = (() => {
     if (["words", "labels"].includes(id))
       return (
         prefix +
-        `Words with ${Math.min(...parts)}–${Math.max(...parts)} letters`
+        `${id === "words" ? parts.length + " words · " : ""}Words with ${Math.min(...parts)}–${Math.max(...parts)} letters`
       );
+    if (id === "catch")
+      return version === "v6"
+        ? "Varied, increasing tosses"
+        : "Original steady tosses";
     if (id === "stacks")
       return (
         prefix +
@@ -952,6 +968,8 @@ const Neighborhood = (() => {
     settings,
     letterSlot,
     returnLetter,
+    retryMow,
+    lawnAct,
     lawnTap,
     lawnStep,
     compost,
