@@ -193,7 +193,7 @@
           a.mode,
           a.seed,
           a.serial,
-          [2, 3, 4, 5].includes(a.rulesVersion) ? a.rulesVersion : 1,
+          [2, 3, 4, 5, 6].includes(a.rulesVersion) ? a.rulesVersion : 1,
           a.wordPlan,
           { picturePlan: a.picturePlan, stackLevel: a.stackLevel },
         );
@@ -232,18 +232,26 @@
     s.jobs.sequence++;
     const mode = s.learningExperience === "little" ? "little" : "growing";
     const plan = ["words", "labels"].includes(id)
-      ? V.choose(mode, id, seed, s.jobs.wordHistory?.[mode] || [])
+      ? V.choose(
+          mode,
+          id,
+          seed,
+          s.jobs.wordHistory?.[mode] || [],
+          id === "words" ? 8 : undefined,
+        )
       : undefined;
     s.jobs.active = make(
       id,
       s.learningExperience === "little" ? "little" : "growing",
       seed >>> 0 || 1,
       s.jobs.sequence,
-      ["sliding", "tidy"].includes(id)
-        ? 5
-        : ["weeds", "tomatoes", "stacks", "hidden"].includes(id)
-          ? 4
-          : 3,
+      ["words", "catch", "tidy", "stacks"].includes(id)
+        ? 6
+        : ["sliding"].includes(id)
+          ? 5
+          : ["weeds", "tomatoes", "stacks", "hidden"].includes(id)
+            ? 4
+            : 3,
       plan,
       {
         picturePlan: ["hidden", "sliding"].includes(id)
@@ -300,7 +308,10 @@
       data: {},
     };
     if (rulesVersion >= 3 && ["words", "labels"].includes(id)) {
-      requireRule(V.valid(wordPlan, mode, id), "This word plan is incomplete.");
+      requireRule(
+        V.valid(wordPlan, mode, id, rulesVersion),
+        "This word plan is incomplete.",
+      );
       a.wordPlan = wordPlan.slice();
     }
     if (["hidden", "sliding"].includes(id)) {
@@ -316,7 +327,10 @@
       a.stackLevel = Number.isInteger(options.stackLevel)
         ? Math.max(0, Math.min(2, options.stackLevel))
         : 0;
-      a.data = Stacks.make(seed, mode, a.stackLevel);
+      a.data =
+        rulesVersion >= 6
+          ? Stacks.makeMixed(seed, mode, a.stackLevel)
+          : Stacks.make(seed, mode, a.stackLevel);
       return a;
     }
     if (id === "words") {
@@ -329,11 +343,14 @@
                   ["CARROT", "GARDEN", "TOMATO", "HARVEST", "BEANS", "CORN"],
                   r,
                 ).slice(0, 4),
-        size = little
-          ? 5
-          : rulesVersion >= 3
-            ? Math.max(8, ...words.map((w) => w.length))
-            : 8,
+        size =
+          rulesVersion >= 6
+            ? Math.max(little ? 8 : 10, ...words.map((w) => w.length))
+            : little
+              ? 5
+              : rulesVersion >= 3
+                ? Math.max(8, ...words.map((w) => w.length))
+                : 8,
         grid = Array(size * size).fill(""),
         paths = {};
       const dirs = little
@@ -464,6 +481,7 @@
         caught: [],
         missed: [],
         launchEvery: little ? 2300 : 1500,
+        ...(rulesVersion >= 6 ? { tosses: makeTosses(seed, little) } : {}),
       };
     } else if (id === "weeds") {
       a.data =
@@ -601,7 +619,38 @@
     g[2] = 1;
     return g;
   }
+  function makeTosses(seed, little) {
+    const r = rng(seed + 2089),
+      tosses = [];
+    let launch = 900;
+    while (launch < 57000) {
+      const pace = launch / 60000,
+        flight =
+          (little ? 2600 : 2200) - pace * (little ? 600 : 650) + r() * 280;
+      tosses.push({
+        index: tosses.length,
+        launch: Math.round(launch),
+        flight: Math.round(flight),
+        start: 0.19 + r() * 0.07,
+        end: 0.28 + r() * 0.65,
+        arc: 1.05 + r() * 0.75,
+        big: tosses.length % 7 === 6,
+      });
+      const burst =
+        launch > (little ? 16000 : 9000) && r() < (little ? 0.18 : 0.3);
+      launch += burst
+        ? 250 + r() * 180
+        : (little ? 1700 : 1250) - pace * (little ? 950 : 700) + r() * 220;
+    }
+    return tosses;
+  }
+  function carrotCount(a) {
+    return a.rulesVersion >= 6
+      ? a.data.tosses.length
+      : Math.ceil(60000 / a.data.launchEvery);
+  }
   function carrot(a, index) {
+    if (a.rulesVersion >= 6) return a.data.tosses[index];
     const r = rng(a.seed + index * 917),
       little = a.mode === "little",
       launch = index * a.data.launchEvery,
@@ -649,13 +698,14 @@
     return {
       t,
       x: c.start + (c.end - c.start) * t,
-      y: 0.45 + (end - 0.45) * t - 1.35 * t * (1 - t),
+      y: 0.45 + (end - 0.45) * t - (c.arc || 1.35) * t * (1 - t),
     };
   }
   function catchTime(a, c) {
     if (a.rulesVersion < 2) return c.launch + c.flight;
-    const b = 0.92 - 0.45 - 1.35,
-      t = (-b + Math.sqrt(b * b - 4 * 1.35 * (0.45 - 0.78))) / (2 * 1.35);
+    const arc = c.arc || 1.35,
+      b = 0.92 - 0.45 - arc,
+      t = (-b + Math.sqrt(b * b - 4 * arc * (0.45 - 0.78))) / (2 * arc);
     return c.launch + Math.round(c.flight * t);
   }
   function canCatch(a, c) {
@@ -676,11 +726,17 @@
       "Invalid activity clock.",
     );
     if (a.ended) return;
+    if (
+      a.rulesVersion >= 6 &&
+      a.id === "tidy" &&
+      a.data.stage === "flowerPause"
+    )
+      return;
     const before = a.elapsed;
     if (["hidden", "sliding"].includes(a.id) && !a.data.started) return;
     a.elapsed = Math.min(clockLimit(a) || 1e9, a.elapsed + ms);
     if (a.id === "catch") {
-      for (let i = 0; i < Math.ceil(60000 / a.data.launchEvery); i++) {
+      for (let i = 0; i < carrotCount(a); i++) {
         const c = carrot(a, i);
         const at = catchTime(a, c);
         if (
@@ -1021,6 +1077,7 @@
     claim,
     quit,
     carrot,
+    carrotCount,
     matches,
     moves,
     duration,

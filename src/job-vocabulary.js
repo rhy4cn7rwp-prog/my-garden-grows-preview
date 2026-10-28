@@ -52,7 +52,7 @@
   function pool(mode) {
     return mode === "little" ? little : all;
   }
-  function choose(mode, id, seed, history = []) {
+  function choose(mode, id, seed, history = [], count) {
     let n = seed >>> 0;
     const r = () => {
       n = (Math.imul(n, 1664525) + 1013904223) >>> 0;
@@ -70,20 +70,29 @@
     });
     return choices.slice(
       0,
-      id === "words" ? (mode === "little" ? 3 : 4) : mode === "little" ? 2 : 3,
-    );
-  }
-  function valid(plan, mode, id) {
-    return (
-      Array.isArray(plan) &&
-      plan.length ===
+      count ??
         (id === "words"
           ? mode === "little"
             ? 3
             : 4
           : mode === "little"
             ? 2
-            : 3) &&
+            : 3),
+    );
+  }
+  function valid(plan, mode, id, version = 3) {
+    return (
+      Array.isArray(plan) &&
+      plan.length ===
+        (id === "words" && version >= 6
+          ? 8
+          : id === "words"
+            ? mode === "little"
+              ? 3
+              : 4
+            : mode === "little"
+              ? 2
+              : 3) &&
       new Set(plan).size === plan.length &&
       plan.every((w) => pool(mode).includes(w))
     );
