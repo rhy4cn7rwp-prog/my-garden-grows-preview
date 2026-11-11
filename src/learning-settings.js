@@ -13,7 +13,7 @@ function selectExperience(mode, event) {
 }
 
 function learningSettingsMarkup() {
-  return `<h2>Play &amp; Sound Settings</h2><output class="learning-current" role="status" aria-live="polite">Playing as ${state.learningExperience === "little" ? "Little Gardener" : "Growing Gardener"}</output><p>Progress stays with you. An unfinished job keeps its current puzzle; you can leave it and start fresh in your new experience. Little Gardener changes Garden weeding to pictures without losing your progress.</p><div class="learning-choices"><button class="btn" aria-pressed="${state.learningExperience === "little"}" data-learning-choice="little" onpointerup="setLearningPreference('little',event)" onclick="setLearningPreference('little',event)">I'm still learning to read! · Little Gardener</button><button class="btn" aria-pressed="${state.learningExperience === "growing"}" data-learning-choice="growing" onpointerup="setLearningPreference('growing',event)" onclick="setLearningPreference('growing',event)">I'm ready for a challenge! · Growing Gardener</button></div><div class="learning-settings"><label><input type="checkbox" ${state.narrationEnabled ? "checked" : ""} onchange="setAudioPreference('narrationEnabled',this.checked)"/>Character narration</label><label><input type="checkbox" ${state.effectsEnabled ? "checked" : ""} onchange="setAudioPreference('effectsEnabled',this.checked)"/>Sound effects</label></div><button class="btn alt" onclick="Narration.speak('Choose the gardening experience you enjoy. Both earn the same rewards. You can turn voices and sound effects on or off separately.','guide',true)">Read to Me</button><p>${typeof Narration !== "undefined" ? Narration.status : ""}</p><button class="btn alt" onclick="reset()">Start a new farm</button>`;
+  return `<h2>Play &amp; Sound Settings</h2><output class="learning-current" role="status" aria-live="polite">Playing as ${state.learningExperience === "little" ? "Little Gardener" : "Growing Gardener"}</output><p>Progress stays with you. An unfinished job keeps its current puzzle; you can leave it and start fresh in your new experience. Little Gardener changes Garden weeding to pictures without losing your progress.</p><div class="learning-choices"><button class="btn" aria-pressed="${state.learningExperience === "little"}" data-learning-choice="little" onpointerup="setLearningPreference('little',event)" onclick="setLearningPreference('little',event)">I'm still learning to read! · Little Gardener</button><button class="btn" aria-pressed="${state.learningExperience === "growing"}" data-learning-choice="growing" onpointerup="setLearningPreference('growing',event)" onclick="setLearningPreference('growing',event)">I'm ready for a challenge! · Growing Gardener</button></div><div class="learning-settings"><label><input type="checkbox" ${state.narrationEnabled ? "checked" : ""} onchange="setAudioPreference('narrationEnabled',this.checked)"/>Character narration</label><label><input type="checkbox" ${state.effectsEnabled ? "checked" : ""} onchange="setAudioPreference('effectsEnabled',this.checked)"/>Sound effects</label></div>${narrationSettingsMarkup()}<button class="btn alt" onclick="Narration.speak('Choose the gardening experience you enjoy. Both earn the same rewards. You can turn voices and sound effects on or off separately.','guide',true)">Read to Me</button><p data-narration-status role="status">${typeof Narration !== "undefined" ? narrationEscape(Narration.status) : ""}</p><button class="btn alt" onclick="reset()">Start a new farm</button>`;
 }
 function learningSettings() {
   show(learningSettingsMarkup(), "learning-settings");
@@ -66,3 +66,32 @@ function littleMarketCheckout() {
     render();
   });
 }
+
+function narrationEscape(text) {
+  return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function narrationSettingsMarkup() {
+  return `<fieldset class="narration-settings"><legend>Read to Me voice</legend><label for="narration-voice">English voice</label><select id="narration-voice" onchange="setNarrationVoice(this.value)">${Narration.options()}</select><p>Free voices from this device only. Available voices vary by device. Automatic chooses a higher-quality voice when available.</p><label for="narration-speed">Speaking speed</label><select id="narration-speed" onchange="setNarrationSpeed(this.value)">${[[0.8,'Slower'],[0.9,'A little slower'],[1,'Mode default'],[1.1,'A little faster'],[1.2,'Faster']].map(([n,label]) => `<option value="${n}" ${state.narrationSpeed === n ? 'selected' : ''}>${label}</option>`).join('')}</select><p>Little Gardener speaks a little more slowly. This setting adjusts either mode.</p><div class="row"><button class="btn" onclick="testNarrationVoice()">Test Voice</button><button class="btn alt" onclick="Narration.stop()">Stop reading</button></div></fieldset>`;
+}
+function setNarrationVoice(key) {
+  if (key !== '' && !Narration.voices().some(v => Narration.voiceKey(v) === key)) return;
+  Narration.stop();
+  state.narrationVoice = key;
+  save();
+}
+function setNarrationSpeed(value) {
+  const n = Number(value);
+  if (![0.8,0.9,1,1.1,1.2].includes(n)) return;
+  Narration.stop();
+  state.narrationSpeed = n;
+  save();
+}
+function testNarrationVoice() {
+  Narration.speak("Welcome to My Garden Grows! Let's plant something wonderful. Your next adventure is waiting.", 'guide', true);
+}
+// Refresh just the voice list/status: never rebuild the settings dialog or steal focus.
+document.addEventListener('narrationvoiceschange', () => {
+  const select = document.querySelector('#narration-voice');
+  if (select) select.innerHTML = Narration.options();
+  document.querySelectorAll('[data-narration-status]').forEach(e => e.textContent = Narration.status);
+});

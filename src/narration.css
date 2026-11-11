@@ -1,0 +1,13 @@
+/* A single compact reader beside the existing navigation. No art or scene resize. */
+.game .hud { grid-template-columns: 44px minmax(0, 1fr) 44px 44px; gap: 4px; }
+.narration-settings { margin: 14px 0; padding: 10px; border: 1px solid #ad8956; border-radius: 12px; min-width: 0; text-align: left; }
+.narration-settings legend { color: #593e28; font-weight: 700; }
+.narration-settings label { display: block; font-weight: 700; margin: 8px 0 4px; }
+.narration-settings select { width: 100%; min-width: 0; max-width: 100%; min-height: 46px; font: inherit; font-size: 16px; color: #493521; background: #fff8e6; border: 1px solid #ad8956; border-radius: 8px; padding: 8px; }
+.narration-settings p { font-size: 14px; line-height: 1.4; margin: 6px 0 10px; }
+@media(max-width:360px) {
+  .game .hud .farm-status { padding-left: 4px; padding-right: 4px; }
+  .game .hud .balance { gap: 2px; }
+  .game .hud .calendar { font-size: 12px; }
+}
+.narration-settings button, .dialog-read { min-height: 44px; }

@@ -18,7 +18,7 @@ function setup(voices = true) {
               spoken.push(u);
             },
             getVoices() {
-              return [];
+              return [{name:"Samantha",voiceURI:"samantha",lang:"en-US",localService:true}];
             },
           }
         : undefined,
@@ -52,7 +52,8 @@ test("narration defaults off, explicit Read to Me works, replay cancels prior sp
   A.equal(t.spoken[0].text, "read");
   t.run("Narration.phoneme('S')");
   A.equal(t.played[0], "assets/neighborhood/phonics/s.wav");
-  t.run("state.narrationEnabled=true;Narration.speak('next','jones')");
+  A.equal(t.run("state.narrationEnabled=true;Narration.speak('automatic','jones')"), false);
+  t.run("Narration.speak('next','jones',true)");
   A.equal(t.spoken[1].text, "next");
   A.ok(t.stops.includes("clip"));
   A.equal(t.run("state.effectsEnabled"), false);

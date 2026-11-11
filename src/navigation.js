@@ -1,5 +1,6 @@
 /* One live navigation/status component, shared by the village and all interiors. */
 const NAV_ICONS = {
+  read: '<path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M17 8q6 4 0 8m-1-5q2 1 0 2"/>',
   back: '<path d="m14 5-7 7 7 7M7 12h14"/>',
   clubhouse:
     '<path d="m3 9 9-6 9 6" stroke="#fff2cb"/><path d="M5 9h14v13H5Z" fill="#ad7547" stroke="#fff2cb"/><path d="M8 22V12a4 4 0 0 1 8 0v10" fill="#e8b66c" stroke="#68442d"/><path d="M10.5 13v8m3-8v8" stroke="#bf8a4f" stroke-width=".8"/><circle cx="12" cy="10.5" r="1.5" fill="#8db8b7" stroke="#68442d" stroke-width=".8"/><circle cx="14.5" cy="17" r=".8" fill="#68442d" stroke="none"/>',
@@ -16,6 +17,7 @@ function header() {
   return `<nav class="hud" aria-label="Farm navigation">
     <button class="nav" onclick="${view === "town" ? "settings()" : "go('town')"}" aria-label="${view === "town" ? "Settings" : "Back to village"}">${navigationIcon(view === "town" ? "settings" : "back")}</button>
     <div class="farm-status"><output class="balance" aria-label="Money balance">${navigationIcon("wallet")}${money(state.cash)}</output><span class="calendar" aria-label="Season and day">Season ${state.season} · Day ${Game.farmDay(state)}</span></div>
+    <button class="nav narration-nav" onclick="toggleScreenNarration()" aria-label="${typeof Narration !== 'undefined' && Narration.busy ? 'Stop reading' : 'Read this screen'}">${navigationIcon("read")}</button>
     <button class="nav clubhouse-nav" onclick="go('clubhouse')" aria-label="Clubhouse" ${view === "clubhouse" ? 'aria-current="page"' : ""}>${navigationIcon("clubhouse")}</button>
   </nav>`;
 }
