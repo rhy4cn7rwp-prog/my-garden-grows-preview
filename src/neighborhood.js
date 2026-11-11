@@ -582,6 +582,7 @@ const Neighborhood = (() => {
     ui.last = now;
   }
   function pause() {
+    Narration.stop();
     checkpoint();
     ui.paused = !ui.paused;
     ui.last = performance.now();
@@ -635,12 +636,12 @@ const Neighborhood = (() => {
       const r = J.claim(state);
       ui.paused = true;
       save();
+      show(
+        `<h2>Thank you, neighbor!</h2><p>You earned ${money(r.rewardCents / 100)} total${r.newBest && r.rewardCents === 300 ? " — New Personal Best!" : ""}. You now have ${money(state.cash)}.</p><button class="btn" onclick="go('jobs')">Back to Job Board</button>`,
+      );
       Narration.speak(
         `Thank you for helping! Here ${r.rewardCents === 300 ? "are three dollars for your new personal best" : "is one dollar"}.`,
         r.id === "catch" ? "jones" : "magee",
-      );
-      show(
-        `<h2>Thank you, neighbor!</h2><p>You earned ${money(r.rewardCents / 100)} total${r.newBest && r.rewardCents === 300 ? " — New Personal Best!" : ""}. You now have ${money(state.cash)}.</p><button class="btn" onclick="go('jobs')">Back to Job Board</button>`,
       );
     } catch (e) {
       ui.feedback = e.message;

@@ -153,6 +153,8 @@
       learningExperience: "growing",
       experienceChosen: true,
       narrationEnabled: false,
+      narrationVoice: "",
+      narrationSpeed: 1,
       effectsEnabled: false,
       newEconomy: false,
       starterClaimed: true,
@@ -396,6 +398,8 @@
       clean.cashRegister = s.cashRegister === true;
       clean.narrationEnabled = s.narrationEnabled === true;
       clean.effectsEnabled = s.effectsEnabled === true;
+      clean.narrationVoice = typeof s.narrationVoice === "string" ? s.narrationVoice.slice(0, 500) : "";
+      clean.narrationSpeed = Number.isFinite(s.narrationSpeed) ? Math.max(0.8, Math.min(1.2, s.narrationSpeed)) : 1;
       clean.jobs = neighborhood ? neighborhood.recover(s.jobs) : (s.jobs || initial().jobs);
       clean.weedingCredits = {};
       for (const id of ids) {
